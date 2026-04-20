@@ -133,7 +133,19 @@ tr.tr-person td.td-blank{background:var(--sf3)}
 /* Ingreso / Salida rows */
 tr.tr-ing td.td-tipo,tr.tr-sal td.td-tipo{position:sticky;left:0;background:var(--sf);z-index:4;padding:3px 7px;font-size:10px;font-weight:700;color:var(--mu);text-align:center;letter-spacing:.4px;border-right:.5px solid var(--bd2)}
 tr.tr-sal td.td-tipo{background:#fafaf8}
-tr.tr-ing td.td-time,tr.tr-sal td.td-time{padding:2px 4px;text-align:center;font-family:var(--mono);font-size:11px;min-width:68px;letter-spacing:-.3px;white-space:nowrap}
+tr.tr-ing td.td-time,tr.tr-sal td.td-time{
+  padding:2px 4px;text-align:center !important;vertical-align:middle;
+  font-family:'JetBrains Mono',monospace !important;font-size:11px !important;
+  font-weight:400;min-width:68px;letter-spacing:0;white-space:nowrap;
+  line-height:1.6
+}
+tr.tr-ing td.td-time.c-zero,tr.tr-sal td.td-time.c-zero-sal{
+  font-family:'JetBrains Mono',monospace !important;font-size:11px !important
+}
+tr.tr-ing td.td-time.c-late{
+  font-family:'JetBrains Mono',monospace !important;font-size:11px !important;
+  font-weight:600
+}
 tr.tr-ing{background:var(--sf)}
 tr.tr-sal{background:#fafaf8}
 tr.tr-sep td{height:5px;background:var(--sf3);border-bottom:.5px solid var(--bd2)}
@@ -409,7 +421,8 @@ th.sortable.asc,th.sortable.desc{background:rgba(255,255,255,.1)!important}
       <div class="card"><div class="card-label">Mes activo</div><div class="card-value" id="dc-mes" style="font-size:16px">—</div><div class="card-sub">Sin mes abierto</div></div>
       <div class="card"><div class="card-label">Personal registrado</div><div class="card-value" id="dc-personal">0</div><div class="card-sub">colaboradores en base</div></div>
       <div class="card"><div class="card-label">Con tardanza</div><div class="card-value warn" id="dc-tard">0</div><div class="card-sub">en el mes activo</div></div>
-      <div class="card"><div class="card-label">Días sin marca</div><div class="card-value" id="dc-sinmarca">0</div><div class="card-sub">registros 0:00:00</div></div>
+      <div class="card"><div class="card-label">Días sin marca</div><div class="card-value" id="dc-sinmarca">0</div><div class="card-sub">lunes a viernes sin registro</div></div>
+      <div class="card"><div class="card-label">Total descuentos</div><div class="card-value warn" id="dc-descuento" style="font-size:17px">S/. 0.00</div><div class="card-sub" id="dc-descuento-sub">en el mes activo</div></div>
     </div>
     <div class="empty" id="dash-empty" style="display:none">
       <div class="empty-ico">📊</div>
@@ -1649,6 +1662,22 @@ function renderTardanzas() {
       </tr>`;
     });
   }
+  // ── Fila de totales ──────────────────────────────────────
+  if (tardPersons.length) {
+    const totalDescuento = Object.values(descMes).reduce((s,v)=>s+(parseFloat(v)||0),0);
+    const totalMinsTodos = tardPersons.reduce((s,p)=>s+p.tardanzas.reduce((a,t)=>a+t.minsTard,0),0);
+    html += `<tr class="tot-row" data-nosort="1" style="background:var(--buk);color:#fff;font-weight:700">
+      <td colspan="3" style="padding:9px 12px;font-size:13px;letter-spacing:-.2px">
+        TOTAL MES — ${tardPersons.length} colaborador${tardPersons.length!==1?'es':''} con tardanza
+      </td>
+      <td style="text-align:center;padding:9px 8px">${tardPersons.reduce((s,p)=>s+p.tardanzas.length,0)} días</td>
+      <td class="mono" style="text-align:center;padding:9px 8px;color:#fde68a;font-weight:700">${totalMinsTodos} min</td>
+      <td class="mono" style="text-align:center;padding:9px 8px">${minsToHora(totalMinsTodos)}</td>
+      <td style="text-align:right;padding:9px 14px;font-size:14px;font-family:var(--mono)">
+        S/. ${totalDescuento.toFixed(2)}
+      </td>
+    </tr>`;
+  }
   html += '</tbody></table>';
   wrap.innerHTML = html;
   applySortable('tbl-tardanzas');
@@ -1658,6 +1687,11 @@ function updateDescuento(inp, mesKey) {
   if (!STATE.descuentos[mesKey]) STATE.descuentos[mesKey]={};
   STATE.descuentos[mesKey][inp.dataset.dni] = parseFloat(inp.value)||0;
   persist('descuentos');
+  // Refresh total row and dashboard live
+  const totalDesc = Object.values(STATE.descuentos[mesKey]).reduce((s,v)=>s+(parseFloat(v)||0),0);
+  const totalRow = document.querySelector('#tbl-tardanzas .tot-row td:last-child');
+  if (totalRow) totalRow.textContent = `S/. ${totalDesc.toFixed(2)}`;
+  if (mesKey === STATE.activeMes) updateDashboard();
 }
 
 async function saveTardanzas() {
@@ -1796,14 +1830,60 @@ async function guardarPersonal() {
 // ════════════════════════════════════════════════════════════
 function updateDashboard() {
   const mes = STATE.activeMes;
-  document.getElementById('dc-mes').textContent = mes?mesKeyToLabel(mes):'—';
-  document.getElementById('dc-personal').textContent = STATE.personal.length;
+
+  // Mes activo
+  const mesEl = document.getElementById('dc-mes');
+  if (mesEl) {
+    mesEl.textContent = mes ? mesKeyToLabel(mes) : '—';
+    const sub = mesEl.nextElementSibling;
+    if (sub) sub.textContent = mes ? 'mes activo' : 'Sin mes abierto';
+  }
+
+  // Personal
+  const persEl = document.getElementById('dc-personal');
+  if (persEl) persEl.textContent = STATE.personal.length;
+
   if (mes) {
-    const rows = STATE.asistencia.filter(r=>r.mes_key===mes);
-    document.getElementById('dc-tard').textContent =
-      rows.filter(r=>!isZeroH(r.ingreso)&&horaToMins(r.ingreso)>CUTOFF_MIN).length;
-    document.getElementById('dc-sinmarca').textContent =
-      rows.filter(r=>isZeroH(r.ingreso)).length;
+    const rows = STATE.asistencia.filter(r => r.mes_key === mes);
+
+    // Con tardanza — count unique persons with at least one late day
+    const conTard = new Set(
+      rows.filter(r => !isZeroH(r.ingreso) && horaToMins(r.ingreso) > CUTOFF_MIN).map(r => r.dni)
+    ).size;
+    const tardEl = document.getElementById('dc-tard');
+    if (tardEl) tardEl.textContent = conTard;
+
+    // Días sin marca — only count Mon-Fri (getDay 1-5)
+    // Group by person → count weekdays with no ingreso mark
+    const [y, m] = mes.split('-').map(Number);
+    const daysInMonth = new Date(y, m, 0).getDate();
+    let sinMarcaCount = 0;
+    const byPerson = {};
+    rows.forEach(r => {
+      byPerson[r.dni] = byPerson[r.dni] || {};
+      byPerson[r.dni][r.fecha] = r.ingreso;
+    });
+    // For each person, count weekdays where ingreso = zero
+    Object.values(byPerson).forEach(personDays => {
+      for (let d = 1; d <= daysInMonth; d++) {
+        const date = new Date(y, m-1, d);
+        const dow = date.getDay();
+        if (dow === 0 || dow === 6) continue; // skip weekends
+        const fechaKey = `${String(d).padStart(2,'0')}/${String(m).padStart(2,'0')}/${y}`;
+        const ing = personDays[fechaKey];
+        if (!ing || isZeroH(ing)) sinMarcaCount++;
+      }
+    });
+    const sinMarcaEl = document.getElementById('dc-sinmarca');
+    if (sinMarcaEl) sinMarcaEl.textContent = sinMarcaCount;
+
+    // Total descuentos del mes
+    const descMes = STATE.descuentos[mes] || {};
+    const totalDesc = Object.values(descMes).reduce((s, v) => s + (parseFloat(v)||0), 0);
+    const descEl = document.getElementById('dc-descuento');
+    if (descEl) descEl.textContent = `S/. ${totalDesc.toFixed(2)}`;
+    const descSub = document.getElementById('dc-descuento-sub');
+    if (descSub) descSub.textContent = `${Object.keys(descMes).length} colaborador${Object.keys(descMes).length!==1?'es':''} con descuento`;
   }
 }
 
