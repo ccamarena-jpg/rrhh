@@ -1879,7 +1879,7 @@ const SHEET_VACACIONES  = 'Vacaciones';
 
 function doGet(e) {
   const ss     = SpreadsheetApp.getActiveSpreadsheet();
-  const accion = e.parameter.accion || '';
+  const accion = (e && e.parameter && e.parameter.accion) ? e.parameter.accion : '';
 
   // ── GET PERSONAL ──────────────────────────────
   if (accion === 'getPersonal') {
@@ -1896,7 +1896,7 @@ function doGet(e) {
 
   // ── GET ASISTENCIA ────────────────────────────
   if (accion === 'getAsistencia') {
-    const mes = e.parameter.mes || ''; // format: YYYY-MM
+    const mes = (e && e.parameter && e.parameter.mes) ? e.parameter.mes : ''; // format: YYYY-MM
     const sh  = ss.getSheetByName(SHEET_ASISTENCIA);
     if (!sh) return jsonResp({error: 'Pestaña no encontrada: ' + SHEET_ASISTENCIA});
 
@@ -1963,7 +1963,7 @@ function doGet(e) {
 function doPost(e) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   let body;
-  try { body = JSON.parse(e.postData.contents); } catch(err) {
+  try { body = JSON.parse(e && e.postData ? e.postData.contents : '{}'); } catch(err) {
     return jsonResp({error: 'JSON inválido'});
   }
   const accion = body.accion || '';
