@@ -1,0 +1,1566 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>TT Audit — Gestión RRHH</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --buk:#2c3280;--buk2:#1e2260;--buk3:#3d44a8;--buk-dim:rgba(44,50,128,.09);--buk-glow:rgba(44,50,128,.18);
+  --ok:#0f9552;--ok-dim:#dcfce7;--warn:#c77c0a;--warn-dim:#fef3c7;
+  --danger:#c62828;--danger-dim:#fee2e2;--info:#0369a1;--info-dim:#dbeafe;
+  --bg:#f1f0ec;--sf:#ffffff;--sf2:#f7f6f2;--sf3:#eeecea;
+  --bd:#dddbd4;--bd2:#c9c7be;
+  --tx:#17160f;--mu:#5e5d56;--hi:#a0a09a;
+  --top-h:52px;--side-w:236px;--icon-w:50px;
+  --font:'Plus Jakarta Sans',sans-serif;--mono:'JetBrains Mono',monospace;
+  --r:9px;--sh:0 1px 3px rgba(0,0,0,.07),0 1px 2px rgba(0,0,0,.05);
+  --sh2:0 4px 16px rgba(0,0,0,.10),0 1px 4px rgba(0,0,0,.06);
+}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--font);background:var(--bg);color:var(--tx);font-size:13.5px;display:flex;flex-direction:column}
+
+/* ══ TOPBAR ══ */
+.topbar{height:var(--top-h);background:var(--buk);display:flex;align-items:center;padding:0 0 0 0;flex-shrink:0;z-index:200;box-shadow:0 2px 8px rgba(0,0,0,.18)}
+.t-left{display:flex;align-items:center;width:calc(var(--icon-w) + var(--side-w));flex-shrink:0;padding:0 14px;gap:10px;border-right:1px solid rgba(255,255,255,.1)}
+.t-mark{width:30px;height:30px;background:#fff;border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:10.5px;color:var(--buk);flex-shrink:0;letter-spacing:-.3px;box-shadow:0 2px 6px rgba(0,0,0,.15)}
+.t-name{font-size:13px;font-weight:700;color:#fff;letter-spacing:-.2px;white-space:nowrap}
+.t-name span{opacity:.55;font-weight:400;font-size:11.5px;display:block;letter-spacing:0}
+.t-mid{flex:1;display:flex;align-items:center;padding:0 18px;gap:12px}
+.t-month-pill{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);border-radius:20px;padding:4px 12px;font-size:12.5px;color:#fff;font-weight:500;cursor:pointer;transition:.15s}
+.t-month-pill:hover{background:rgba(255,255,255,.2)}
+.t-month-dot{width:7px;height:7px;border-radius:50%;background:#4ade80;flex-shrink:0}
+.t-month-dot.off{background:rgba(255,255,255,.3)}
+.t-sheets-status{display:flex;align-items:center;gap:6px;padding:4px 10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:6px;font-size:11.5px;color:rgba(255,255,255,.65);cursor:pointer;transition:.15s}
+.t-sheets-status:hover{background:rgba(255,255,255,.15);color:#fff}
+.t-sep{flex:1}
+.t-right{display:flex;align-items:center;gap:10px;padding:0 16px}
+.t-avatar{width:28px;height:28px;background:rgba(255,255,255,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;cursor:pointer}
+.t-uname{font-size:12.5px;color:rgba(255,255,255,.75);font-weight:500}
+
+/* ══ SHELL ══ */
+.shell{display:flex;flex:1;overflow:hidden}
+
+/* ══ SIDEBAR ══ */
+.sidebar{width:calc(var(--icon-w) + var(--side-w));background:var(--sf);border-right:.5px solid var(--bd2);display:flex;flex-shrink:0;overflow:hidden;transition:width .25s cubic-bezier(.4,0,.2,1)}
+.sidebar.collapsed{width:var(--icon-w)}
+.sb-icons{width:var(--icon-w);flex-shrink:0;display:flex;flex-direction:column;align-items:center;padding:8px 0;gap:2px;border-right:.5px solid var(--bd)}
+.sb-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s;color:var(--hi);position:relative}
+.sb-icon:hover{background:var(--sf2);color:var(--mu)}
+.sb-icon.active{background:var(--buk-dim);color:var(--buk)}
+.sb-icon-sep{width:22px;height:.5px;background:var(--bd);margin:4px 0}
+.sb-labels{width:var(--side-w);flex-shrink:0;overflow-y:auto;overflow-x:hidden}
+.sb-section{padding:6px 0}
+.sb-section-title{font-size:10px;font-weight:700;color:var(--hi);letter-spacing:.7px;text-transform:uppercase;padding:8px 14px 4px}
+.sb-item{display:flex;align-items:center;gap:9px;padding:7px 14px;cursor:pointer;color:var(--mu);font-size:13px;font-weight:400;transition:.12s;position:relative;white-space:nowrap;border-radius:0}
+.sb-item:hover{background:var(--sf2);color:var(--tx)}
+.sb-item.active{background:var(--buk-dim);color:var(--buk);font-weight:600}
+.sb-item.active::before{content:'';position:absolute;left:0;top:5px;bottom:5px;width:3px;background:var(--buk);border-radius:0 3px 3px 0}
+.sb-item svg{flex-shrink:0;width:15px;height:15px;opacity:.7}
+.sb-item.active svg,.sb-item:hover svg{opacity:1}
+.sb-sep{height:.5px;background:var(--bd);margin:4px 0}
+.sb-badge{margin-left:auto;padding:1px 6px;background:var(--danger);color:#fff;border-radius:10px;font-size:10px;font-weight:700}
+
+/* ══ CONTENT ══ */
+.content{flex:1;overflow:auto;display:flex;flex-direction:column;background:var(--bg)}
+
+/* ══ PAGE ══ */
+.page{display:none;flex-direction:column;flex:1;min-height:0}
+.page.active{display:flex}
+
+/* ══ PAGE HEADER ══ */
+.ph{padding:22px 28px 0;flex-shrink:0}
+.ph h1{font-size:19px;font-weight:800;letter-spacing:-.5px;color:var(--tx);margin-bottom:2px}
+.ph p{font-size:13px;color:var(--mu);font-weight:400}
+.ph-row{display:flex;align-items:center;gap:10px;margin-top:14px}
+
+/* ══ TABS ══ */
+.tabs{display:flex;padding:0 28px;border-bottom:.5px solid var(--bd2);flex-shrink:0;margin-top:14px}
+.tab{padding:9px 15px;font-size:13px;font-weight:500;color:var(--mu);cursor:pointer;border-bottom:2.5px solid transparent;margin-bottom:-1px;transition:.12s;white-space:nowrap;user-select:none}
+.tab:hover{color:var(--tx)}
+.tab.active{color:var(--buk);border-bottom-color:var(--buk);font-weight:700}
+
+/* ══ TAB PANELS ══ */
+.tp{display:none;flex:1;flex-direction:column;min-height:0;padding:18px 28px}
+.tp.active{display:flex}
+
+/* ══ CONTROLS ROW ══ */
+.ctrl{display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex-shrink:0;margin-bottom:12px}
+.fsel,.finp{padding:5px 9px;border:.5px solid var(--bd2);border-radius:7px;font-family:var(--font);font-size:12.5px;background:var(--sf);color:var(--tx);outline:none;cursor:pointer;transition:.12s;height:30px}
+.fsel:hover,.finp:hover{border-color:var(--buk)}
+.fsel:focus,.finp:focus{border-color:var(--buk);box-shadow:0 0 0 3px var(--buk-dim)}
+.btn{padding:0 13px;height:30px;border-radius:7px;font-family:var(--font);font-size:12.5px;font-weight:600;cursor:pointer;border:none;transition:.13s;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn svg{flex-shrink:0}
+.btn-primary{background:var(--buk);color:#fff}
+.btn-primary:hover{background:var(--buk2);transform:translateY(-1px);box-shadow:var(--sh2)}
+.btn-outline{background:var(--sf);color:var(--tx);border:.5px solid var(--bd2)}
+.btn-outline:hover{border-color:var(--buk);color:var(--buk);background:var(--buk-dim)}
+.btn-success{background:var(--ok);color:#fff}
+.btn-success:hover{filter:brightness(.92)}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-danger:hover{filter:brightness(.92)}
+.fgap{flex:1}
+
+/* ══ LEGEND ══ */
+.legend{display:flex;align-items:center;gap:14px;padding:7px 12px;background:var(--sf2);border:.5px solid var(--bd);border-radius:7px;font-size:12px;color:var(--mu);flex-shrink:0;margin-bottom:10px;flex-wrap:wrap}
+.l-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+
+/* ══ TABLE WRAPPER ══ */
+.tbl-wrap{flex:1;overflow:auto;border:.5px solid var(--bd2);border-radius:var(--r);background:var(--sf);min-height:0}
+.tbl-wrap::-webkit-scrollbar{width:6px;height:6px}
+.tbl-wrap::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:3px}
+
+/* ══ MATRIX TABLE ══ */
+table.mx{border-collapse:collapse;font-size:12px;min-width:100%}
+table.mx th,table.mx td{border-right:.5px solid var(--bd);border-bottom:.5px solid var(--bd)}
+/* Header row */
+table.mx thead tr th{background:var(--buk);color:#fff;font-weight:700;font-size:11px;white-space:nowrap;padding:7px 7px;text-align:center;position:sticky;top:0;z-index:15}
+table.mx thead tr th.h-name{background:var(--buk2);text-align:left;padding-left:14px;position:sticky;left:0;z-index:20;min-width:186px}
+table.mx thead tr th.h-optimo{background:var(--buk2);min-width:84px;font-size:10.5px;text-align:center}
+table.mx thead tr th.h-tipo{background:var(--buk2);min-width:55px;font-size:10px;text-align:center}
+table.mx thead tr th.h-total{background:var(--buk2);min-width:96px;font-size:10.5px;white-space:nowrap;text-align:center}
+/* Day header — weekend coloring */
+table.mx thead tr th.h-day{min-width:74px}
+table.mx thead tr th.h-sat{background:#232870}
+table.mx thead tr th.h-sun{background:#1a1f5e}
+/* Person name row */
+tr.tr-person td{padding:0}
+tr.tr-person td.td-name{position:sticky;left:0;background:var(--sf2);z-index:5;padding:5px 14px;font-weight:700;font-size:12.5px;color:var(--tx);border-bottom:.5px solid var(--bd);vertical-align:middle;min-width:186px;max-width:186px}
+tr.tr-person td.td-opt{background:var(--sf2);text-align:center;font-family:var(--mono);font-size:11px;color:var(--mu);vertical-align:middle;padding:4px 6px}
+tr.tr-person td.td-blank{background:var(--sf3)}
+/* Ingreso / Salida rows */
+tr.tr-ing td.td-tipo,tr.tr-sal td.td-tipo{position:sticky;left:0;background:var(--sf);z-index:4;padding:3px 7px;font-size:10px;font-weight:700;color:var(--mu);text-align:center;letter-spacing:.4px;border-right:.5px solid var(--bd2)}
+tr.tr-sal td.td-tipo{background:#fafaf8}
+tr.tr-ing td.td-time,tr.tr-sal td.td-time{padding:3px 6px;text-align:center;font-family:var(--mono);font-size:11.5px;min-width:74px}
+tr.tr-ing{background:var(--sf)}
+tr.tr-sal{background:#fafaf8}
+tr.tr-sep td{height:5px;background:var(--sf3);border-bottom:.5px solid var(--bd2)}
+/* Total cells */
+td.td-total{font-family:var(--mono);font-weight:700;font-size:12px;text-align:center;padding:3px 8px;background:var(--sf2);color:var(--buk);border-right:none}
+td.td-total-empty{background:var(--sf3)}
+/* Cell state */
+.c-zero{color:var(--danger);font-weight:500;opacity:.8}
+.c-late{color:var(--warn);font-weight:700}
+.c-ok{color:var(--tx)}
+/* Weekend day cells */
+td.td-wk{background:#f8f7fb!important}
+
+/* ══ CARDS ══ */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:16px;flex-shrink:0}
+.card{background:var(--sf);border:.5px solid var(--bd);border-radius:var(--r);padding:14px 16px;box-shadow:var(--sh)}
+.card-label{font-size:11px;font-weight:600;color:var(--mu);letter-spacing:.3px;text-transform:uppercase;margin-bottom:6px}
+.card-value{font-size:22px;font-weight:800;letter-spacing:-.5px;color:var(--tx)}
+.card-value.ok{color:var(--ok)}
+.card-value.warn{color:var(--warn)}
+.card-sub{font-size:11.5px;color:var(--hi);margin-top:3px}
+
+/* ══ EMPTY STATE ══ */
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:10px;padding:40px;text-align:center}
+.empty-ico{font-size:38px;opacity:.3;margin-bottom:4px}
+.empty-title{font-size:15px;font-weight:700;color:var(--mu)}
+.empty-sub{font-size:13px;color:var(--hi);max-width:320px;line-height:1.6}
+
+/* ══ RESUMEN TABLE ══ */
+table.rst{border-collapse:collapse;width:100%;font-size:13px}
+table.rst th{background:var(--buk);color:#fff;font-weight:600;font-size:11.5px;padding:8px 12px;text-align:left;position:sticky;top:0;z-index:5;white-space:nowrap}
+table.rst td{padding:8px 12px;border-bottom:.5px solid var(--bd);vertical-align:middle}
+table.rst tr:hover td{background:var(--sf2)}
+table.rst tr.tot-row td{background:var(--sf2);font-weight:700;font-size:13.5px;border-top:1px solid var(--bd2)}
+table.rst td.mono{font-family:var(--mono);font-size:12px}
+table.rst td input{width:70px;padding:3px 6px;border:.5px solid var(--bd2);border-radius:5px;font-family:var(--mono);font-size:12px;text-align:center;outline:none;background:var(--sf)}
+table.rst td input:focus{border-color:var(--buk);box-shadow:0 0 0 2px var(--buk-dim)}
+.status-pill{padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700;display:inline-block}
+.sp-ok{background:var(--ok-dim);color:var(--ok)}
+.sp-warn{background:var(--warn-dim);color:var(--warn)}
+.sp-danger{background:var(--danger-dim);color:var(--danger)}
+
+/* ══ TARDANZA TABLE ══ */
+table.tdt{border-collapse:collapse;width:100%;font-size:13px}
+table.tdt th{background:var(--buk);color:#fff;font-weight:600;font-size:11.5px;padding:8px 12px;text-align:left;position:sticky;top:0;z-index:5}
+table.tdt td{padding:8px 12px;border-bottom:.5px solid var(--bd);vertical-align:middle}
+table.tdt tr:hover td{background:var(--sf2)}
+table.tdt td input{width:90px;padding:3px 8px;border:.5px solid var(--bd2);border-radius:5px;font-family:var(--mono);font-size:12px;text-align:right;outline:none;background:var(--sf)}
+table.tdt td input:focus{border-color:var(--buk);box-shadow:0 0 0 2px var(--buk-dim)}
+table.tdt td.mono{font-family:var(--mono);font-size:12px}
+
+/* ══ PERSONAL TABLE ══ */
+table.pst{border-collapse:collapse;width:100%;font-size:13px}
+table.pst th{background:var(--buk);color:#fff;font-weight:600;font-size:11.5px;padding:8px 12px;text-align:left;position:sticky;top:0;z-index:5}
+table.pst td{padding:8px 12px;border-bottom:.5px solid var(--bd);vertical-align:middle}
+table.pst tr:hover td{background:var(--sf2)}
+.tag-area{padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;background:var(--info-dim);color:var(--info);display:inline-block}
+
+/* ══ MODAL ══ */
+.overlay{position:fixed;inset:0;background:rgba(10,10,20,.45);z-index:500;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s;backdrop-filter:blur(2px)}
+.overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--sf);border-radius:14px;padding:28px;width:500px;max-width:95vw;box-shadow:0 24px 64px rgba(0,0,0,.25);transform:translateY(12px);transition:.2s;max-height:90vh;overflow-y:auto}
+.overlay.open .modal{transform:translateY(0)}
+.modal.wide{width:680px}
+.modal h2{font-size:17px;font-weight:800;letter-spacing:-.4px;margin-bottom:4px}
+.modal p.msub{font-size:13px;color:var(--mu);margin-bottom:20px;line-height:1.5}
+.mclose{float:right;font-size:18px;cursor:pointer;color:var(--mu);line-height:1;margin:-2px -2px 0 0;padding:2px 4px;border-radius:4px}
+.mclose:hover{background:var(--sf2);color:var(--tx)}
+.mfooter{display:flex;gap:8px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:.5px solid var(--bd)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-grid.cols3{grid-template-columns:1fr 1fr 1fr}
+.fg{display:flex;flex-direction:column;gap:4px}
+.fg.full{grid-column:1/-1}
+.fg label{font-size:11.5px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.4px}
+.fg input,.fg select,.fg textarea{padding:7px 10px;border:.5px solid var(--bd2);border-radius:7px;font-family:var(--font);font-size:13px;background:var(--sf);color:var(--tx);outline:none;width:100%;transition:.12s}
+.fg input:focus,.fg select:focus{border-color:var(--buk);box-shadow:0 0 0 3px var(--buk-dim)}
+.preview-bar{padding:10px 12px;background:var(--sf2);border:.5px solid var(--bd);border-radius:7px;font-size:12.5px;color:var(--mu);margin-bottom:14px}
+.preview-bar b{color:var(--tx)}
+.col-map-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+
+/* ══ UPLOAD ZONE ══ */
+.upzone{border:2px dashed var(--bd2);border-radius:var(--r);padding:36px 20px;text-align:center;cursor:pointer;transition:.2s;background:var(--sf2)}
+.upzone:hover,.upzone.drag{border-color:var(--buk);background:var(--buk-dim)}
+.upzone-ico{font-size:34px;margin-bottom:10px;display:block}
+.upzone h3{font-size:14.5px;font-weight:700;margin-bottom:5px}
+.upzone p{font-size:12.5px;color:var(--mu);line-height:1.5}
+.upzone p b{color:var(--buk)}
+.up-tags{display:flex;gap:6px;justify-content:center;margin-top:12px;flex-wrap:wrap}
+.up-tag{padding:2px 9px;background:var(--sf3);border:.5px solid var(--bd);border-radius:20px;font-size:11px;color:var(--mu);font-weight:500}
+
+/* ══ TOAST ══ */
+.toast{position:fixed;bottom:22px;right:22px;z-index:999;display:flex;flex-direction:column;gap:6px;pointer-events:none}
+.toast-item{background:var(--tx);color:#fff;padding:11px 16px;border-radius:9px;font-size:13px;font-weight:500;box-shadow:var(--sh2);opacity:0;transform:translateY(8px);transition:.25s;max-width:320px;display:flex;align-items:center;gap:8px}
+.toast-item.show{opacity:1;transform:translateY(0)}
+.toast-item.ok{background:var(--ok)}
+.toast-item.warn{background:var(--warn)}
+.toast-item.err{background:var(--danger)}
+
+/* ══ SPINNER ══ */
+.spinner{width:20px;height:20px;border:2.5px solid var(--bd2);border-top-color:var(--buk);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* ══ SCROLLBAR ══ */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--mu)}
+
+/* ══ SHEETS CONFIG BANNER ══ */
+.config-banner{padding:10px 16px;background:var(--warn-dim);border:.5px solid #fcd34d;border-radius:8px;font-size:12.5px;color:var(--warn);display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-shrink:0}
+.config-banner.hidden{display:none}
+.config-banner a{color:var(--warn);font-weight:600;cursor:pointer;text-decoration:underline}
+
+/* ══ INLINE EDIT ══ */
+.editable{cursor:text;border-bottom:1.5px dashed transparent;transition:.12s;padding:1px 2px;border-radius:3px}
+.editable:hover{border-bottom-color:var(--buk);background:var(--buk-dim)}
+
+/* ══ HAMBURGUER ══ */
+.hamburger{width:34px;height:34px;border-radius:7px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s;color:rgba(255,255,255,.8);flex-shrink:0;margin-left:6px}
+.hamburger:hover{background:rgba(255,255,255,.12);color:#fff}
+.hamburger-lines{display:flex;flex-direction:column;gap:4.5px}
+.hamburger-lines span{display:block;width:17px;height:1.5px;background:currentColor;border-radius:2px;transition:.2s}
+</style>
+</head>
+<body>
+
+<!-- ══ TOPBAR ══ -->
+<div class="topbar">
+  <div class="t-left">
+    <div class="t-mark">TTA</div>
+    <div class="t-name">TT Audit<span>Gestión RRHH</span></div>
+    <div class="hamburger" onclick="toggleSidebar()" title="Colapsar menú">
+      <div class="hamburger-lines"><span></span><span></span><span></span></div>
+    </div>
+  </div>
+  <div class="t-mid">
+    <div class="t-month-pill" id="top-month-pill" onclick="showPage('asistencia')">
+      <div class="t-month-dot off" id="top-month-dot"></div>
+      <span id="top-month-label">Sin mes activo</span>
+    </div>
+    <div class="t-sheets-status" id="sheets-btn" onclick="showPage('config')">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <span id="sheets-status-label">Sheets: no conectado</span>
+    </div>
+  </div>
+  <div class="t-sep"></div>
+  <div class="t-right">
+    <div class="t-avatar">CL</div>
+    <span class="t-uname">Claudia</span>
+  </div>
+</div>
+
+<!-- ══ SHELL ══ -->
+<div class="shell">
+
+<!-- ══ SIDEBAR ══ -->
+<nav class="sidebar" id="sidebar">
+  <div class="sb-icons">
+    <!-- Dashboard -->
+    <div class="sb-icon active" data-page="dashboard" onclick="showPage('dashboard')" title="Panel general">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    </div>
+    <div class="sb-icon-sep"></div>
+    <!-- Asistencia -->
+    <div class="sb-icon" data-page="asistencia" onclick="showPage('asistencia')" title="Ver asistencia">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    </div>
+    <div class="sb-icon-sep"></div>
+    <!-- Vacaciones -->
+    <div class="sb-icon" data-page="vacaciones" onclick="showPage('vacaciones')" title="Vacaciones">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l4-8 4 4 4-6 4 10"/><path d="M3 21h18"/></svg>
+    </div>
+    <div class="sb-icon-sep"></div>
+    <!-- Personal -->
+    <div class="sb-icon" data-page="personal" onclick="showPage('personal')" title="Base de personal">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    </div>
+    <div class="sb-icon-sep"></div>
+    <!-- Config -->
+    <div class="sb-icon" data-page="config" onclick="showPage('config')" title="Configuración">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M12 2v2M12 20v2M2 12h2M20 12h2M17.66 17.66l-1.41-1.41M6.34 17.66l1.41-1.41"/></svg>
+    </div>
+  </div>
+  <div class="sb-labels" id="sb-labels">
+    <!-- Mi TT Audit -->
+    <div class="sb-section">
+      <div class="sb-section-title">Mi TT Audit</div>
+      <div class="sb-item active" data-page="dashboard" onclick="showPage('dashboard')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Panel general
+      </div>
+    </div>
+    <div class="sb-sep"></div>
+    <!-- Asistencia -->
+    <div class="sb-section">
+      <div class="sb-section-title">Asistencia</div>
+      <div class="sb-item" data-page="asistencia" onclick="showPage('asistencia')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Ver asistencia
+      </div>
+    </div>
+    <div class="sb-sep"></div>
+    <!-- Vacaciones -->
+    <div class="sb-section">
+      <div class="sb-section-title">Vacaciones</div>
+      <div class="sb-item" data-page="vacaciones" onclick="showPage('vacaciones')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l4-8 4 4 4-6 4 10"/><path d="M3 21h18"/></svg>
+        Calendario
+      </div>
+    </div>
+    <div class="sb-sep"></div>
+    <!-- Sistema -->
+    <div class="sb-section">
+      <div class="sb-section-title">Sistema</div>
+      <div class="sb-item" data-page="personal" onclick="showPage('personal')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Base de personal
+      </div>
+      <div class="sb-item" data-page="config" onclick="showPage('config')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M12 2v2M12 20v2M2 12h2M20 12h2M17.66 17.66l-1.41-1.41M6.34 17.66l1.41-1.41"/></svg>
+        Configuración
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ══ CONTENT ══ -->
+<main class="content" id="main-content">
+
+<!-- ════════════════════════════════════
+     PAGE: DASHBOARD
+════════════════════════════════════ -->
+<div class="page active" id="page-dashboard">
+  <div class="ph">
+    <h1>Panel general</h1>
+    <p>Resumen del mes activo y estado del equipo</p>
+  </div>
+  <div class="tp active" style="padding-top:20px">
+    <div id="dash-no-mes" class="config-banner" style="display:none">
+      ⚠ No hay un mes activo. <a onclick="showPage('asistencia')">Ir a Asistencia → Abrir mes</a> para comenzar.
+    </div>
+    <div class="cards" id="dash-cards">
+      <div class="card"><div class="card-label">Mes activo</div><div class="card-value" id="dc-mes" style="font-size:16px">—</div><div class="card-sub">Sin mes abierto</div></div>
+      <div class="card"><div class="card-label">Personal registrado</div><div class="card-value" id="dc-personal">0</div><div class="card-sub">colaboradores en base</div></div>
+      <div class="card"><div class="card-label">Con tardanza</div><div class="card-value warn" id="dc-tard">0</div><div class="card-sub">en el mes activo</div></div>
+      <div class="card"><div class="card-label">Días sin marca</div><div class="card-value" id="dc-sinmarca">0</div><div class="card-sub">registros 0:00:00</div></div>
+    </div>
+    <div class="empty" id="dash-empty" style="display:none">
+      <div class="empty-ico">📊</div>
+      <div class="empty-title">Carga datos para ver el resumen</div>
+      <div class="empty-sub">Abre un mes en la sección Asistencia para ver estadísticas aquí.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     PAGE: ASISTENCIA
+════════════════════════════════════ -->
+<div class="page" id="page-asistencia">
+  <div class="ph">
+    <h1>Ver asistencia</h1>
+    <div class="ph-row">
+      <button class="btn btn-primary" onclick="openAbrirMes()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Abrir mes
+      </button>
+      <span id="asi-mes-badge" style="font-size:13px;color:var(--mu);font-weight:500"></span>
+    </div>
+  </div>
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('asi',this,'tab-diaria')">Asistencia diaria</div>
+    <div class="tab" onclick="switchTab('asi',this,'tab-resumen')">Resumen mensual</div>
+    <div class="tab" onclick="switchTab('asi',this,'tab-tardanzas')">Tardanzas &amp; descuentos</div>
+  </div>
+
+  <!-- TAB: DIARIA -->
+  <div class="tp active" id="tab-diaria">
+    <div class="ctrl">
+      <select class="fsel" id="asi-filter-mes" onchange="renderMatrix()">
+        <option value="">— Seleccionar mes —</option>
+      </select>
+      <select class="fsel" id="asi-filter-proyecto" onchange="renderMatrix()">
+        <option value="">Todos los proyectos</option>
+      </select>
+      <div class="fgap"></div>
+      <button class="btn btn-outline" onclick="refrescarMes()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        Actualizar datos
+      </button>
+      <button class="btn btn-success" id="btn-dl-csv" style="display:none" onclick="exportCSVTardanzas()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Exportar CSV Buk
+      </button>
+    </div>
+    <div class="legend">
+      <span><b>Formato:</b> INGRESO y SALIDA por día.</span>
+      <div class="l-dot" style="background:var(--danger)"></div><span style="color:var(--danger);font-weight:600">Rojo</span><span>= sin marca (0:00:00)</span>
+      <div class="l-dot" style="background:var(--warn)"></div><span style="color:var(--warn);font-weight:600">Naranja</span><span>= tardanza.</span>
+      <span>Hora de corte: <b style="color:var(--buk)">10:30</b></span>
+    </div>
+    <div class="tbl-wrap" id="matrix-wrap" style="display:none"></div>
+    <div class="empty" id="matrix-empty">
+      <div class="empty-ico">📋</div>
+      <div class="empty-title">No hay datos cargados</div>
+      <div class="empty-sub">Abre un mes con el botón <b>"Abrir mes"</b> para cargar los datos directamente desde Google Sheets.</div>
+      <button class="btn btn-primary" style="margin-top:8px" onclick="openAbrirMes()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Abrir mes
+      </button>
+    </div>
+  </div>
+
+  <!-- TAB: RESUMEN MENSUAL -->
+  <div class="tp" id="tab-resumen">
+    <div class="ctrl">
+      <select class="fsel" id="res-filter-mes" onchange="renderResumen()">
+        <option value="">— Seleccionar mes —</option>
+      </select>
+      <div class="fgap"></div>
+      <button class="btn btn-primary" onclick="saveResumen()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Guardar cambios
+      </button>
+    </div>
+    <div class="tbl-wrap" id="resumen-wrap" style="display:none"></div>
+    <div class="empty" id="resumen-empty">
+      <div class="empty-ico">📊</div>
+      <div class="empty-title">Selecciona un mes para ver el resumen</div>
+      <div class="empty-sub">El resumen se calcula automáticamente desde los datos de asistencia diaria. Puedes ingresar horas de descanso médico y vacaciones manualmente.</div>
+    </div>
+  </div>
+
+  <!-- TAB: TARDANZAS -->
+  <div class="tp" id="tab-tardanzas">
+    <div class="ctrl">
+      <select class="fsel" id="tard-filter-mes" onchange="renderTardanzas()">
+        <option value="">— Seleccionar mes —</option>
+      </select>
+      <div class="fgap"></div>
+      <button class="btn btn-primary" onclick="saveTardanzas()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Guardar descuentos
+      </button>
+      <button class="btn btn-outline" onclick="exportCSVTardanzas()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Exportar Buk
+      </button>
+    </div>
+    <div class="tbl-wrap" id="tardanzas-wrap" style="display:none"></div>
+    <div class="empty" id="tardanzas-empty">
+      <div class="empty-ico">⏰</div>
+      <div class="empty-title">Selecciona un mes</div>
+      <div class="empty-sub">Las tardanzas se calculan automáticamente desde la asistencia diaria. El monto de descuento se ingresa manualmente.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     PAGE: PERSONAL
+════════════════════════════════════ -->
+<div class="page" id="page-personal">
+  <div class="ph">
+    <h1>Base de personal</h1>
+    <p>Colaboradores registrados. Esta base es usada para calcular asistencia y tardanzas.</p>
+    <div class="ph-row">
+      <button class="btn btn-primary" onclick="syncPersonal()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        Sincronizar desde Sheets
+      </button>
+      <div class="fgap"></div>
+      <input class="finp" placeholder="Buscar por nombre o DNI…" oninput="filterPersonal(this.value)" style="width:220px">
+    </div>
+  </div>
+  <div class="tp active">
+    <div class="tbl-wrap" id="personal-wrap">
+      <table class="pst" id="personal-table">
+        <thead><tr>
+          <th>DNI</th><th>Nombre completo</th><th>Ficha Buk</th><th>Cargo</th><th>Área</th><th>Fecha ingreso</th><th style="text-align:center">Acciones</th>
+        </tr></thead>
+        <tbody id="personal-tbody"><tr><td colspan="7" style="text-align:center;padding:40px;color:var(--hi)">Sin colaboradores registrados. Agrega uno o carga un Excel.</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     PAGE: VACACIONES
+════════════════════════════════════ -->
+<div class="page" id="page-vacaciones">
+  <div class="ph"><h1>Vacaciones</h1><p>Calendario y saldos (próximamente)</p></div>
+  <div class="tp active">
+    <div class="empty">
+      <div class="empty-ico">🏖</div>
+      <div class="empty-title">Módulo en construcción</div>
+      <div class="empty-sub">El módulo de vacaciones estará disponible en la siguiente versión.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     PAGE: CONFIG
+════════════════════════════════════ -->
+<div class="page" id="page-config">
+  <div class="ph"><h1>Configuración</h1><p>Conexión a Google Sheets y ajustes del sistema</p></div>
+  <div class="tp active">
+    <div class="card" style="max-width:560px;padding:22px 24px;box-shadow:var(--sh2)">
+      <div class="card-label" style="margin-bottom:12px">Conexión Google Sheets</div>
+      <div class="fg" style="margin-bottom:14px">
+        <label>URL del Web App (Apps Script)</label>
+        <input id="sheets-url-input" type="url" placeholder="https://script.google.com/macros/s/…/exec" value="">
+      </div>
+      <button class="btn btn-primary" onclick="saveConfig()">Guardar y probar conexión</button>
+      <div id="config-test-result" style="margin-top:12px;font-size:12.5px;color:var(--mu)"></div>
+    </div>
+    <div class="card" style="max-width:560px;padding:22px 24px;box-shadow:var(--sh2);margin-top:14px">
+      <div class="card-label" style="margin-bottom:10px">Instrucciones para conectar Google Sheets</div>
+      <ol style="font-size:13px;color:var(--mu);line-height:2;padding-left:18px">
+        <li>Crea un nuevo Google Sheet (puede tener cualquier nombre)</li>
+        <li>Ve a <b>Extensiones → Apps Script</b></li>
+        <li>Borra el código existente y pega el código que aparece abajo</li>
+        <li>Haz clic en <b>Implementar → Nueva implementación</b></li>
+        <li>Tipo: <b>Aplicación web</b> · Ejecutar como: <b>Yo</b> · Acceso: <b>Cualquiera</b></li>
+        <li>Autoriza los permisos y copia la URL del Web App</li>
+        <li>Pega la URL arriba y guarda</li>
+      </ol>
+      <div style="margin-top:14px">
+        <div style="font-size:11.5px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Código Apps Script</div>
+        <pre id="apps-script-code" style="background:var(--sf3);border:.5px solid var(--bd);border-radius:7px;padding:12px 14px;font-family:var(--mono);font-size:11px;color:var(--tx);overflow-x:auto;white-space:pre;line-height:1.6;max-height:260px;overflow-y:auto"></pre>
+        <button class="btn btn-outline" style="margin-top:8px" onclick="copyScript()">Copiar código</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+</div><!-- /shell -->
+
+<!-- ════════ MODALS ════════ -->
+
+<!-- Abrir Mes -->
+<div class="overlay" id="modal-abrir-mes">
+  <div class="modal">
+    <span class="mclose" onclick="closeModal('modal-abrir-mes')">✕</span>
+    <h2>Abrir mes de asistencia</h2>
+    <p class="msub">Selecciona el período y define el total de horas mensuales para cada colaborador.</p>
+    <div class="form-grid">
+      <div class="fg">
+        <label>Mes</label>
+        <select id="am-mes">
+          <option value="1">Enero</option><option value="2">Febrero</option>
+          <option value="3">Marzo</option><option value="4">Abril</option>
+          <option value="5">Mayo</option><option value="6">Junio</option>
+          <option value="7">Julio</option><option value="8">Agosto</option>
+          <option value="9">Septiembre</option><option value="10">Octubre</option>
+          <option value="11">Noviembre</option><option value="12">Diciembre</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label>Año</label>
+        <input type="number" id="am-año" value="2026" min="2020" max="2035">
+      </div>
+    </div>
+    <div style="margin-top:14px;margin-bottom:6px;font-size:12px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.4px">
+      Total horas del mes por colaborador
+    </div>
+    <div style="font-size:12px;color:var(--hi);margin-bottom:10px">Puedes establecer un valor por defecto para todos, o personalizarlo por persona.</div>
+    <div class="fg" style="margin-bottom:12px">
+      <label>Horas por defecto (aplicar a todos)</label>
+      <div style="display:flex;gap:8px">
+        <input type="number" id="am-horas-default" placeholder="Ej: 180" style="width:120px;padding:7px 10px;border:.5px solid var(--bd2);border-radius:7px;font-family:var(--font);font-size:13px;background:var(--sf);color:var(--tx);outline:none">
+        <button class="btn btn-outline" style="height:34px" onclick="aplicarHorasDefault()">Aplicar a todos</button>
+      </div>
+    </div>
+    <div id="am-personal-list" style="max-height:240px;overflow-y:auto;border:.5px solid var(--bd);border-radius:7px;background:var(--sf2)">
+      <div style="padding:12px;text-align:center;color:var(--hi);font-size:13px">Carga la base de personal primero.</div>
+    </div>
+    <div class="mfooter">
+      <button class="btn btn-outline" onclick="closeModal('modal-abrir-mes')">Cancelar</button>
+      <button class="btn btn-primary" onclick="confirmarAbrirMes()">Abrir mes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Upload Asistencia -->
+<div class="overlay" id="modal-upload-asi">
+  <div class="modal wide">
+    <span class="mclose" onclick="closeModal('modal-upload-asi')">✕</span>
+    <h2>Cargar archivo de asistencia</h2>
+    <p class="msub">Sube el reporte biométrico mensual (.xlsx / .xls / .csv). Se mapeará a la base de personal por DNI.</p>
+    <div class="upzone" id="upzone-asi"
+      ondragover="event.preventDefault();this.classList.add('drag')"
+      ondragleave="this.classList.remove('drag')"
+      ondrop="handleDropAsi(event)"
+      onclick="document.getElementById('file-asi').click()">
+      <span class="upzone-ico">📂</span>
+      <h3>Arrastra tu archivo aquí</h3>
+      <p>o haz clic para seleccionarlo<br><b>.xlsx / .xls / .csv</b></p>
+      <div class="up-tags">
+        <span class="up-tag">Documento (DNI)</span>
+        <span class="up-tag">Fecha/Hora</span>
+        <span class="up-tag">Ingreso</span>
+        <span class="up-tag">Salida</span>
+        <span class="up-tag">DIA</span>
+      </div>
+    </div>
+    <input type="file" id="file-asi" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleFileAsi(this)">
+    <div id="asi-col-map" style="display:none;margin-top:16px">
+      <div class="preview-bar" id="asi-preview-bar"></div>
+      <div style="font-size:12px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">Mapear columnas</div>
+      <div class="col-map-grid">
+        <div class="fg"><label>DNI / Documento</label><select id="map-asi-dni"></select></div>
+        <div class="fg"><label>Nombre (opcional)</label><select id="map-asi-nombre"></select></div>
+        <div class="fg"><label>Fecha</label><select id="map-asi-fecha"></select></div>
+        <div class="fg"><label>Hora ingreso</label><select id="map-asi-ingreso"></select></div>
+        <div class="fg"><label>Hora salida</label><select id="map-asi-salida"></select></div>
+        <div class="fg"><label>Proyecto / Área (opcional)</label><select id="map-asi-proyecto"></select></div>
+      </div>
+      <div class="mfooter">
+        <button class="btn btn-outline" onclick="closeModal('modal-upload-asi')">Cancelar</button>
+        <button class="btn btn-primary" onclick="importarAsistencia()">Importar datos</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Nuevo Personal -->
+<div class="overlay" id="modal-nuevo-personal">
+  <div class="modal">
+    <span class="mclose" onclick="closeModal('modal-nuevo-personal')">✕</span>
+    <h2>Nuevo colaborador</h2>
+    <p class="msub">Ingresa los datos del colaborador. El DNI es el identificador principal.</p>
+    <div class="form-grid">
+      <div class="fg"><label>DNI *</label><input type="text" id="np-dni" maxlength="8" placeholder="12345678"></div>
+      <div class="fg"><label>Ficha Buk *</label><input type="text" id="np-ficha" placeholder="BUK-001"></div>
+      <div class="fg full"><label>Nombre completo *</label><input type="text" id="np-nombre" placeholder="Apellidos, Nombre"></div>
+      <div class="fg"><label>Cargo</label><input type="text" id="np-cargo" placeholder="Analista SR"></div>
+      <div class="fg"><label>Área</label><input type="text" id="np-area" placeholder="Operaciones"></div>
+      <div class="fg"><label>Fecha de ingreso</label><input type="date" id="np-ingreso"></div>
+    </div>
+    <div class="mfooter">
+      <button class="btn btn-outline" onclick="closeModal('modal-nuevo-personal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarPersonal()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Upload Personal -->
+<div class="overlay" id="modal-upload-personal">
+  <div class="modal wide">
+    <span class="mclose" onclick="closeModal('modal-upload-personal')">✕</span>
+    <h2>Cargar base de personal desde Excel</h2>
+    <p class="msub">Sube un Excel con la nómina de colaboradores.</p>
+    <div class="upzone" id="upzone-per"
+      ondragover="event.preventDefault();this.classList.add('drag')"
+      ondragleave="this.classList.remove('drag')"
+      ondrop="handleDropPer(event)"
+      onclick="document.getElementById('file-per').click()">
+      <span class="upzone-ico">👥</span>
+      <h3>Arrastra tu archivo aquí</h3>
+      <p>o haz clic para seleccionarlo<br><b>.xlsx / .xls / .csv</b></p>
+      <div class="up-tags">
+        <span class="up-tag">DNI</span><span class="up-tag">Nombre</span>
+        <span class="up-tag">Ficha Buk</span><span class="up-tag">Cargo</span>
+        <span class="up-tag">Área</span><span class="up-tag">Fecha ingreso</span>
+      </div>
+    </div>
+    <input type="file" id="file-per" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleFilePer(this)">
+    <div id="per-col-map" style="display:none;margin-top:16px">
+      <div class="preview-bar" id="per-preview-bar"></div>
+      <div class="col-map-grid" style="grid-template-columns:1fr 1fr 1fr">
+        <div class="fg"><label>DNI *</label><select id="map-per-dni"></select></div>
+        <div class="fg"><label>Nombre *</label><select id="map-per-nombre"></select></div>
+        <div class="fg"><label>Ficha Buk</label><select id="map-per-ficha"></select></div>
+        <div class="fg"><label>Cargo</label><select id="map-per-cargo"></select></div>
+        <div class="fg"><label>Área</label><select id="map-per-area"></select></div>
+        <div class="fg"><label>Fecha ingreso</label><select id="map-per-fecha"></select></div>
+      </div>
+      <div class="mfooter">
+        <button class="btn btn-outline" onclick="closeModal('modal-upload-personal')">Cancelar</button>
+        <button class="btn btn-primary" onclick="importarPersonal()">Importar personal</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast" id="toast-container"></div>
+
+<script>
+// ════════════════════════════════════════════════════════════
+//  TT AUDIT — RRHH PLATFORM  |  Google Sheets Edition
+//  Sheet ID: 1s7r7KjxTYO_PK2obc_yQ9pXI8l-mEl3vbmrrfIqCrio
+// ════════════════════════════════════════════════════════════
+
+const CUTOFF_MIN = 10 * 60 + 30; // 10:30
+const SHEET_ID = '1s7r7KjxTYO_PK2obc_yQ9pXI8l-mEl3vbmrrfIqCrio';
+
+// ── STATE ──────────────────────────────────────────────────
+const STATE = {
+  sheetsUrl: localStorage.getItem('tt_sheets_url') || '',
+  personal: JSON.parse(localStorage.getItem('tt_personal') || '[]'),
+  asistencia: JSON.parse(localStorage.getItem('tt_asistencia') || '[]'),
+  mesConfig: JSON.parse(localStorage.getItem('tt_mes_config') || '{}'),
+  resumen: JSON.parse(localStorage.getItem('tt_resumen') || '{}'),
+  descuentos: JSON.parse(localStorage.getItem('tt_descuentos') || '{}'),
+  activeMes: localStorage.getItem('tt_active_mes') || '',
+  lastSync: localStorage.getItem('tt_last_sync') || '',
+};
+
+function persist(key) {
+  const map = {
+    personal:'tt_personal', asistencia:'tt_asistencia',
+    mesConfig:'tt_mes_config', resumen:'tt_resumen', descuentos:'tt_descuentos',
+  };
+  if (map[key]) localStorage.setItem(map[key], JSON.stringify(STATE[key]));
+}
+
+// ── NAVIGATION ─────────────────────────────────────────────
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sb-item, .sb-icon').forEach(i => i.classList.remove('active'));
+  document.getElementById('page-' + id)?.classList.add('active');
+  document.querySelectorAll(`[data-page="${id}"]`).forEach(el => el.classList.add('active'));
+  if (id === 'asistencia') { syncMesSelects(); renderMatrix(); }
+  if (id === 'personal') renderPersonalTable();
+  if (id === 'dashboard') updateDashboard();
+  if (id === 'config') renderConfigPage();
+}
+
+let sidebarCollapsed = false;
+function toggleSidebar() {
+  sidebarCollapsed = !sidebarCollapsed;
+  document.getElementById('sidebar').classList.toggle('collapsed', sidebarCollapsed);
+}
+
+function switchTab(ns, el, tabId) {
+  const panel = el.closest('.page');
+  panel.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  panel.querySelectorAll('.tp').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(tabId)?.classList.add('active');
+  if (tabId === 'tab-resumen') renderResumen();
+  if (tabId === 'tab-tardanzas') renderTardanzas();
+  if (tabId === 'tab-diaria') renderMatrix();
+}
+
+// ── MODAL HELPERS ───────────────────────────────────────────
+function closeModal(id) { document.getElementById(id)?.classList.remove('open'); }
+function openModal(id)  { document.getElementById(id)?.classList.add('open'); }
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.overlay').forEach(o =>
+    o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); })
+  );
+});
+
+// ── TOAST ───────────────────────────────────────────────────
+function toast(msg, type = '') {
+  const c = document.getElementById('toast-container');
+  const el = document.createElement('div');
+  el.className = 'toast-item ' + type;
+  el.textContent = msg;
+  c.appendChild(el);
+  requestAnimationFrame(() => el.classList.add('show'));
+  setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 300); }, 3500);
+}
+
+// ── LOADING OVERLAY ─────────────────────────────────────────
+function showLoading(msg = 'Cargando desde Google Sheets…') {
+  let ov = document.getElementById('loading-ov');
+  if (!ov) {
+    ov = document.createElement('div');
+    ov.id = 'loading-ov';
+    ov.style.cssText = 'position:fixed;inset:0;background:rgba(44,50,128,.18);z-index:900;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px)';
+    ov.innerHTML = `<div style="background:#fff;border-radius:12px;padding:24px 32px;display:flex;align-items:center;gap:14px;box-shadow:0 8px 32px rgba(0,0,0,.18)">
+      <div class="spinner"></div>
+      <span id="loading-msg" style="font-family:var(--font);font-size:14px;font-weight:600;color:var(--tx)">${msg}</span>
+    </div>`;
+    document.body.appendChild(ov);
+  } else {
+    document.getElementById('loading-msg').textContent = msg;
+  }
+}
+function hideLoading() {
+  document.getElementById('loading-ov')?.remove();
+}
+
+// ── MES HELPERS ─────────────────────────────────────────────
+const MES_NAMES = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio',
+  'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+function mesKeyToLabel(key) {
+  if (!key) return '';
+  const [y, m] = key.split('-');
+  return `${MES_NAMES[parseInt(m)]} ${y}`;
+}
+
+function getMesesDisponibles() {
+  const keys = [...new Set(STATE.asistencia.map(r => r.mes_key))].filter(Boolean);
+  Object.keys(STATE.mesConfig).forEach(k => { if (!keys.includes(k)) keys.push(k); });
+  return keys.sort();
+}
+
+function syncMesSelects() {
+  const meses = getMesesDisponibles();
+  const opts = meses.map(k => `<option value="${k}">${mesKeyToLabel(k)}</option>`).join('');
+  ['asi-filter-mes','res-filter-mes','tard-filter-mes'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    sel.innerHTML = '<option value="">— Seleccionar mes —</option>' + opts;
+    if (STATE.activeMes && meses.includes(STATE.activeMes)) sel.value = STATE.activeMes;
+  });
+}
+
+// ════════════════════════════════════════════════════════════
+//  GOOGLE SHEETS — FETCH VIA APPS SCRIPT
+// ════════════════════════════════════════════════════════════
+
+async function fetchFromSheets(accion, params = {}) {
+  const url = STATE.sheetsUrl;
+  if (!url) throw new Error('No hay URL de Apps Script configurada. Ve a Configuración.');
+  const qs = new URLSearchParams({ accion, ...params }).toString();
+  const res = await fetch(`${url}?${qs}`);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const json = await res.json();
+  if (json.error) throw new Error(json.error);
+  return json;
+}
+
+async function syncPersonalFromSheets() {
+  const data = await fetchFromSheets('getPersonal');
+  if (!data.rows) return;
+  // data.rows: [[dni, nombre, ficha_buk, cargo, area, fecha_ingreso], ...]
+  STATE.personal = data.rows.map(r => ({
+    dni: (r[0]||'').toString().trim(),
+    nombre: (r[1]||'').toString().trim(),
+    ficha_buk: (r[2]||'').toString().trim(),
+    cargo: (r[3]||'').toString().trim(),
+    area: (r[4]||'').toString().trim(),
+    fecha_ingreso: (r[5]||'').toString().trim(),
+  })).filter(p => p.dni && p.nombre);
+  persist('personal');
+}
+
+async function syncAsistenciaFromSheets(mesKey) {
+  const data = await fetchFromSheets('getAsistencia', { mes: mesKey });
+  if (!data.rows) return 0;
+  // Remove existing records for this mesKey and replace
+  STATE.asistencia = STATE.asistencia.filter(r => r.mes_key !== mesKey);
+  const rows = data.rows.map(r => {
+    // r: [dni, fecha_str, ingreso, salida, proyecto, dia]
+    const dni = (r[0]||'').toString().trim();
+    const fecha_str = (r[1]||'').toString().trim();
+    const fecha = parseFecha(fecha_str);
+    const mk = fecha ? `${fecha.getFullYear()}-${String(fecha.getMonth()+1).padStart(2,'0')}` : mesKey;
+    const persona = STATE.personal.find(p => p.dni === dni);
+    return {
+      dni,
+      nombre: persona?.nombre || '',
+      fecha: fecha ? formatFecha(fecha) : fecha_str,
+      ingreso: parseHora(r[2]),
+      salida: parseHora(r[3]),
+      proyecto: (r[4]||'').toString().trim(),
+      mes_key: mk,
+    };
+  }).filter(r => r.dni);
+  STATE.asistencia.push(...rows);
+  persist('asistencia');
+  return rows.length;
+}
+
+// ════════════════════════════════════════════════════════════
+//  ABRIR MES  — reads from Sheets
+// ════════════════════════════════════════════════════════════
+
+function openAbrirMes() {
+  const now = new Date();
+  document.getElementById('am-mes').value = now.getMonth() + 1;
+  document.getElementById('am-año').value = now.getFullYear();
+  renderAbrirMesPersonal();
+  openModal('modal-abrir-mes');
+}
+
+function renderAbrirMesPersonal() {
+  const cont = document.getElementById('am-personal-list');
+  if (!STATE.personal.length) {
+    cont.innerHTML = '<div style="padding:14px;text-align:center;color:var(--hi);font-size:13px">⚠ Sin personal cargado. Primero sincroniza en <b>Base de personal</b>.</div>';
+    return;
+  }
+  const mesKey = getMesKeyFromForm();
+  cont.innerHTML = STATE.personal.map(p => {
+    const prev = STATE.mesConfig[mesKey]?.[p.dni] || '';
+    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:.5px solid var(--bd)">
+      <div style="flex:1;font-size:13px;font-weight:500">${p.nombre}</div>
+      <div style="font-size:11.5px;color:var(--hi)">${p.dni}</div>
+      <input type="number" class="am-horas-input" data-dni="${p.dni}"
+        value="${prev}" placeholder="h/mes"
+        style="width:72px;padding:4px 7px;border:.5px solid var(--bd2);border-radius:6px;font-family:var(--mono);font-size:12px;text-align:center;outline:none;background:var(--sf)">
+    </div>`;
+  }).join('');
+}
+
+function getMesKeyFromForm() {
+  const m = String(document.getElementById('am-mes')?.value || 1).padStart(2,'0');
+  const y = document.getElementById('am-año')?.value || 2026;
+  return `${y}-${m}`;
+}
+
+function aplicarHorasDefault() {
+  const val = document.getElementById('am-horas-default').value;
+  document.querySelectorAll('.am-horas-input').forEach(i => i.value = val);
+}
+
+async function confirmarAbrirMes() {
+  const mesKey = getMesKeyFromForm();
+
+  // Save hour objectives
+  if (!STATE.mesConfig[mesKey]) STATE.mesConfig[mesKey] = {};
+  document.querySelectorAll('.am-horas-input').forEach(inp => {
+    const val = parseFloat(inp.value) || 0;
+    if (val) STATE.mesConfig[mesKey][inp.dataset.dni] = val;
+  });
+  persist('mesConfig');
+
+  closeModal('modal-abrir-mes');
+
+  // Now load data from Sheets
+  if (!STATE.sheetsUrl) {
+    toast('⚠ Configura la URL de Google Sheets primero', 'warn');
+    STATE.activeMes = mesKey;
+    localStorage.setItem('tt_active_mes', mesKey);
+    updateTopbarMes();
+    syncMesSelects();
+    return;
+  }
+
+  showLoading(`Cargando asistencia de ${mesKeyToLabel(mesKey)}…`);
+  try {
+    const count = await syncAsistenciaFromSheets(mesKey);
+    STATE.activeMes = mesKey;
+    localStorage.setItem('tt_active_mes', mesKey);
+    updateTopbarMes();
+    syncMesSelects();
+    renderMatrix();
+    updateDashboard();
+    toast(`✓ ${count} registros cargados para ${mesKeyToLabel(mesKey)}`, 'ok');
+  } catch(err) {
+    toast('Error al cargar desde Sheets: ' + err.message, 'err');
+  } finally {
+    hideLoading();
+  }
+}
+
+// ── REFRESH BUTTON (reload current month) ───────────────────
+async function refrescarMes() {
+  const mesKey = STATE.activeMes;
+  if (!mesKey) { toast('No hay mes activo', 'warn'); return; }
+  if (!STATE.sheetsUrl) { toast('Configura la URL de Apps Script primero', 'warn'); return; }
+  showLoading(`Actualizando ${mesKeyToLabel(mesKey)}…`);
+  try {
+    const count = await syncAsistenciaFromSheets(mesKey);
+    renderMatrix();
+    renderResumen();
+    renderTardanzas();
+    updateDashboard();
+    toast(`✓ ${count} registros actualizados`, 'ok');
+  } catch(err) {
+    toast('Error: ' + err.message, 'err');
+  } finally {
+    hideLoading();
+  }
+}
+
+// ── TOPBAR ──────────────────────────────────────────────────
+function updateTopbarMes() {
+  const label = document.getElementById('top-month-label');
+  const dot   = document.getElementById('top-month-dot');
+  const badge = document.getElementById('asi-mes-badge');
+  if (STATE.activeMes) {
+    label.textContent = mesKeyToLabel(STATE.activeMes);
+    dot.classList.remove('off');
+    if (badge) badge.textContent = `Mes activo: ${mesKeyToLabel(STATE.activeMes)}`;
+  } else {
+    label.textContent = 'Sin mes activo';
+    dot.classList.add('off');
+    if (badge) badge.textContent = '';
+  }
+}
+
+// ── PROYECTO FILTER ──────────────────────────────────────────
+function updateProyectoFilter() {
+  const proyectos = [...new Set(STATE.asistencia.map(r=>r.proyecto).filter(Boolean))].sort();
+  const sel = document.getElementById('asi-filter-proyecto');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">Todos los proyectos</option>' +
+    proyectos.map(p=>`<option value="${p}">${p}</option>`).join('');
+}
+
+// ════════════════════════════════════════════════════════════
+//  RENDER MATRIX
+// ════════════════════════════════════════════════════════════
+function renderMatrix() {
+  const mesKey = document.getElementById('asi-filter-mes')?.value || STATE.activeMes;
+  const proyFilt = document.getElementById('asi-filter-proyecto')?.value || '';
+  const wrap  = document.getElementById('matrix-wrap');
+  const empty = document.getElementById('matrix-empty');
+  if (!wrap) return;
+
+  let rows = STATE.asistencia.filter(r => r.mes_key === mesKey);
+  if (proyFilt) rows = rows.filter(r => r.proyecto === proyFilt);
+
+  if (!rows.length) {
+    wrap.style.display = 'none'; empty.style.display = 'flex'; return;
+  }
+  wrap.style.display = ''; empty.style.display = 'none';
+
+  const [y,m] = mesKey.split('-').map(Number);
+  const daysInMonth = new Date(y, m, 0).getDate();
+  const days = Array.from({length:daysInMonth},(_,i)=>new Date(y,m-1,i+1));
+
+  // Group by DNI
+  const byPerson = {};
+  rows.forEach(r => {
+    const key = r.dni || r.nombre;
+    if (!byPerson[key]) byPerson[key] = {dni:r.dni, nombre:r.nombre, days:{}};
+    byPerson[key].days[r.fecha] = {ingreso:r.ingreso, salida:r.salida};
+  });
+
+  const persons = Object.values(byPerson).sort((a,b)=>a.nombre.localeCompare(b.nombre,'es'));
+  const DAY_LABELS = ['DOM','LUN','MAR','MIÉ','JUE','VIE','SÁB'];
+
+  let html = `<table class="mx"><thead><tr>
+    <th class="h-name">Proyecto / Personal</th>
+    <th class="h-optimo">Óptimo de horas</th>
+    <th class="h-tipo"></th>`;
+
+  days.forEach(d => {
+    const dow = d.getDay();
+    const cls = dow===0?'h-sun':dow===6?'h-sat':'h-day';
+    html += `<th class="${cls}">${DAY_LABELS[dow]}<br>
+      <span style="font-size:10px;opacity:.75">${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}</span></th>`;
+  });
+  html += `<th class="h-total">TOTAL HORAS<br>TRABAJADAS</th></tr></thead><tbody>`;
+
+  persons.forEach(p => {
+    const optimo = STATE.mesConfig[mesKey]?.[p.dni] || 0;
+    const optimoFmt = optimo ? `${optimo}:00:00` : '—';
+    let totalMins = 0;
+
+    const dayData = days.map(d => {
+      const k = formatFecha(d);
+      const rec = p.days[k] || {};
+      const ing = rec.ingreso || null;
+      const sal = rec.salida  || null;
+      const zeroIng = isZeroH(ing);
+      const zeroSal = isZeroH(sal);
+      const late = !zeroIng && horaToMins(ing) > CUTOFF_MIN;
+      if (!zeroIng && !zeroSal) {
+        const mi=horaToMins(ing), ms=horaToMins(sal);
+        if (ms>mi) totalMins += ms-mi;
+      }
+      return {ing, sal, zeroIng, zeroSal, late, dow:d.getDay()};
+    });
+
+    const totalFmt = totalMins>0 ? minsToHora(totalMins) : '0:00:00';
+
+    // INGRESO row
+    html += `<tr class="tr-person">
+      <td class="td-name" rowspan="2">${p.nombre}</td>
+      <td class="td-opt" rowspan="2" style="font-size:10px;line-height:1.8;text-align:center">
+        <span style="font-family:var(--mono);font-weight:700">${optimoFmt}</span><br>
+        <span style="color:var(--hi);font-size:9.5px">${optimo||'—'} h</span>
+      </td>
+      <td class="td-tipo" style="font-size:9px;letter-spacing:.4px">INGRESO</td>`;
+
+    dayData.forEach(dd => {
+      const wk = (dd.dow===0||dd.dow===6)?' td-wk':'';
+      if (dd.zeroIng) {
+        html += `<td class="td-time c-zero${wk}">0:00:00</td>`;
+      } else if (dd.late) {
+        html += `<td class="td-time c-late${wk}">${dd.ing}</td>`;
+      } else {
+        html += `<td class="td-time c-ok${wk}">${dd.ing}</td>`;
+      }
+    });
+    html += `<td class="td-total" rowspan="2">${totalFmt}</td></tr>`;
+
+    // SALIDA row
+    html += `<tr class="tr-sal"><td class="td-tipo" style="font-size:9px;letter-spacing:.4px">SALIDA</td>`;
+    dayData.forEach(dd => {
+      const wk = (dd.dow===0||dd.dow===6)?' td-wk':'';
+      if (dd.zeroSal) {
+        html += `<td class="td-time c-zero${wk}">0:00:00</td>`;
+      } else {
+        html += `<td class="td-time c-ok${wk}">${dd.sal}</td>`;
+      }
+    });
+    html += `</tr><tr class="tr-sep"><td colspan="${3+days.length+1}"></td></tr>`;
+  });
+
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+  document.getElementById('btn-dl-csv').style.display = '';
+}
+
+// ════════════════════════════════════════════════════════════
+//  RENDER RESUMEN
+// ════════════════════════════════════════════════════════════
+function renderResumen() {
+  const mesKey = document.getElementById('res-filter-mes')?.value || '';
+  const wrap  = document.getElementById('resumen-wrap');
+  const empty = document.getElementById('resumen-empty');
+  if (!mesKey) { wrap.style.display='none'; empty.style.display='flex'; return; }
+
+  const rows = STATE.asistencia.filter(r => r.mes_key === mesKey);
+  if (!rows.length) { wrap.style.display='none'; empty.style.display='flex'; return; }
+  wrap.style.display=''; empty.style.display='none';
+
+  const byPerson = {};
+  rows.forEach(r => {
+    if (!byPerson[r.dni]) byPerson[r.dni]={dni:r.dni,nombre:r.nombre,days:[]};
+    byPerson[r.dni].days.push(r);
+  });
+
+  const resMes = STATE.resumen[mesKey] || {};
+
+  let html = `<table class="rst"><thead><tr>
+    <th>Colaborador</th><th>DNI</th>
+    <th style="text-align:center">Horas trabajadas</th>
+    <th style="text-align:center">Desc. médico (h)</th>
+    <th style="text-align:center">Vacaciones (h)</th>
+    <th style="text-align:center">Total (h)</th>
+    <th style="text-align:center">Objetivo (h)</th>
+    <th style="text-align:center">Estado</th>
+  </tr></thead><tbody>`;
+
+  Object.values(byPerson).sort((a,b)=>a.nombre.localeCompare(b.nombre,'es')).forEach(p => {
+    let totalMins=0;
+    p.days.forEach(r => {
+      if (!isZeroH(r.ingreso)&&!isZeroH(r.salida)) {
+        const mi=horaToMins(r.ingreso),ms=horaToMins(r.salida);
+        if (ms>mi) totalMins+=ms-mi;
+      }
+    });
+    const hTrab = totalMins/60;
+    const saved = resMes[p.dni]||{};
+    const dm  = saved.dm  ?? '';
+    const vac = saved.vac ?? '';
+    const objetivo = STATE.mesConfig[mesKey]?.[p.dni] || 0;
+    const total = hTrab+(parseFloat(dm)||0)+(parseFloat(vac)||0);
+    let estado='Sin objetivo',estClass='';
+    if (objetivo>0) {
+      if (total>=objetivo)             { estado='Completo';      estClass='sp-ok';     }
+      else if (total>=objetivo*0.9)    { estado='Casi completo'; estClass='sp-warn';   }
+      else                             { estado='Incompleto';    estClass='sp-danger';  }
+    }
+    html += `<tr>
+      <td style="font-weight:600">${p.nombre}</td>
+      <td class="mono" style="color:var(--mu)">${p.dni}</td>
+      <td class="mono" style="text-align:center">${minsToHora(totalMins)}</td>
+      <td style="text-align:center"><input type="number" step="0.5" value="${dm}"
+        data-dni="${p.dni}" data-field="dm" onchange="updateResumenCell(this,'${mesKey}')" placeholder="0"></td>
+      <td style="text-align:center"><input type="number" step="0.5" value="${vac}"
+        data-dni="${p.dni}" data-field="vac" onchange="updateResumenCell(this,'${mesKey}')" placeholder="0"></td>
+      <td class="mono" style="text-align:center;font-weight:700">${total.toFixed(1)}</td>
+      <td class="mono" style="text-align:center;color:var(--mu)">${objetivo||'—'}</td>
+      <td style="text-align:center"><span class="status-pill ${estClass}">${estado}</span></td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+}
+
+function updateResumenCell(inp, mesKey) {
+  if (!STATE.resumen[mesKey]) STATE.resumen[mesKey]={};
+  if (!STATE.resumen[mesKey][inp.dataset.dni]) STATE.resumen[mesKey][inp.dataset.dni]={};
+  STATE.resumen[mesKey][inp.dataset.dni][inp.dataset.field] = parseFloat(inp.value)||0;
+  persist('resumen');
+}
+
+function saveResumen() { persist('resumen'); toast('✓ Resumen guardado','ok'); }
+
+// ════════════════════════════════════════════════════════════
+//  RENDER TARDANZAS
+// ════════════════════════════════════════════════════════════
+function renderTardanzas() {
+  const mesKey = document.getElementById('tard-filter-mes')?.value || '';
+  const wrap  = document.getElementById('tardanzas-wrap');
+  const empty = document.getElementById('tardanzas-empty');
+  if (!mesKey) { wrap.style.display='none'; empty.style.display='flex'; return; }
+
+  const rows = STATE.asistencia.filter(r => r.mes_key === mesKey);
+  if (!rows.length) { wrap.style.display='none'; empty.style.display='flex'; return; }
+  wrap.style.display=''; empty.style.display='none';
+
+  // Build per-person tardanza detail
+  const byPerson = {};
+  rows.forEach(r => {
+    if (!byPerson[r.dni]) byPerson[r.dni]={dni:r.dni,nombre:r.nombre,tardanzas:[]};
+    if (!isZeroH(r.ingreso) && horaToMins(r.ingreso)>CUTOFF_MIN) {
+      byPerson[r.dni].tardanzas.push({
+        fecha: r.fecha,
+        ingreso: r.ingreso,
+        minsTard: horaToMins(r.ingreso)-CUTOFF_MIN,
+      });
+    }
+  });
+
+  const descMes = STATE.descuentos[mesKey]||{};
+
+  let html = `<table class="tdt"><thead><tr>
+    <th>Colaborador</th><th>DNI</th><th>Ficha Buk</th>
+    <th style="text-align:center">Días con tardanza</th>
+    <th style="text-align:center">Total min. tarde</th>
+    <th style="text-align:center">Horas tarde</th>
+    <th style="text-align:right;padding-right:14px">Descuento (S/.)</th>
+  </tr></thead><tbody>`;
+
+  const tardPersons = Object.values(byPerson)
+    .filter(p=>p.tardanzas.length>0)
+    .sort((a,b)=>a.nombre.localeCompare(b.nombre,'es'));
+
+  if (!tardPersons.length) {
+    html += `<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--hi)">
+      Sin tardanzas en ${mesKeyToLabel(mesKey)} 🎉</td></tr>`;
+  } else {
+    tardPersons.forEach(p => {
+      const totalMins = p.tardanzas.reduce((s,t)=>s+t.minsTard,0);
+      const ficha = STATE.personal.find(x=>x.dni===p.dni)?.ficha_buk||'—';
+      const monto = descMes[p.dni]??'';
+      html += `<tr>
+        <td style="font-weight:600">${p.nombre}</td>
+        <td class="mono" style="color:var(--mu)">${p.dni}</td>
+        <td class="mono">${ficha}</td>
+        <td style="text-align:center">${p.tardanzas.length} días</td>
+        <td class="mono" style="text-align:center;color:var(--warn);font-weight:700">${totalMins} min</td>
+        <td class="mono" style="text-align:center">${minsToHora(totalMins)}</td>
+        <td style="text-align:right;padding-right:14px">
+          <input type="number" step="0.01" value="${monto}" data-dni="${p.dni}"
+            onchange="updateDescuento(this,'${mesKey}')" placeholder="0.00">
+        </td>
+      </tr>`;
+    });
+  }
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+}
+
+function updateDescuento(inp, mesKey) {
+  if (!STATE.descuentos[mesKey]) STATE.descuentos[mesKey]={};
+  STATE.descuentos[mesKey][inp.dataset.dni] = parseFloat(inp.value)||0;
+  persist('descuentos');
+}
+
+function saveTardanzas() { persist('descuentos'); toast('✓ Descuentos guardados','ok'); }
+
+// ── EXPORT CSV BUK ───────────────────────────────────────────
+function exportCSVTardanzas() {
+  const mesKey = document.getElementById('tard-filter-mes')?.value || STATE.activeMes;
+  if (!mesKey) { toast('Selecciona un mes','warn'); return; }
+  const rows = STATE.asistencia.filter(r=>r.mes_key===mesKey);
+  const byPerson = {};
+  rows.forEach(r => {
+    if (!byPerson[r.dni]) byPerson[r.dni]={dni:r.dni,nombre:r.nombre,totalMins:0};
+    if (!isZeroH(r.ingreso)&&horaToMins(r.ingreso)>CUTOFF_MIN)
+      byPerson[r.dni].totalMins+=horaToMins(r.ingreso)-CUTOFF_MIN;
+  });
+  const descMes = STATE.descuentos[mesKey]||{};
+  let csv = 'RUT;FICHA_BUK;NOMBRE;CONCEPTO;MONTO\n';
+  Object.values(byPerson).filter(p=>p.totalMins>0).forEach(p => {
+    const ficha = STATE.personal.find(x=>x.dni===p.dni)?.ficha_buk||'';
+    const monto = (descMes[p.dni]||0).toFixed(2);
+    csv += `${p.dni};${ficha};${p.nombre};DESCUENTO_TARDANZA;${monto}\n`;
+  });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));
+  a.download = `tardanzas_buk_${mesKey}.csv`;
+  a.click();
+  toast('✓ CSV exportado para Buk','ok');
+}
+
+// ════════════════════════════════════════════════════════════
+//  PERSONAL
+// ════════════════════════════════════════════════════════════
+async function syncPersonal() {
+  if (!STATE.sheetsUrl) { toast('Configura la URL de Apps Script primero','warn'); return; }
+  showLoading('Sincronizando base de personal…');
+  try {
+    await syncPersonalFromSheets();
+    renderPersonalTable();
+    updateDashboard();
+    renderAbrirMesPersonal();
+    toast(`✓ ${STATE.personal.length} colaboradores sincronizados`,'ok');
+  } catch(err) {
+    toast('Error al sincronizar: '+err.message,'err');
+  } finally {
+    hideLoading();
+  }
+}
+
+function renderPersonalTable(filter='') {
+  const tbody = document.getElementById('personal-tbody');
+  if (!tbody) return;
+  let data = STATE.personal;
+  if (filter) {
+    const q=filter.toLowerCase();
+    data=data.filter(p=>p.nombre.toLowerCase().includes(q)||p.dni.includes(q));
+  }
+  if (!data.length) {
+    tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--hi)">Sin colaboradores. Haz clic en "Sincronizar desde Sheets".</td></tr>';
+    return;
+  }
+  tbody.innerHTML=data.map(p=>`<tr>
+    <td class="mono" style="color:var(--mu)">${p.dni}</td>
+    <td style="font-weight:600">${p.nombre}</td>
+    <td class="mono">${p.ficha_buk||'—'}</td>
+    <td>${p.cargo||'—'}</td>
+    <td>${p.area?`<span class="tag-area">${p.area}</span>`:'—'}</td>
+    <td style="color:var(--mu);font-size:12px">${p.fecha_ingreso||'—'}</td>
+    <td style="text-align:center">
+      <span style="font-size:11px;color:var(--hi)">Solo lectura</span>
+    </td>
+  </tr>`).join('');
+}
+
+function filterPersonal(q) { renderPersonalTable(q); }
+
+// ════════════════════════════════════════════════════════════
+//  DASHBOARD
+// ════════════════════════════════════════════════════════════
+function updateDashboard() {
+  const mes = STATE.activeMes;
+  document.getElementById('dc-mes').textContent = mes?mesKeyToLabel(mes):'—';
+  document.getElementById('dc-personal').textContent = STATE.personal.length;
+  if (mes) {
+    const rows = STATE.asistencia.filter(r=>r.mes_key===mes);
+    document.getElementById('dc-tard').textContent =
+      rows.filter(r=>!isZeroH(r.ingreso)&&horaToMins(r.ingreso)>CUTOFF_MIN).length;
+    document.getElementById('dc-sinmarca').textContent =
+      rows.filter(r=>isZeroH(r.ingreso)).length;
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+//  CONFIG PAGE
+// ════════════════════════════════════════════════════════════
+function renderConfigPage() {
+  const inp = document.getElementById('sheets-url-input');
+  if (inp && STATE.sheetsUrl) inp.value = STATE.sheetsUrl;
+}
+
+async function saveConfig() {
+  const url = document.getElementById('sheets-url-input').value.trim();
+  if (!url) { toast('Ingresa la URL del Apps Script','warn'); return; }
+  STATE.sheetsUrl = url;
+  localStorage.setItem('tt_sheets_url', url);
+  document.getElementById('sheets-status-label').textContent = 'Sheets: verificando…';
+  try {
+    showLoading('Verificando conexión…');
+    const res = await fetch(url);
+    const json = await res.json();
+    hideLoading();
+    if (json.status) {
+      document.getElementById('sheets-status-label').textContent = 'Sheets: conectado ✓';
+      document.getElementById('config-test-result').innerHTML =
+        '<span style="color:var(--ok);font-weight:600">✓ Conexión exitosa. Listo para sincronizar.</span>';
+      toast('✓ Conexión verificada','ok');
+    }
+  } catch(err) {
+    hideLoading();
+    document.getElementById('config-test-result').innerHTML =
+      '<span style="color:var(--danger)">✗ No se pudo conectar. Verifica que el Apps Script esté publicado correctamente.</span>';
+    toast('Error de conexión: '+err.message,'err');
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+//  UTILS
+// ════════════════════════════════════════════════════════════
+function parseFecha(val) {
+  if (!val) return null;
+  const s = val.toString().trim();
+  let m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+  if (m) return new Date(+m[3],+m[2]-1,+m[1]);
+  m = s.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
+  if (m) return new Date(+m[1],+m[2]-1,+m[3]);
+  const d=new Date(s); if (!isNaN(d)) return d;
+  return null;
+}
+function formatFecha(d) {
+  return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+}
+function parseHora(val) {
+  if (val===null||val===undefined||val==='') return null;
+  const s=val.toString().trim();
+  if (s==='-'||s==='') return '0:00:00';
+  const m=s.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?/);
+  if (m) return `${m[1].padStart(2,'0')}:${m[2]}:${m[3]||'00'}`;
+  return '0:00:00';
+}
+function isZeroH(h) { return !h||h==='0:00:00'||h==='00:00:00'||h==='0:00'||h==='-'||h===null; }
+function horaToMins(h) {
+  if (!h||isZeroH(h)) return 0;
+  const p=h.split(':').map(Number); return p[0]*60+(p[1]||0);
+}
+function minsToHora(t) {
+  const h=Math.floor(t/60),m=t%60;
+  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:00`;
+}
+
+// ════════════════════════════════════════════════════════════
+//  APPS SCRIPT CODE (for display in Config)
+// ════════════════════════════════════════════════════════════
+const APPS_SCRIPT = `// ══════════════════════════════════════════════
+// TT Audit RRHH — Apps Script
+// Pega en Extensiones → Apps Script
+// Configura: acceso "Cualquiera", ejecutar como "Yo"
+// ══════════════════════════════════════════════
+
+// IMPORTANTE: ajusta estos nombres si tus pestañas
+// tienen nombres distintos
+const SHEET_PERSONAL    = 'Datos generales personal';
+const SHEET_ASISTENCIA  = 'Detalle de asistencia';
+
+function doGet(e) {
+  const ss     = SpreadsheetApp.getActiveSpreadsheet();
+  const accion = e.parameter.accion || '';
+
+  // ── GET PERSONAL ──────────────────────────────
+  if (accion === 'getPersonal') {
+    const sh   = ss.getSheetByName(SHEET_PERSONAL);
+    if (!sh) return jsonResp({error: 'Pestaña no encontrada: ' + SHEET_PERSONAL});
+    const data = sh.getDataRange().getValues();
+    // Skip header row (row 0)
+    const rows = data.slice(1).filter(r => r[0] && r[1]);
+    // Expected cols: DNI | Nombre | Ficha_Buk | Cargo | Area | Fecha_Ingreso
+    return jsonResp({ rows: rows.map(r => [
+      r[0], r[1], r[2]||'', r[3]||'', r[4]||'', r[5]||''
+    ])});
+  }
+
+  // ── GET ASISTENCIA ────────────────────────────
+  if (accion === 'getAsistencia') {
+    const mes = e.parameter.mes || ''; // format: YYYY-MM
+    const sh  = ss.getSheetByName(SHEET_ASISTENCIA);
+    if (!sh) return jsonResp({error: 'Pestaña no encontrada: ' + SHEET_ASISTENCIA});
+
+    const data = sh.getDataRange().getValues();
+    // Expected cols: Documento | Fecha/Hora | Ingreso | Salida | DIA
+    // (col B has the date, col C ingreso time, col D salida time)
+    const rows = [];
+    for (let i = 1; i < data.length; i++) {
+      const r     = data[i];
+      const dni   = (r[0] || '').toString().trim();
+      if (!dni) continue;
+
+      // Parse date from column B
+      let fechaStr = '';
+      const rawFecha = r[1];
+      if (rawFecha instanceof Date) {
+        const d = rawFecha;
+        fechaStr = pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear();
+      } else {
+        fechaStr = rawFecha ? rawFecha.toString().trim() : '';
+      }
+      if (!fechaStr) continue;
+
+      // Filter by month if specified
+      if (mes) {
+        const parts = fechaStr.split('/');
+        if (parts.length === 3) {
+          const rowMes = parts[2] + '-' + pad(parseInt(parts[1]));
+          if (rowMes !== mes) continue;
+        }
+      }
+
+      // Ingreso and salida
+      const ingreso = formatTime(r[2]);
+      const salida  = formatTime(r[3]);
+
+      rows.push([dni, fechaStr, ingreso, salida, '', r[4]||'']);
+    }
+    return jsonResp({ rows, count: rows.length });
+  }
+
+  // ── PING ──────────────────────────────────────
+  return jsonResp({ status: 'TT Audit API activa', sheet: SpreadsheetApp.getActiveSpreadsheet().getName() });
+}
+
+function formatTime(val) {
+  if (!val || val === '-') return '0:00:00';
+  if (val instanceof Date) {
+    return pad(val.getHours())+':'+pad(val.getMinutes())+':'+pad(val.getSeconds());
+  }
+  const s = val.toString().trim();
+  if (!s || s === '-') return '0:00:00';
+  const m = s.match(/^(\\d{1,2}):(\\d{2})(?::(\\d{2}))?/);
+  if (m) return pad(parseInt(m[1]))+':'+m[2]+':'+(m[3]||'00');
+  return '0:00:00';
+}
+
+function pad(n) { return String(n).padStart(2, '0'); }
+
+function jsonResp(obj) {
+  return ContentService
+    .createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}`;
+
+document.addEventListener('DOMContentLoaded', () => {
+  const pre = document.getElementById('apps-script-code');
+  if (pre) pre.textContent = APPS_SCRIPT;
+  updateTopbarMes();
+  updateDashboard();
+  renderPersonalTable();
+  if (STATE.sheetsUrl) {
+    const inp = document.getElementById('sheets-url-input');
+    if (inp) inp.value = STATE.sheetsUrl;
+    document.getElementById('sheets-status-label').textContent = 'Sheets: conectado';
+  }
+  document.getElementById('am-mes')?.addEventListener('change', renderAbrirMesPersonal);
+  document.getElementById('am-año')?.addEventListener('input', renderAbrirMesPersonal);
+});
+
+function copyScript() {
+  navigator.clipboard.writeText(APPS_SCRIPT).then(()=>toast('✓ Código copiado','ok'));
+}
+</script>
+</html>
+
+</body>
+</html>
