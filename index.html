@@ -1876,9 +1876,18 @@ const APPS_SCRIPT = `// ══════════════════�
 const SHEET_PERSONAL    = 'Datos generales personal';
 const SHEET_ASISTENCIA  = 'Detalle de asistencia';
 const SHEET_VACACIONES  = 'Vacaciones';
+const SS_ID             = '1s7r7KjxTYO_PK2obc_yQ9pXI8l-mEl3vbmrrfIqCrio';
+
+function getSS() {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    if (ss) return ss;
+  } catch(e) {}
+  return SpreadsheetApp.openById(SS_ID);
+}
 
 function doGet(e) {
-  const ss     = SpreadsheetApp.getActiveSpreadsheet();
+  const ss = getSS();
   const accion = (e && e.parameter && e.parameter.accion) ? e.parameter.accion : '';
 
   // ── GET PERSONAL ──────────────────────────────
@@ -1956,12 +1965,12 @@ function doGet(e) {
   }
 
   // ── PING ──────────────────────────────────────
-  return jsonResp({ status: 'TT Audit API activa', sheet: SpreadsheetApp.getActiveSpreadsheet().getName() });
+  return jsonResp({ status: 'TT Audit API activa', sheet: getSS().getName() });
 }
 
 // ── POST: todos los endpoints de escritura ────────────────────
 function doPost(e) {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const ss = getSS();
   let body;
   try { body = JSON.parse(e && e.postData ? e.postData.contents : '{}'); } catch(err) {
     return jsonResp({error: 'JSON inválido'});
@@ -2056,7 +2065,13 @@ function doPost(e) {
 }
 
 function getOrCreate(ss, name) {
-  return ss.getSheetByName(name) || ss.insertSheet(name);
+  if (!ss) ss = getSS();
+  try {
+    return ss.getSheetByName(name) || ss.insertSheet(name);
+  } catch(err) {
+    Logger.log('getOrCreate error for ' + name + ': ' + err.message);
+    throw err;
+  }
 }
 
 function formatTime(val) {
