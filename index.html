@@ -142,6 +142,7 @@ td.td-total{font-family:var(--mono);font-weight:700;font-size:12px;text-align:ce
 td.td-total-empty{background:var(--sf3)}
 /* Cell state */
 .c-zero{color:var(--danger);font-weight:500;opacity:.8}
+.c-zero-sal{color:var(--hi);font-weight:400;opacity:.6}
 .c-late{color:var(--warn);font-weight:700}
 .c-ok{color:var(--tx)}
 /* Weekend day cells */
@@ -250,6 +251,20 @@ table.pst tr:hover td{background:var(--sf2)}
 .editable{cursor:text;border-bottom:1.5px dashed transparent;transition:.12s;padding:1px 2px;border-radius:3px}
 .editable:hover{border-bottom-color:var(--buk);background:var(--buk-dim)}
 
+/* ══ SISTEMA LOCK ══ */
+.lock-overlay{position:fixed;inset:0;background:rgba(44,50,128,.55);z-index:800;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:.25s}
+.lock-overlay.open{opacity:1;pointer-events:all}
+.lock-box{background:var(--sf);border-radius:16px;padding:36px 32px;width:340px;max-width:92vw;box-shadow:0 24px 64px rgba(0,0,0,.28);text-align:center;transform:translateY(14px);transition:.25s}
+.lock-overlay.open .lock-box{transform:translateY(0)}
+.lock-icon{font-size:38px;margin-bottom:12px}
+.lock-box h2{font-size:17px;font-weight:800;letter-spacing:-.4px;margin-bottom:4px}
+.lock-box p{font-size:13px;color:var(--mu);margin-bottom:20px}
+.lock-inp{width:100%;padding:10px 14px;border:1.5px solid var(--bd2);border-radius:9px;font-family:var(--font);font-size:15px;text-align:center;letter-spacing:3px;outline:none;transition:.15s;background:var(--sf2)}
+.lock-inp:focus{border-color:var(--buk);box-shadow:0 0 0 3px var(--buk-dim);background:var(--sf)}
+.lock-inp.err{border-color:var(--danger);animation:shake .3s ease}
+.lock-err{font-size:12px;color:var(--danger);margin-top:8px;height:16px;font-weight:500}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+
 /* ══ HAMBURGUER ══ */
 .hamburger{width:34px;height:34px;border-radius:7px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s;color:rgba(255,255,255,.8);flex-shrink:0;margin-left:6px}
 .hamburger:hover{background:rgba(255,255,255,.12);color:#fff}
@@ -338,9 +353,17 @@ table.pst tr:hover td{background:var(--sf2)}
     <!-- Vacaciones -->
     <div class="sb-section">
       <div class="sb-section-title">Vacaciones</div>
-      <div class="sb-item" data-page="vacaciones" onclick="showPage('vacaciones')">
+      <div class="sb-item" data-page="vacaciones" onclick="showPage('vacaciones');setTimeout(()=>document.querySelectorAll('#page-vacaciones .tab')[0]?.click(),50)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l4-8 4 4 4-6 4 10"/><path d="M3 21h18"/></svg>
-        Calendario
+        Resumen consolidado
+      </div>
+      <div class="sb-item" data-page="vacaciones" onclick="showPage('vacaciones');setTimeout(()=>document.querySelectorAll('#page-vacaciones .tab')[1]?.click(),50)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg>
+        Detalle por año
+      </div>
+      <div class="sb-item" data-page="vacaciones" onclick="showPage('vacaciones');setTimeout(()=>document.querySelectorAll('#page-vacaciones .tab')[2]?.click(),50)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Consolidado mensual
       </div>
     </div>
     <div class="sb-sep"></div>
@@ -522,13 +545,85 @@ table.pst tr:hover td{background:var(--sf2)}
      PAGE: VACACIONES
 ════════════════════════════════════ -->
 <div class="page" id="page-vacaciones">
-  <div class="ph"><h1>Vacaciones</h1><p>Calendario y saldos (próximamente)</p></div>
-  <div class="tp active">
-    <div class="empty">
-      <div class="empty-ico">🏖</div>
-      <div class="empty-title">Módulo en construcción</div>
-      <div class="empty-sub">El módulo de vacaciones estará disponible en la siguiente versión.</div>
+  <div class="ph">
+    <h1>Vacaciones</h1>
+    <div class="ph-row">
+      <p style="margin:0">Gestión y seguimiento de vacaciones del equipo</p>
+      <div class="fgap"></div>
+      <button class="btn btn-outline" onclick="syncVacaciones()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        Sincronizar desde Sheets
+      </button>
     </div>
+  </div>
+  <div class="tabs">
+    <div class="tab active" onclick="switchVacTab(this,'vac-resumen')">Resumen consolidado</div>
+    <div class="tab" onclick="switchVacTab(this,'vac-detalle')">Detalle por año</div>
+    <div class="tab" onclick="switchVacTab(this,'vac-mensual')">Consolidado mensual</div>
+  </div>
+
+  <!-- TAB 1: RESUMEN CONSOLIDADO (Resumen VF) -->
+  <div class="tp active" id="vac-resumen">
+    <div class="ctrl">
+      <div class="fgap"></div>
+      <button class="btn btn-primary" onclick="openModalVac()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Registrar vacaciones
+      </button>
+      <button class="btn btn-outline" onclick="exportVacCSV()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Exportar CSV
+      </button>
+    </div>
+    <div class="tbl-wrap" id="vac-resumen-wrap"></div>
+  </div>
+
+  <!-- TAB 2: DETALLE POR AÑO -->
+  <div class="tp" id="vac-detalle">
+    <div class="ctrl">
+      <select class="fsel" id="vac-det-año" onchange="renderVacDetalle()">
+        <option value="2026">2026</option>
+        <option value="2025">2025</option>
+        <option value="2024">2024</option>
+        <option value="2023">2023</option>
+        <option value="2022">2022</option>
+      </select>
+      <div class="fgap"></div>
+    </div>
+    <div class="tbl-wrap" id="vac-detalle-wrap"></div>
+  </div>
+
+  <!-- TAB 3: CONSOLIDADO MENSUAL -->
+  <div class="tp" id="vac-mensual">
+    <div class="ctrl">
+      <select class="fsel" id="vac-mes-num" onchange="renderVacMensual()" style="min-width:130px">
+        <option value="1">Enero</option>
+        <option value="2">Febrero</option>
+        <option value="3">Marzo</option>
+        <option value="4">Abril</option>
+        <option value="5">Mayo</option>
+        <option value="6">Junio</option>
+        <option value="7">Julio</option>
+        <option value="8">Agosto</option>
+        <option value="9">Septiembre</option>
+        <option value="10">Octubre</option>
+        <option value="11">Noviembre</option>
+        <option value="12">Diciembre</option>
+      </select>
+      <select class="fsel" id="vac-mes-año" onchange="renderVacMensual()">
+        <option value="2026">2026</option>
+        <option value="2025">2025</option>
+        <option value="2024">2024</option>
+        <option value="2023">2023</option>
+        <option value="2022">2022</option>
+      </select>
+      <div class="fgap"></div>
+      <button class="btn btn-primary" onclick="openModalVac()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Registrar vacaciones
+      </button>
+    </div>
+    <div class="tbl-wrap" id="vac-mensual-wrap"></div>
   </div>
 </div>
 
@@ -551,6 +646,9 @@ table.pst tr:hover td{background:var(--sf2)}
       <div class="card-label" style="margin-bottom:10px">Instrucciones para conectar Google Sheets</div>
       <ol style="font-size:13px;color:var(--mu);line-height:2;padding-left:18px">
         <li>Crea un nuevo Google Sheet (puede tener cualquier nombre)</li>
+        <li>El Apps Script crea automáticamente las pestañas necesarias al guardar por primera vez</li>
+        <li><b>Pestañas que se crean solas:</b> Datos generales personal · Detalle de asistencia · Vacaciones · Resumen Mensual · Tardanzas Descuentos</li>
+        <li style="color:var(--ok);font-weight:500">✓ Todo lo que guardes en la plataforma se sincroniza automáticamente si hay conexión activa</li>
         <li>Ve a <b>Extensiones → Apps Script</b></li>
         <li>Borra el código existente y pega el código que aparece abajo</li>
         <li>Haz clic en <b>Implementar → Nueva implementación</b></li>
@@ -569,6 +667,25 @@ table.pst tr:hover td{background:var(--sf2)}
 
 </main>
 </div><!-- /shell -->
+
+<!-- ══ SISTEMA LOCK MODAL ══ -->
+<div class="lock-overlay" id="sistema-lock">
+  <div class="lock-box">
+    <div class="lock-icon">🔒</div>
+    <h2>Acceso restringido</h2>
+    <p>Ingresa la clave para acceder al módulo de Sistema</p>
+    <input class="lock-inp" id="lock-inp" type="password"
+      placeholder="••••"
+      maxlength="20"
+      onkeydown="if(event.key==='Enter')checkLock();else clearLockErr()"
+      autocomplete="off">
+    <div class="lock-err" id="lock-err"></div>
+    <div style="display:flex;gap:8px;margin-top:18px">
+      <button class="btn btn-outline" style="flex:1" onclick="closeLock()">Cancelar</button>
+      <button class="btn btn-primary" style="flex:1" onclick="checkLock()">Ingresar</button>
+    </div>
+  </div>
+</div>
 
 <!-- ════════ MODALS ════════ -->
 
@@ -718,6 +835,73 @@ table.pst tr:hover td{background:var(--sf2)}
   </div>
 </div>
 
+<!-- Modal: Registrar Vacaciones -->
+<div class="overlay" id="modal-vac">
+  <div class="modal">
+    <span class="mclose" onclick="closeModal('modal-vac')">✕</span>
+    <h2>Registrar vacaciones</h2>
+    <p class="msub">Ingresa el período de vacaciones. Se guardará en la plataforma y, si hay Sheets conectado, también en el Sheet automáticamente.</p>
+    <div class="form-grid">
+      <div class="fg full">
+        <label>Colaborador *</label>
+        <select id="mv-colaborador">
+          <option value="">— Seleccionar —</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label>Año *</label>
+        <select id="mv-año">
+          <option value="2026">2026</option>
+          <option value="2025">2025</option>
+          <option value="2024">2024</option>
+          <option value="2023">2023</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label>Mes *</label>
+        <select id="mv-mes">
+          <option value="1">Enero</option>
+          <option value="2">Febrero</option>
+          <option value="3">Marzo</option>
+          <option value="4">Abril</option>
+          <option value="5">Mayo</option>
+          <option value="6">Junio</option>
+          <option value="7">Julio</option>
+          <option value="8">Agosto</option>
+          <option value="9">Septiembre</option>
+          <option value="10">Octubre</option>
+          <option value="11">Noviembre</option>
+          <option value="12">Diciembre</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label>Días tomados *</label>
+        <input type="number" id="mv-dias" min="1" max="31" placeholder="Ej: 5" oninput="previewDiasVac()">
+      </div>
+      <div class="fg">
+        <label>Días específicos</label>
+        <input type="text" id="mv-detalle" placeholder="Ej: 3,4,5,6,7" oninput="previewDiasVac()">
+      </div>
+    </div>
+
+    <!-- Preview pills -->
+    <div id="mv-preview" style="display:none;margin-top:14px">
+      <div style="font-size:11px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Vista previa días</div>
+      <div id="mv-pills" style="display:flex;flex-wrap:wrap;gap:5px"></div>
+    </div>
+
+    <div id="mv-status" style="margin-top:12px;font-size:12.5px;min-height:18px"></div>
+
+    <div class="mfooter">
+      <button class="btn btn-outline" onclick="closeModal('modal-vac')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarVacacion()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Guardar
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- Toast container -->
 <div class="toast" id="toast-container"></div>
 
@@ -751,7 +935,20 @@ function persist(key) {
 }
 
 // ── NAVIGATION ─────────────────────────────────────────────
+const SISTEMA_PAGES = ['personal','config'];
+let _sistemaUnlocked = sessionStorage.getItem('tt_sis_ok') === '1';
+let _pendingPage = null;
+
 function showPage(id) {
+  if (SISTEMA_PAGES.includes(id) && !_sistemaUnlocked) {
+    _pendingPage = id;
+    openLock();
+    return;
+  }
+  _navigateTo(id);
+}
+
+function _navigateTo(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.sb-item, .sb-icon').forEach(i => i.classList.remove('active'));
   document.getElementById('page-' + id)?.classList.add('active');
@@ -760,6 +957,44 @@ function showPage(id) {
   if (id === 'personal') renderPersonalTable();
   if (id === 'dashboard') updateDashboard();
   if (id === 'config') renderConfigPage();
+  if (id === 'vacaciones') renderVacResumen();
+}
+
+function openLock() {
+  const ov = document.getElementById('sistema-lock');
+  ov.classList.add('open');
+  setTimeout(() => document.getElementById('lock-inp')?.focus(), 200);
+}
+
+function closeLock() {
+  document.getElementById('sistema-lock').classList.remove('open');
+  document.getElementById('lock-inp').value = '';
+  document.getElementById('lock-err').textContent = '';
+  _pendingPage = null;
+}
+
+function clearLockErr() {
+  document.getElementById('lock-err').textContent = '';
+  document.getElementById('lock-inp').classList.remove('err');
+}
+
+function checkLock() {
+  const val = document.getElementById('lock-inp').value;
+  if (val === 'Bota') {
+    _sistemaUnlocked = true;
+    sessionStorage.setItem('tt_sis_ok', '1');
+    document.getElementById('sistema-lock').classList.remove('open');
+    document.getElementById('lock-inp').value = '';
+    const target = _pendingPage || 'config';
+    _pendingPage = null;
+    _navigateTo(target);
+  } else {
+    const inp = document.getElementById('lock-inp');
+    inp.classList.add('err');
+    document.getElementById('lock-err').textContent = 'Clave incorrecta. Intenta de nuevo.';
+    inp.value = '';
+    setTimeout(() => inp.classList.remove('err'), 400);
+  }
 }
 
 let sidebarCollapsed = false;
@@ -859,6 +1094,30 @@ async function fetchFromSheets(accion, params = {}) {
   const json = await res.json();
   if (json.error) throw new Error(json.error);
   return json;
+}
+
+// Generic POST to Sheets — silent (no toast), returns true/false
+async function postToSheets(body) {
+  if (!STATE.sheetsUrl) return false;
+  try {
+    await fetch(STATE.sheetsUrl, {
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
+    return true;
+  } catch(e) {
+    console.warn('[Sheets POST error]', e.message);
+    return false;
+  }
+}
+
+// Show sync indicator in topbar (green dot pulse)
+function flashSync() {
+  const dot = document.getElementById('top-month-dot');
+  if (!dot) return;
+  dot.style.background = '#4ade80';
+  dot.style.boxShadow = '0 0 6px #4ade80';
+  setTimeout(() => { dot.style.boxShadow = ''; }, 1500);
 }
 
 async function syncPersonalFromSheets() {
@@ -1124,7 +1383,7 @@ function renderMatrix() {
     dayData.forEach(dd => {
       const wk = (dd.dow===0||dd.dow===6)?' td-wk':'';
       if (dd.zeroSal) {
-        html += `<td class="td-time c-zero${wk}">0:00:00</td>`;
+        html += `<td class="td-time c-zero-sal${wk}">0:00:00</td>`;
       } else {
         html += `<td class="td-time c-ok${wk}">${dd.sal}</td>`;
       }
@@ -1212,7 +1471,27 @@ function updateResumenCell(inp, mesKey) {
   persist('resumen');
 }
 
-function saveResumen() { persist('resumen'); toast('✓ Resumen guardado','ok'); }
+async function saveResumen() {
+  persist('resumen');
+  toast('✓ Resumen guardado','ok');
+  if (!STATE.sheetsUrl) return;
+  const mesKey = document.getElementById('res-filter-mes')?.value || '';
+  if (!mesKey) return;
+  const resMes = STATE.resumen[mesKey] || {};
+  // Save each person row
+  const promises = Object.entries(resMes).map(([dni, vals]) => {
+    const persona = STATE.personal.find(p=>p.dni===dni);
+    const objetivo = STATE.mesConfig[mesKey]?.[dni] || 0;
+    return postToSheets({
+      accion:'saveResumen', mesKey, dni,
+      nombre: persona?.nombre||'',
+      dm: vals.dm||0, vac: vals.vac||0, objetivo
+    });
+  });
+  await Promise.all(promises);
+  flashSync();
+  toast('✓ Resumen sincronizado en Sheets','ok');
+}
 
 // ════════════════════════════════════════════════════════════
 //  RENDER TARDANZAS
@@ -1286,7 +1565,26 @@ function updateDescuento(inp, mesKey) {
   persist('descuentos');
 }
 
-function saveTardanzas() { persist('descuentos'); toast('✓ Descuentos guardados','ok'); }
+async function saveTardanzas() {
+  persist('descuentos');
+  toast('✓ Descuentos guardados','ok');
+  if (!STATE.sheetsUrl) return;
+  const mesKey = document.getElementById('tard-filter-mes')?.value || '';
+  if (!mesKey) return;
+  const descMes = STATE.descuentos[mesKey] || {};
+  const promises = Object.entries(descMes).map(([dni, monto]) => {
+    const persona = STATE.personal.find(p=>p.dni===dni);
+    return postToSheets({
+      accion:'saveDescuento', mesKey, dni,
+      nombre: persona?.nombre||'',
+      ficha_buk: persona?.ficha_buk||'',
+      monto
+    });
+  });
+  await Promise.all(promises);
+  flashSync();
+  toast('✓ Tardanzas sincronizadas en Sheets','ok');
+}
 
 // ── EXPORT CSV BUK ───────────────────────────────────────────
 function exportCSVTardanzas() {
@@ -1358,6 +1656,44 @@ function renderPersonalTable(filter='') {
 }
 
 function filterPersonal(q) { renderPersonalTable(q); }
+
+function openNuevoPersonal() {
+  ['np-dni','np-ficha','np-nombre','np-cargo','np-area'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.value='';
+  });
+  const fi = document.getElementById('np-ingreso');
+  if(fi) fi.value = '';
+  openModal('modal-nuevo-personal');
+}
+
+async function guardarPersonal() {
+  const dni    = document.getElementById('np-dni')?.value.trim();
+  const nombre = document.getElementById('np-nombre')?.value.trim();
+  const ficha  = document.getElementById('np-ficha')?.value.trim();
+  const cargo  = document.getElementById('np-cargo')?.value.trim();
+  const area   = document.getElementById('np-area')?.value.trim();
+  const fi     = document.getElementById('np-ingreso')?.value.trim();
+  if (!dni || !nombre) { toast('DNI y Nombre son obligatorios','warn'); return; }
+
+  // Check duplicate
+  const exists = STATE.personal.find(p => p.dni === dni);
+  if (exists) {
+    Object.assign(exists, {nombre, ficha_buk:ficha, cargo, area, fecha_ingreso:fi});
+  } else {
+    STATE.personal.push({dni, nombre, ficha_buk:ficha, cargo, area, fecha_ingreso:fi});
+  }
+  persist('personal');
+  renderPersonalTable();
+  updateDashboard();
+  closeModal('modal-nuevo-personal');
+  toast(`✓ ${nombre} guardado localmente`,'ok');
+
+  // Sync to Sheets in background
+  if (STATE.sheetsUrl) {
+    const ok = await postToSheets({accion:'savePersonal',dni,nombre,ficha_buk:ficha,cargo,area,fecha_ingreso:fi});
+    if (ok) { flashSync(); toast(`✓ ${nombre} sincronizado en Sheets`,'ok'); }
+  }
+}
 
 // ════════════════════════════════════════════════════════════
 //  DASHBOARD
@@ -1455,6 +1791,7 @@ const APPS_SCRIPT = `// ══════════════════�
 // tienen nombres distintos
 const SHEET_PERSONAL    = 'Datos generales personal';
 const SHEET_ASISTENCIA  = 'Detalle de asistencia';
+const SHEET_VACACIONES  = 'Vacaciones';
 
 function doGet(e) {
   const ss     = SpreadsheetApp.getActiveSpreadsheet();
@@ -1517,8 +1854,125 @@ function doGet(e) {
     return jsonResp({ rows, count: rows.length });
   }
 
+  // ── GET VACACIONES ────────────────────────────
+  if (accion === 'getVacaciones') {
+    const sh = ss.getSheetByName(SHEET_VACACIONES);
+    if (!sh) return jsonResp({error: 'Pestaña no encontrada: ' + SHEET_VACACIONES});
+    const data = sh.getDataRange().getValues();
+    if (data.length < 2) return jsonResp({ rows: [] });
+    // Expected cols: Colaborador | Año | Mes | Dias | Dias_Detalle
+    const rows = data.slice(1).filter(r => r[0] && r[1] && r[2] !== '').map(r => ({
+      colaborador: (r[0]||'').toString().trim(),
+      año:         parseInt(r[1]) || 0,
+      mes:         parseInt(r[2]) || 0,
+      dias:        parseInt(r[3]) || 0,
+      detalle:     (r[4]||'').toString().trim(), // "1,2,3,4,5" comma-separated days
+    })).filter(r => r.colaborador && r.año && r.mes);
+    return jsonResp({ rows, count: rows.length });
+  }
+
   // ── PING ──────────────────────────────────────
   return jsonResp({ status: 'TT Audit API activa', sheet: SpreadsheetApp.getActiveSpreadsheet().getName() });
+}
+
+// ── POST: todos los endpoints de escritura ────────────────────
+function doPost(e) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let body;
+  try { body = JSON.parse(e.postData.contents); } catch(err) {
+    return jsonResp({error: 'JSON inválido'});
+  }
+  const accion = body.accion || '';
+
+  // ── SAVE PERSONAL ───────────────────────────
+  if (accion === 'savePersonal') {
+    const sh = getOrCreate(ss, SHEET_PERSONAL);
+    if (sh.getLastRow() === 0) {
+      sh.appendRow(['DNI','Nombre','Ficha_Buk','Cargo','Area','Fecha_Ingreso']);
+    }
+    const { dni, nombre, ficha_buk, cargo, area, fecha_ingreso } = body;
+    if (!dni || !nombre) return jsonResp({error: 'DNI y Nombre requeridos'});
+    const data = sh.getDataRange().getValues();
+    let found = false;
+    for (let i = 1; i < data.length; i++) {
+      if (data[i][0].toString().trim() === dni.toString().trim()) {
+        sh.getRange(i+1,1,1,6).setValues([[dni,nombre,ficha_buk||'',cargo||'',area||'',fecha_ingreso||'']]);
+        found = true; break;
+      }
+    }
+    if (!found) sh.appendRow([dni,nombre,ficha_buk||'',cargo||'',area||'',fecha_ingreso||'']);
+    return jsonResp({ok:true, action: found?'updated':'created'});
+  }
+
+  // ── SAVE RESUMEN MENSUAL ─────────────────────
+  if (accion === 'saveResumen') {
+    const sh = getOrCreate(ss, 'Resumen Mensual');
+    if (sh.getLastRow() === 0) {
+      sh.appendRow(['Mes','DNI','Nombre','Horas_DM','Horas_Vacaciones','Objetivo_Horas']);
+    }
+    const { mesKey, dni, nombre, dm, vac, objetivo } = body;
+    if (!mesKey || !dni) return jsonResp({error: 'mesKey y DNI requeridos'});
+    const data = sh.getDataRange().getValues();
+    let found = false;
+    for (let i = 1; i < data.length; i++) {
+      if (data[i][0] === mesKey && data[i][1].toString().trim() === dni.toString().trim()) {
+        sh.getRange(i+1,4,1,3).setValues([[dm||0, vac||0, objetivo||0]]);
+        found = true; break;
+      }
+    }
+    if (!found) sh.appendRow([mesKey,dni,nombre||'',dm||0,vac||0,objetivo||0]);
+    return jsonResp({ok:true, action: found?'updated':'created'});
+  }
+
+  // ── SAVE DESCUENTO TARDANZA ──────────────────
+  if (accion === 'saveDescuento') {
+    const sh = getOrCreate(ss, 'Tardanzas Descuentos');
+    if (sh.getLastRow() === 0) {
+      sh.appendRow(['Mes','DNI','Nombre','Ficha_Buk','Monto_Descuento']);
+    }
+    const { mesKey, dni, nombre, ficha_buk, monto } = body;
+    if (!mesKey || !dni) return jsonResp({error: 'mesKey y DNI requeridos'});
+    const data = sh.getDataRange().getValues();
+    let found = false;
+    for (let i = 1; i < data.length; i++) {
+      if (data[i][0] === mesKey && data[i][1].toString().trim() === dni.toString().trim()) {
+        sh.getRange(i+1,5).setValue(monto||0);
+        found = true; break;
+      }
+    }
+    if (!found) sh.appendRow([mesKey,dni,nombre||'',ficha_buk||'',monto||0]);
+    return jsonResp({ok:true, action: found?'updated':'created'});
+  }
+
+  // ── SAVE VACACION ────────────────────────────
+  if (accion === 'saveVacacion') {
+    const sh = getOrCreate(ss, SHEET_VACACIONES);
+    if (sh.getLastRow() === 0) {
+      sh.appendRow(['Colaborador','Año','Mes','Nombre_Mes','Dias','Dias_Detalle']);
+    }
+    const { colaborador, año, mes, dias, detalle } = body;
+    if (!colaborador || !año || !mes) return jsonResp({error: 'Faltan campos requeridos'});
+    const mesNombres = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+    const data = sh.getDataRange().getValues();
+    let found = false;
+    for (let i = 1; i < data.length; i++) {
+      if (data[i][0].toString().trim() === colaborador &&
+          parseInt(data[i][1]) === parseInt(año) &&
+          parseInt(data[i][2]) === parseInt(mes)) {
+        sh.getRange(i+1,5).setValue(dias||0);
+        sh.getRange(i+1,6).setValue(detalle||'');
+        found = true; break;
+      }
+    }
+    if (!found) sh.appendRow([colaborador, año, mes, mesNombres[parseInt(mes)]||'', dias||0, detalle||'']);
+    return jsonResp({ok:true, action: found?'updated':'created'});
+  }
+
+  return jsonResp({error: 'Acción no reconocida: ' + accion});
+}
+
+function getOrCreate(ss, name) {
+  return ss.getSheetByName(name) || ss.insertSheet(name);
 }
 
 function formatTime(val) {
@@ -1541,6 +1995,618 @@ function jsonResp(obj) {
     .setMimeType(ContentService.MimeType.JSON);
 }`;
 
+
+
+// ════════════════════════════════════════════════════════════
+//  VACACIONES MODULE
+// ════════════════════════════════════════════════════════════
+
+// ── VACATION DATA (from Excel cronogramas) ──────────────────
+// Structure: { nombre_corto: { año: { mes: dias } } }
+// Names normalized for matching
+const VAC_DATA = {
+  'Camarena Velasquez Claudia Cecilia': {
+    fi: '2019-10-28',
+    acum: 120,
+    byYear: {
+      2020:{total:2, mes:{}},
+      2021:{total:8, mes:{}},
+      2022:{total:26,mes:{}},
+      2023:{total:17,mes:{}},
+      2024:{total:18,mes:{}},
+      2025:{total:25,mes:{1:5,5:12,7:5,9:3},diasDetalle:{1:[1,2,3,4,5],5:[1,2,5,6,7,8,9,12,13,14,15],7:[1,2,3,4,5],9:[1,2,3]}},
+      2026:{total:3, mes:{1:2,4:1},diasDetalle:{1:[28,29],4:[1]}},
+    }
+  },
+  'Carhuallanqui Romani Massiel Emily': {
+    fi: '2023-02-01',
+    acum: 57.5,
+    byYear: {
+      2023:{total:6, mes:{}},
+      2024:{total:10,mes:{}},
+      2025:{total:16,mes:{2:5,3:2,4:7,9:1,10:1},diasDetalle:{2:[10,11,12,13,14],3:[2,3],4:[8,9,10,11,12,13,14],9:[30],10:[1]}},
+      2026:{total:13,mes:{1:5,2:7,4:1},diasDetalle:{1:[18,19,20,21,22],2:[17,18,19,20,21,22,23],4:[6]}},
+    }
+  },
+  'Olaguibel Bueno Daniela Alessandra': {
+    fi: '2017-04-01',
+    acum: 120,
+    byYear: {
+      2020:{total:10,mes:{}},
+      2021:{total:37,mes:{}},
+      2022:{total:24,mes:{}},
+      2023:{total:9, mes:{}},
+      2024:{total:22,mes:{1:3},diasDetalle:{1:[6,7,8]}},
+      2025:{total:10,mes:{2:7,3:2,6:1,12:10},diasDetalle:{2:[10,11,12,13,14,17,18],3:[2,3],6:[30],12:[22,23,24,25,26,29,30,31,1,2]}},
+      2026:{total:5, mes:{1:4,2:1},diasDetalle:{1:[1,2,3,4],2:[24]}},
+    }
+  },
+  'Pablo Romero Alessandra Mayte': {
+    fi: '2023-05-22',
+    acum: 57.5,
+    byYear: {
+      2023:{total:0, mes:{}},
+      2024:{total:5, mes:{}},
+      2025:{total:15,mes:{3:1,6:7,7:7},diasDetalle:{3:[31],6:[23,24,25,26,27,30,1],7:[1,2,3,4,5,6,7]}},
+      2026:{total:2, mes:{2:2},diasDetalle:{2:[11,12]}},
+    }
+  },
+  'Pezo Herrera Edinson Alberto': {
+    fi: '2021-09-01',
+    acum: 57.5,
+    byYear: {
+      2023:{total:5, mes:{}},
+      2024:{total:11,mes:{2:9}},
+      2025:{total:0, mes:{}},
+      2026:{total:0, mes:{}},
+    }
+  },
+  'Pretell Trigoso Jorge Andre': {
+    fi: '2019-09-01',
+    acum: 120,
+    byYear: {
+      2020:{total:13,mes:{}},
+      2021:{total:14,mes:{}},
+      2022:{total:0, mes:{}},
+      2023:{total:23,mes:{}},
+      2024:{total:16,mes:{}},
+      2025:{total:22,mes:{1:12,2:2,4:1,5:4,7:2},diasDetalle:{1:[1,2,3,4,5,6,7,8,9,10,11,12],2:[1,2],4:[28],5:[5,6,7,8],7:[1,2]}},
+      2026:{total:0, mes:{}},
+    }
+  },
+  'Pulido Espejo Raul Fernando': {
+    fi: '2017-09-01',
+    acum: 120,
+    byYear: {
+      2020:{total:10,mes:{}},
+      2021:{total:9, mes:{}},
+      2022:{total:11,mes:{}},
+      2023:{total:25,mes:{}},
+      2024:{total:17,mes:{1:2},diasDetalle:{1:[6,7]}},
+      2025:{total:19,mes:{6:19},diasDetalle:{6:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]}},
+      2026:{total:10,mes:{3:10},diasDetalle:{3:[1,2,3,4,5,6,7,8,9,10]}},
+    }
+  },
+  'Arostegui Alva Enrique Andre': {
+    fi: '2025-11-10',
+    acum: 2,
+    byYear: {
+      2025:{total:2, mes:{12:2}},
+      2026:{total:0, mes:{}},
+    }
+  },
+  'Aguero Rosales Gianella Milene': {
+    fi: '2025-07-01',
+    acum: 2,
+    byYear: {
+      2025:{total:2, mes:{12:2}},
+      2026:{total:0, mes:{}},
+    }
+  },
+  'Hidalgo Morales Gabriel': {
+    fi: '2025-07-01',
+    acum: 2,
+    byYear: {
+      2025:{total:2, mes:{12:2},diasDetalle:{12:[29,30]}},
+      2026:{total:15,mes:{2:15},diasDetalle:{2:[9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]}},
+    }
+  },
+};
+
+// Editable state for resumen VF
+let VAC_EDITS = JSON.parse(localStorage.getItem('tt_vac_edits') || '{}');
+
+function persistVacEdits() {
+  localStorage.setItem('tt_vac_edits', JSON.stringify(VAC_EDITS));
+}
+
+const MES_NAMES_SHORT = ['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+const MES_NAMES_FULL  = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const YEARS = [2020,2021,2022,2023,2024,2025,2026];
+
+function switchVacTab(el, tabId) {
+  const page = document.getElementById('page-vacaciones');
+  page.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  page.querySelectorAll('.tp').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(tabId).classList.add('active');
+  if(tabId==='vac-resumen') renderVacResumen();
+  if(tabId==='vac-detalle') renderVacDetalle();
+  if(tabId==='vac-mensual') renderVacMensual();
+}
+
+// ── DIAS GANADOS PER YEAR ────────────────────────────────────
+// Header row: editable per-year allocation (15 or 30 days/year)
+// Stored as VAC_EDITS._diasAnuales[year]
+function getAlocAnual(year) {
+  return (VAC_EDITS._diasAnuales && VAC_EDITS._diasAnuales[year]) || (year <= 2024 ? 30 : 15);
+}
+
+// ── RESUMEN VF TABLE ─────────────────────────────────────────
+function renderVacResumen() {
+  const wrap = document.getElementById('vac-resumen-wrap');
+  if (!wrap) return;
+
+  const names = Object.keys(VAC_DATA);
+
+  let html = `<table style="border-collapse:collapse;width:100%;font-size:12.5px">
+    <thead>
+      <tr style="background:var(--buk);color:#fff">
+        <th style="padding:8px 12px;text-align:left;position:sticky;top:0;z-index:10;white-space:nowrap;min-width:220px">Empleado</th>
+        <th style="padding:8px 10px;text-align:left;position:sticky;top:0;z-index:10;white-space:nowrap">Fecha Ingreso</th>
+        <th style="padding:8px 10px;text-align:center;position:sticky;top:0;z-index:10;white-space:nowrap;background:var(--buk2)">
+          TOTAL VAC<br>ACUM AL '25
+        </th>`;
+
+  YEARS.forEach(y => {
+    const aloc = getAlocAnual(y);
+    html += `<th style="padding:8px 6px;text-align:center;position:sticky;top:0;z-index:10;min-width:48px;font-size:11px">
+      <div contenteditable="true" 
+           style="cursor:pointer;border-bottom:1.5px dashed rgba(255,255,255,.5);padding:1px 2px;min-width:24px;text-align:center"
+           onblur="saveAlocAnual(${y},this.textContent.trim())"
+           title="Click para editar días anuales">${aloc}</div>
+      <div style="font-size:10px;opacity:.7;margin-top:2px">${y}</div>
+    </th>`;
+  });
+
+  html += `<th style="padding:8px 10px;text-align:center;position:sticky;top:0;z-index:10;white-space:nowrap;background:var(--buk2)">
+      TOTAL VAC.<br>TOMADAS al '26
+    </th>
+    <th style="padding:8px 10px;text-align:center;position:sticky;top:0;z-index:10;white-space:nowrap;background:var(--buk2)">
+      SALDO<br>PENDIENTE
+    </th>
+  </tr></thead><tbody>`;
+
+  names.forEach(nombre => {
+    const p = VAC_DATA[nombre];
+    const editKey = nombre.replace(/\s+/g,'_');
+    const acum = VAC_EDITS[editKey]?.acum ?? p.acum;
+
+    let totalTomado = 0;
+    YEARS.forEach(y => {
+      totalTomado += p.byYear[y]?.total || 0;
+    });
+
+    const saldo = acum - totalTomado;
+    const saldoColor = saldo < 0 ? 'color:var(--danger);font-weight:700' :
+                       saldo < 10 ? 'color:var(--warn);font-weight:600' :
+                       'color:var(--ok);font-weight:600';
+
+    html += `<tr style="border-bottom:.5px solid var(--bd)" onmouseover="this.style.background='var(--sf2)'" onmouseout="this.style.background=''">
+      <td style="padding:8px 12px;font-weight:600;white-space:nowrap">${nombre}</td>
+      <td style="padding:8px 10px;color:var(--mu);font-family:var(--mono);font-size:11.5px">${p.fi}</td>
+      <td style="padding:8px 10px;text-align:center;background:#f0f0fa">
+        <span contenteditable="true"
+              style="font-family:var(--mono);font-weight:700;font-size:13px;cursor:pointer;border-bottom:1.5px dashed var(--buk);padding:1px 3px"
+              onblur="saveVacAcum('${editKey}',this.textContent.trim())"
+              title="Click para editar acumulado">${acum}</span>
+      </td>`;
+
+    YEARS.forEach(y => {
+      const dias = p.byYear[y]?.total;
+      const val = dias != null ? dias : '';
+      const bg = dias > 0 ? 'background:#eef2ff' : '';
+      html += `<td style="padding:8px 6px;text-align:center;font-family:var(--mono);font-size:12px;${bg}">
+        <span contenteditable="true"
+              style="cursor:pointer;min-width:24px;display:inline-block;padding:1px 2px;border-radius:3px"
+              onblur="saveVacYear('${editKey}',${y},this.textContent.trim())"
+              onfocus="this.style.background='var(--buk-dim)'"
+              onblur="saveVacYear('${editKey}',${y},this.textContent.trim());this.style.background=''"
+              title="${y}: click para editar">${val}</span>
+      </td>`;
+    });
+
+    html += `<td style="padding:8px 10px;text-align:center;background:#f0f0fa;font-family:var(--mono);font-weight:700;font-size:13px">${totalTomado}</td>
+      <td style="padding:8px 10px;text-align:center;background:#f0f0fa;font-family:var(--mono);font-size:13px;${saldoColor}">${saldo}</td>
+    </tr>`;
+  });
+
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+}
+
+function saveAlocAnual(year, val) {
+  const n = parseInt(val);
+  if (isNaN(n) || n < 0) return;
+  if (!VAC_EDITS._diasAnuales) VAC_EDITS._diasAnuales = {};
+  VAC_EDITS._diasAnuales[year] = n;
+  persistVacEdits();
+}
+
+function saveVacAcum(editKey, val) {
+  const n = parseFloat(val);
+  if (isNaN(n)) return;
+  if (!VAC_EDITS[editKey]) VAC_EDITS[editKey] = {};
+  VAC_EDITS[editKey].acum = n;
+  persistVacEdits();
+  renderVacResumen();
+}
+
+function saveVacYear(editKey, year, val) {
+  const n = parseInt(val);
+  if (isNaN(n) || n < 0) return;
+  if (!VAC_EDITS[editKey]) VAC_EDITS[editKey] = {};
+  if (!VAC_EDITS[editKey].years) VAC_EDITS[editKey].years = {};
+  VAC_EDITS[editKey].years[year] = n;
+  // Also update VAC_DATA runtime
+  const nombre = Object.keys(VAC_DATA).find(k => k.replace(/\s+/g,'_') === editKey);
+  if (nombre) {
+    if (!VAC_DATA[nombre].byYear[year]) VAC_DATA[nombre].byYear[year] = {total:0,mes:{}};
+    VAC_DATA[nombre].byYear[year].total = n;
+  }
+  persistVacEdits();
+  renderVacResumen();
+}
+
+// ── DETALLE POR AÑO ──────────────────────────────────────────
+function renderVacDetalle() {
+  const wrap = document.getElementById('vac-detalle-wrap');
+  const año = parseInt(document.getElementById('vac-det-año')?.value || 2026);
+  if (!wrap) return;
+
+  const names = Object.keys(VAC_DATA);
+  const allMonths = [];
+  names.forEach(n => {
+    const byYear = VAC_DATA[n].byYear[año];
+    if (byYear) Object.keys(byYear.mes||{}).forEach(m => {
+      if (!allMonths.includes(parseInt(m))) allMonths.push(parseInt(m));
+    });
+  });
+  allMonths.sort((a,b)=>a-b);
+
+  // If no monthly detail available, show year totals
+  let html = `<table style="border-collapse:collapse;width:100%;font-size:13px">
+    <thead><tr style="background:var(--buk);color:#fff">
+      <th style="padding:8px 14px;text-align:left;position:sticky;top:0;white-space:nowrap;min-width:220px">Colaborador</th>
+      <th style="padding:8px 10px;text-align:left;position:sticky;top:0">Fecha Ingreso</th>`;
+
+  if (allMonths.length > 0) {
+    allMonths.forEach(m => {
+      html += `<th style="padding:8px 10px;text-align:center;position:sticky;top:0;min-width:64px">${MES_NAMES_SHORT[m]}</th>`;
+    });
+  }
+  html += `<th style="padding:8px 10px;text-align:center;position:sticky;top:0;background:var(--buk2)">TOTAL ${año}</th>
+    </tr></thead><tbody>`;
+
+  names.forEach(nombre => {
+    const p = VAC_DATA[nombre];
+    const yearData = p.byYear[año];
+    if (!yearData) return;
+
+    const total = yearData.total || 0;
+    const mesData = yearData.mes || {};
+
+    html += `<tr style="border-bottom:.5px solid var(--bd)" onmouseover="this.style.background='var(--sf2)'" onmouseout="this.style.background=''">
+      <td style="padding:8px 14px;font-weight:600">${nombre}</td>
+      <td style="padding:8px 10px;color:var(--mu);font-size:12px;font-family:var(--mono)">${p.fi}</td>`;
+
+    if (allMonths.length > 0) {
+      allMonths.forEach(m => {
+        const d = mesData[m] || 0;
+        const bg = d > 0 ? 'background:#eef2ff;' : '';
+        html += `<td style="padding:8px 10px;text-align:center;font-family:var(--mono);font-weight:${d?'700':'400'};color:${d?'var(--buk)':'var(--hi)'};${bg}">${d || '—'}</td>`;
+      });
+    }
+
+    const totBg = total > 0 ? 'background:#e8f5e9;color:var(--ok)' : 'color:var(--hi)';
+    html += `<td style="padding:8px 10px;text-align:center;font-family:var(--mono);font-weight:700;font-size:14px;${totBg}">${total || '—'}</td>
+    </tr>`;
+  });
+
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+}
+
+// ── CONSOLIDADO MENSUAL ──────────────────────────────────────
+function renderVacMensual() {
+  const wrap = document.getElementById('vac-mensual-wrap');
+  if (!wrap) return;
+  const mes  = parseInt(document.getElementById('vac-mes-num')?.value || 1);
+  const año  = parseInt(document.getElementById('vac-mes-año')?.value || 2026);
+
+  const names = Object.keys(VAC_DATA);
+  const conVac = [];
+
+  names.forEach(nombre => {
+    const p = VAC_DATA[nombre];
+    const yearData = p.byYear[año];
+    if (!yearData) return;
+    const dias = yearData.mes?.[mes] || 0;
+    if (dias > 0) {
+      // Build list of specific days if available (from cronograma detail)
+      const diasDetalle = yearData.diasDetalle?.[mes] || [];
+      conVac.push({nombre, fi: p.fi, dias, diasDetalle});
+    }
+  });
+
+  // Build day-of-month grid for the selected month
+  const daysInMonth = new Date(año, mes, 0).getDate();
+  const allDays = Array.from({length: daysInMonth}, (_,i) => i+1);
+
+  // Detect which persons have day-level detail
+  const hasDetail = conVac.some(p => p.diasDetalle.length > 0);
+
+  let html = `<div style="margin-bottom:12px;font-size:13px;color:var(--mu)">
+    <b>${conVac.length}</b> colaborador${conVac.length!==1?'es':''} con vacaciones en <b>${MES_NAMES_FULL[mes]} ${año}</b>
+  </div>
+  <table style="border-collapse:collapse;width:100%;font-size:12.5px">
+    <thead><tr style="background:var(--buk);color:#fff">
+      <th style="padding:8px 14px;text-align:left;position:sticky;top:0;z-index:5;min-width:200px">Colaborador</th>`;
+
+  if (hasDetail) {
+    // Show day-by-day columns
+    allDays.forEach(d => {
+      const date = new Date(año, mes-1, d);
+      const dow = date.getDay();
+      const isWk = dow===0||dow===6;
+      const bg = isWk ? 'background:#1e2260' : '';
+      html += `<th style="padding:4px 3px;text-align:center;position:sticky;top:0;min-width:26px;font-size:10px;${bg}">
+        <div style="font-weight:400;opacity:.7">${'DLMMJVS'[dow]}</div>
+        <div style="font-weight:700">${d}</div>
+      </th>`;
+    });
+  }
+
+  html += `<th style="padding:8px 10px;text-align:center;position:sticky;top:0;z-index:5;background:var(--buk2);white-space:nowrap">Días tomados</th>
+      <th style="padding:8px 10px;text-align:center;position:sticky;top:0;z-index:5;white-space:nowrap">Semanas</th>
+    </tr></thead><tbody>`;
+
+  if (!conVac.length) {
+    const span = hasDetail ? daysInMonth + 3 : 4;
+    html += `<tr><td colspan="${span}" style="padding:40px;text-align:center;color:var(--hi)">
+      Sin vacaciones registradas para ${MES_NAMES_FULL[mes]} ${año} 🏖
+    </td></tr>`;
+  } else {
+    conVac.sort((a,b)=>b.dias-a.dias).forEach(p => {
+      const semanas = (p.dias / 5).toFixed(1);
+      html += `<tr style="border-bottom:.5px solid var(--bd)" onmouseover="this.style.background='var(--sf2)'" onmouseout="this.style.background=''">
+        <td style="padding:8px 14px;font-weight:600">${p.nombre}</td>`;
+
+      if (hasDetail) {
+        allDays.forEach(d => {
+          const date = new Date(año, mes-1, d);
+          const dow = date.getDay();
+          const isWk = dow===0||dow===6;
+          const taken = p.diasDetalle.includes(d);
+          const bgCell = taken ? 'background:var(--buk);color:#fff' :
+                         isWk  ? 'background:#f0f0f8;color:var(--hi)' : '';
+          html += `<td style="padding:3px;text-align:center;font-size:11px;${bgCell}">
+            ${taken ? '✓' : isWk ? '·' : ''}
+          </td>`;
+        });
+      }
+
+      html += `<td style="padding:8px 10px;text-align:center">
+          <span style="display:inline-flex;align-items:center;gap:5px;background:var(--buk-dim);color:var(--buk);font-weight:700;padding:3px 10px;border-radius:20px;font-family:var(--mono)">
+            ${p.dias} días
+          </span>
+        </td>
+        <td style="padding:8px 10px;text-align:center;color:var(--mu);font-family:var(--mono)">${semanas} sem</td>
+      </tr>`;
+    });
+  }
+
+  // Summary row
+  if (conVac.length) {
+    const totalDias = conVac.reduce((s,p)=>s+p.dias,0);
+    const span = hasDetail ? daysInMonth + 2 : 2;
+    html += `<tr style="background:var(--sf2);border-top:1px solid var(--bd2)">
+      <td style="padding:8px 14px;font-weight:700;color:var(--mu)">TOTAL MES</td>`;
+    if (hasDetail) html += `<td colspan="${daysInMonth}"></td>`;
+    html += `<td style="padding:8px 10px;text-align:center;font-weight:700;font-family:var(--mono);color:var(--buk)">${totalDias} días</td>
+      <td style="padding:8px 10px;text-align:center;font-family:var(--mono);color:var(--mu)">${(totalDias/5).toFixed(1)} sem</td>
+    </tr>`;
+  }
+
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+}
+
+// ── SYNC VACACIONES FROM SHEETS ─────────────────────────────
+async function syncVacaciones() {
+  if (!STATE.sheetsUrl) { toast('Configura la URL de Apps Script primero','warn'); return; }
+  showLoading('Sincronizando vacaciones desde Sheets…');
+  try {
+    const data = await fetchFromSheets('getVacaciones');
+    if (!data.rows || !data.rows.length) {
+      toast('Sin datos en la pestaña Vacaciones del Sheet','warn');
+      hideLoading(); return;
+    }
+    // Rebuild VAC_DATA from sheets rows
+    data.rows.forEach(r => {
+      const nombre = r.colaborador;
+      const año    = r.año;
+      const mes    = r.mes;   // 0 = annual total row, 1-12 = specific month
+      const dias   = r.dias;
+      const detalle = r.detalle ? r.detalle.split(',').map(d=>parseInt(d.trim())).filter(d=>!isNaN(d)&&d>0) : [];
+
+      if (!VAC_DATA[nombre]) {
+        VAC_DATA[nombre] = { fi: '—', acum: 0, byYear: {} };
+      }
+      if (!VAC_DATA[nombre].byYear[año]) {
+        VAC_DATA[nombre].byYear[año] = { total: 0, mes: {}, diasDetalle: {} };
+      }
+      if (!VAC_DATA[nombre].byYear[año].mes) VAC_DATA[nombre].byYear[año].mes = {};
+      if (!VAC_DATA[nombre].byYear[año].diasDetalle) VAC_DATA[nombre].byYear[año].diasDetalle = {};
+
+      if (mes === 0) {
+        // Annual total row — only set total if no monthly rows exist yet
+        if (!VAC_DATA[nombre].byYear[año].total) VAC_DATA[nombre].byYear[año].total = dias;
+      } else {
+        VAC_DATA[nombre].byYear[año].mes[mes] = dias;
+        if (detalle.length) VAC_DATA[nombre].byYear[año].diasDetalle[mes] = detalle;
+        // Recalculate year total from monthly data
+        VAC_DATA[nombre].byYear[año].total = Object.values(VAC_DATA[nombre].byYear[año].mes).reduce((s,d)=>s+d,0);
+      }
+    });
+
+    // Also update fecha_ingreso from personal if available
+    STATE.personal.forEach(p => {
+      const match = Object.keys(VAC_DATA).find(n =>
+        n.toLowerCase().includes(p.nombre.split(',')[0].toLowerCase().trim()) ||
+        p.nombre.toLowerCase().includes(n.split(' ')[0].toLowerCase())
+      );
+      if (match && p.fecha_ingreso) VAC_DATA[match].fi = p.fecha_ingreso;
+    });
+
+    toast(`✓ ${data.count} registros de vacaciones sincronizados`, 'ok');
+    renderVacResumen();
+    renderVacDetalle();
+    renderVacMensual();
+  } catch(err) {
+    toast('Error al sincronizar vacaciones: ' + err.message, 'err');
+  } finally {
+    hideLoading();
+  }
+}
+
+async function saveVacacionToSheets(colaborador, año, mes, dias, detalle) {
+  if (!STATE.sheetsUrl) return;
+  try {
+    await fetch(STATE.sheetsUrl, {
+      method: 'POST',
+      body: JSON.stringify({ accion:'saveVacacion', colaborador, año, mes, dias, detalle }),
+    });
+  } catch(e) { console.warn('Save vac failed:', e); }
+}
+
+// ── MODAL VACACIONES ─────────────────────────────────────────
+function openModalVac() {
+  // Populate colaborador selector from VAC_DATA keys + personal list
+  const sel = document.getElementById('mv-colaborador');
+  const nombres = Object.keys(VAC_DATA).sort((a,b)=>a.localeCompare(b,'es'));
+  // Also add from personal list if not already in VAC_DATA
+  STATE.personal.forEach(p => {
+    if (!nombres.includes(p.nombre)) nombres.push(p.nombre);
+  });
+  sel.innerHTML = '<option value="">— Seleccionar —</option>' +
+    nombres.map(n=>`<option value="${n}">${n}</option>`).join('');
+
+  // Default to current month
+  const now = new Date();
+  document.getElementById('mv-mes').value = now.getMonth()+1;
+  document.getElementById('mv-año').value = now.getFullYear();
+  document.getElementById('mv-dias').value = '';
+  document.getElementById('mv-detalle').value = '';
+  document.getElementById('mv-preview').style.display = 'none';
+  document.getElementById('mv-status').innerHTML = '';
+  openModal('modal-vac');
+}
+
+function previewDiasVac() {
+  const detalleRaw = document.getElementById('mv-detalle').value.trim();
+  const dias = document.getElementById('mv-dias').value;
+  const preview = document.getElementById('mv-preview');
+  const pills = document.getElementById('mv-pills');
+
+  if (!detalleRaw && !dias) { preview.style.display='none'; return; }
+
+  preview.style.display = '';
+  if (detalleRaw) {
+    const dayNums = detalleRaw.split(',').map(d=>parseInt(d.trim())).filter(d=>!isNaN(d)&&d>0&&d<=31);
+    pills.innerHTML = dayNums.map(d =>
+      `<span style="padding:2px 9px;background:var(--buk-dim);color:var(--buk);border-radius:20px;font-family:var(--mono);font-size:12px;font-weight:600">día ${d}</span>`
+    ).join('');
+    // Auto-fill días count if empty
+    if (!dias && dayNums.length) document.getElementById('mv-dias').value = dayNums.length;
+  } else if (dias) {
+    pills.innerHTML = `<span style="padding:3px 12px;background:var(--buk-dim);color:var(--buk);border-radius:20px;font-family:var(--mono);font-weight:700">${dias} días</span>`;
+  }
+}
+
+async function guardarVacacion() {
+  const colaborador = document.getElementById('mv-colaborador').value.trim();
+  const año  = parseInt(document.getElementById('mv-año').value);
+  const mes  = parseInt(document.getElementById('mv-mes').value);
+  const dias = parseInt(document.getElementById('mv-dias').value);
+  const detalleRaw = document.getElementById('mv-detalle').value.trim();
+  const statusEl = document.getElementById('mv-status');
+
+  if (!colaborador) { statusEl.innerHTML='<span style="color:var(--danger)">⚠ Selecciona un colaborador</span>'; return; }
+  if (!dias || dias < 1) { statusEl.innerHTML='<span style="color:var(--danger)">⚠ Ingresa los días tomados</span>'; return; }
+
+  const detalle = detalleRaw
+    ? detalleRaw.split(',').map(d=>parseInt(d.trim())).filter(d=>!isNaN(d)&&d>0&&d<=31)
+    : [];
+
+  // 1. Update VAC_DATA in memory
+  if (!VAC_DATA[colaborador]) {
+    VAC_DATA[colaborador] = { fi: STATE.personal.find(p=>p.nombre===colaborador)?.fecha_ingreso||'—', acum: 0, byYear: {} };
+  }
+  if (!VAC_DATA[colaborador].byYear[año]) {
+    VAC_DATA[colaborador].byYear[año] = { total: 0, mes: {}, diasDetalle: {} };
+  }
+  VAC_DATA[colaborador].byYear[año].mes[mes] = dias;
+  if (detalle.length) VAC_DATA[colaborador].byYear[año].diasDetalle[mes] = detalle;
+  VAC_DATA[colaborador].byYear[año].total =
+    Object.values(VAC_DATA[colaborador].byYear[año].mes).reduce((s,d)=>s+d,0);
+
+  // 2. Save to Sheets if connected
+  if (STATE.sheetsUrl) {
+    statusEl.innerHTML = '<span style="color:var(--mu)">⏳ Guardando en Sheets…</span>';
+    try {
+      await saveVacacionToSheets(colaborador, año, mes, dias, detalle.join(','));
+      statusEl.innerHTML = '<span style="color:var(--ok)">✓ Guardado en plataforma y Sheets</span>';
+    } catch(e) {
+      statusEl.innerHTML = '<span style="color:var(--warn)">⚠ Guardado localmente. Error en Sheets: '+e.message+'</span>';
+    }
+  } else {
+    statusEl.innerHTML = '<span style="color:var(--ok)">✓ Guardado en plataforma</span>';
+  }
+
+  // 3. Refresh all vac views
+  renderVacResumen();
+  renderVacDetalle();
+  renderVacMensual();
+
+  // 4. Close after brief delay
+  setTimeout(() => closeModal('modal-vac'), 1200);
+  toast(`✓ Vacaciones de ${colaborador.split(' ')[0]} registradas`, 'ok');
+}
+
+// ── EXPORT VAC CSV ────────────────────────────────────────────
+function exportVacCSV() {
+  let csv = 'Colaborador,Fecha Ingreso,Acum Total,2020,2021,2022,2023,2024,2025,2026,Total Tomado,Saldo\n';
+  Object.keys(VAC_DATA).forEach(nombre => {
+    const p = VAC_DATA[nombre];
+    const editKey = nombre.replace(/\s+/g,'_');
+    const acum = VAC_EDITS[editKey]?.acum ?? p.acum;
+    let total = 0;
+    const yVals = YEARS.map(y => {
+      const d = p.byYear[y]?.total||0;
+      total += d;
+      return d||'';
+    });
+    const saldo = acum - total;
+    csv += `"${nombre}",${p.fi},${acum},${yVals.join(',')},${total},${saldo}\n`;
+  });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));
+  a.download = 'vacaciones_staff.csv';
+  a.click();
+  toast('✓ CSV exportado','ok');
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const pre = document.getElementById('apps-script-code');
   if (pre) pre.textContent = APPS_SCRIPT;
@@ -1553,6 +2619,12 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('sheets-status-label').textContent = 'Sheets: conectado';
   }
   document.getElementById('am-mes')?.addEventListener('change', renderAbrirMesPersonal);
+  // Init vac mensual selectors to current month
+  const _now = new Date();
+  const _mesEl = document.getElementById('vac-mes-num');
+  const _añoEl = document.getElementById('vac-mes-año');
+  if (_mesEl) _mesEl.value = _now.getMonth() + 1;
+  if (_añoEl) _añoEl.value = _now.getFullYear();
   document.getElementById('am-año')?.addEventListener('input', renderAbrirMesPersonal);
 });
 
