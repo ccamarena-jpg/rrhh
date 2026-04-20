@@ -1865,19 +1865,23 @@ function minsToHora(t) {
 // ════════════════════════════════════════════════════════════
 //  APPS SCRIPT CODE (for display in Config)
 // ════════════════════════════════════════════════════════════
-const APPS_SCRIPT = `// ══════════════════════════════════════════════
-// TT Audit RRHH — Apps Script
-// Pega en Extensiones → Apps Script
-// Configura: acceso "Cualquiera", ejecutar como "Yo"
-// ══════════════════════════════════════════════
+const APPS_SCRIPT = `// ══════════════════════════════════════════════════════════
+// TT Audit RRHH — Apps Script v3
+// 1. Ve a Extensiones → Apps Script
+// 2. Reemplaza TODO el código con este
+// 3. Implementar → Nueva implementación
+//    Tipo: Aplicación web | Ejecutar como: Yo | Acceso: Cualquiera
+// 4. Copia la URL y pégala en Configuración de la plataforma
+// ══════════════════════════════════════════════════════════
 
-// IMPORTANTE: ajusta estos nombres si tus pestañas
-// tienen nombres distintos
-const SHEET_PERSONAL    = 'Datos generales personal';
-const SHEET_ASISTENCIA  = 'Detalle de asistencia';
-const SHEET_VACACIONES  = 'Vacaciones';
-const SS_ID             = '1s7r7KjxTYO_PK2obc_yQ9pXI8l-mEl3vbmrrfIqCrio';
+const SHEET_PERSONAL   = 'Datos generales personal';
+const SHEET_ASISTENCIA = 'Detalle de asistencia';
+const SHEET_VACACIONES = 'Vacaciones';
+const SHEET_RESUMEN    = 'Resumen Mensual';
+const SHEET_TARDANZAS  = 'Tardanzas Descuentos';
+const SS_ID            = '1s7r7KjxTYO_PK2obc_yQ9pXI8l-mEl3vbmrrfIqCrio';
 
+// ── Obtener el Spreadsheet (activo o por ID) ─────────────────
 function getSS() {
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -1886,50 +1890,79 @@ function getSS() {
   return SpreadsheetApp.openById(SS_ID);
 }
 
-function doGet(e) {
+// ── Crear o abrir pestaña con headers si está vacía ──────────
+function getOrCreate(ss, name, headers) {
+  if (!ss) ss = getSS();
+  let sh = ss.getSheetByName(name);
+  if (!sh) {
+    sh = ss.insertSheet(name);
+  }
+  // Add headers if sheet is completely empty
+  if (sh.getLastRow() === 0 && headers && headers.length > 0) {
+    sh.appendRow(headers);
+    sh.getRange(1, 1, 1, headers.length)
+      .setFontWeight('bold')
+      .setBackground('#2c3280')
+      .setFontColor('#ffffff');
+    sh.setFrozenRows(1);
+  }
+  return sh;
+}
+
+// ── Inicializar TODAS las pestañas de una vez ────────────────
+// Llama a esta función manualmente desde el editor si quieres
+// crear todas las hojas antes de usar la plataforma
+function initSheets() {
   const ss = getSS();
+  getOrCreate(ss, SHEET_PERSONAL,   ['DNI','Nombre','Ficha_Buk','Cargo','Area','Fecha_Ingreso']);
+  getOrCreate(ss, SHEET_ASISTENCIA, ['Documento','Fecha','Ingreso','Salida','Proyecto','DIA']);
+  getOrCreate(ss, SHEET_VACACIONES, ['Colaborador','Año','Mes','Nombre_Mes','Dias','Dias_Detalle']);
+  getOrCreate(ss, SHEET_RESUMEN,    ['Mes','DNI','Nombre','Horas_DM','Horas_Vacaciones','Objetivo_Horas']);
+  getOrCreate(ss, SHEET_TARDANZAS,  ['Mes','DNI','Nombre','Ficha_Buk','Monto_Descuento']);
+  return 'OK — pestañas creadas';
+}
+
+// ════════════════════════════════════════════════════════════
+//  GET — Lectura de datos
+// ════════════════════════════════════════════════════════════
+function doGet(e) {
+  const ss     = getSS();
   const accion = (e && e.parameter && e.parameter.accion) ? e.parameter.accion : '';
 
-  // ── GET PERSONAL ──────────────────────────────
-  if (accion === 'getPersonal') {
-    const sh   = ss.getSheetByName(SHEET_PERSONAL);
-    if (!sh) return jsonResp({error: 'Pestaña no encontrada: ' + SHEET_PERSONAL});
-    const data = sh.getDataRange().getValues();
-    // Skip header row (row 0)
-    const rows = data.slice(1).filter(r => r[0] && r[1]);
-    // Expected cols: DNI | Nombre | Ficha_Buk | Cargo | Area | Fecha_Ingreso
-    return jsonResp({ rows: rows.map(r => [
-      r[0], r[1], r[2]||'', r[3]||'', r[4]||'', r[5]||''
-    ])});
+  // ── Ping / health check ───────────────────────────────────
+  if (!accion) {
+    return jsonResp({ status: 'TT Audit API activa', sheet: ss.getName() });
   }
 
-  // ── GET ASISTENCIA ────────────────────────────
-  if (accion === 'getAsistencia') {
-    const mes = (e && e.parameter && e.parameter.mes) ? e.parameter.mes : ''; // format: YYYY-MM
-    const sh  = ss.getSheetByName(SHEET_ASISTENCIA);
-    if (!sh) return jsonResp({error: 'Pestaña no encontrada: ' + SHEET_ASISTENCIA});
-
+  // ── GET PERSONAL ──────────────────────────────────────────
+  if (accion === 'getPersonal') {
+    const sh = ss.getSheetByName(SHEET_PERSONAL);
+    if (!sh) return jsonResp({ error: 'Pestaña no encontrada: ' + SHEET_PERSONAL });
     const data = sh.getDataRange().getValues();
-    // Expected cols: Documento | Fecha/Hora | Ingreso | Salida | DIA
-    // (col B has the date, col C ingreso time, col D salida time)
+    const rows = data.slice(1).filter(r => r[0] && r[1]).map(r => [
+      r[0], r[1], r[2]||'', r[3]||'', r[4]||'', r[5]||''
+    ]);
+    return jsonResp({ rows, count: rows.length });
+  }
+
+  // ── GET ASISTENCIA ────────────────────────────────────────
+  if (accion === 'getAsistencia') {
+    const mes = (e && e.parameter && e.parameter.mes) ? e.parameter.mes : '';
+    const sh  = ss.getSheetByName(SHEET_ASISTENCIA);
+    if (!sh) return jsonResp({ error: 'Pestaña no encontrada: ' + SHEET_ASISTENCIA });
+    const data = sh.getDataRange().getValues();
     const rows = [];
     for (let i = 1; i < data.length; i++) {
-      const r     = data[i];
-      const dni   = (r[0] || '').toString().trim();
+      const r   = data[i];
+      const dni = (r[0] || '').toString().trim();
       if (!dni) continue;
-
-      // Parse date from column B
       let fechaStr = '';
-      const rawFecha = r[1];
-      if (rawFecha instanceof Date) {
-        const d = rawFecha;
-        fechaStr = pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear();
+      if (r[1] instanceof Date) {
+        fechaStr = pad(r[1].getDate())+'/'+pad(r[1].getMonth()+1)+'/'+r[1].getFullYear();
       } else {
-        fechaStr = rawFecha ? rawFecha.toString().trim() : '';
+        fechaStr = r[1] ? r[1].toString().trim() : '';
       }
       if (!fechaStr) continue;
-
-      // Filter by month if specified
       if (mes) {
         const parts = fechaStr.split('/');
         if (parts.length === 3) {
@@ -1937,143 +1970,127 @@ function doGet(e) {
           if (rowMes !== mes) continue;
         }
       }
-
-      // Ingreso and salida
-      const ingreso = formatTime(r[2]);
-      const salida  = formatTime(r[3]);
-
-      rows.push([dni, fechaStr, ingreso, salida, '', r[4]||'']);
+      rows.push([dni, fechaStr, formatTime(r[2]), formatTime(r[3]), r[4]||'', r[5]||'']);
     }
     return jsonResp({ rows, count: rows.length });
   }
 
-  // ── GET VACACIONES ────────────────────────────
+  // ── GET VACACIONES ────────────────────────────────────────
   if (accion === 'getVacaciones') {
     const sh = ss.getSheetByName(SHEET_VACACIONES);
-    if (!sh) return jsonResp({error: 'Pestaña no encontrada: ' + SHEET_VACACIONES});
+    if (!sh) return jsonResp({ error: 'Pestaña no encontrada: ' + SHEET_VACACIONES });
     const data = sh.getDataRange().getValues();
-    if (data.length < 2) return jsonResp({ rows: [] });
-    // Expected cols: Colaborador | Año | Mes | Dias | Dias_Detalle
-    const rows = data.slice(1).filter(r => r[0] && r[1] && r[2] !== '').map(r => ({
-      colaborador: (r[0]||'').toString().trim(),
-      año:         parseInt(r[1]) || 0,
-      mes:         parseInt(r[2]) || 0,
-      dias:        parseInt(r[3]) || 0,
-      detalle:     (r[4]||'').toString().trim(), // "1,2,3,4,5" comma-separated days
-    })).filter(r => r.colaborador && r.año && r.mes);
+    if (data.length < 2) return jsonResp({ rows: [], count: 0 });
+    const rows = data.slice(1)
+      .filter(r => r[0] && r[1] !== '' && r[2] !== '')
+      .map(r => ({
+        colaborador: (r[0]||'').toString().trim(),
+        año:         parseInt(r[1]) || 0,
+        mes:         parseInt(r[2]) || 0,
+        dias:        parseInt(r[3]) || 0,
+        detalle:     (r[5]||'').toString().trim(),
+      }))
+      .filter(r => r.colaborador && r.año);
     return jsonResp({ rows, count: rows.length });
   }
 
-  // ── PING ──────────────────────────────────────
-  return jsonResp({ status: 'TT Audit API activa', sheet: getSS().getName() });
+  return jsonResp({ status: 'TT Audit API activa', sheet: ss.getName() });
 }
 
-// ── POST: todos los endpoints de escritura ────────────────────
+// ════════════════════════════════════════════════════════════
+//  POST — Escritura de datos
+// ════════════════════════════════════════════════════════════
 function doPost(e) {
   const ss = getSS();
   let body;
-  try { body = JSON.parse(e && e.postData ? e.postData.contents : '{}'); } catch(err) {
-    return jsonResp({error: 'JSON inválido'});
+  try {
+    body = JSON.parse(e && e.postData ? e.postData.contents : '{}');
+  } catch(err) {
+    return jsonResp({ error: 'JSON inválido: ' + err.message });
   }
   const accion = body.accion || '';
 
-  // ── SAVE PERSONAL ───────────────────────────
+  // ── SAVE PERSONAL ─────────────────────────────────────────
   if (accion === 'savePersonal') {
-    const sh = getOrCreate(ss, SHEET_PERSONAL);
-    if (sh.getLastRow() === 0) {
-      sh.appendRow(['DNI','Nombre','Ficha_Buk','Cargo','Area','Fecha_Ingreso']);
-    }
+    const sh = getOrCreate(ss, SHEET_PERSONAL, ['DNI','Nombre','Ficha_Buk','Cargo','Area','Fecha_Ingreso']);
     const { dni, nombre, ficha_buk, cargo, area, fecha_ingreso } = body;
-    if (!dni || !nombre) return jsonResp({error: 'DNI y Nombre requeridos'});
+    if (!dni || !nombre) return jsonResp({ error: 'DNI y Nombre requeridos' });
     const data = sh.getDataRange().getValues();
     let found = false;
     for (let i = 1; i < data.length; i++) {
       if (data[i][0].toString().trim() === dni.toString().trim()) {
-        sh.getRange(i+1,1,1,6).setValues([[dni,nombre,ficha_buk||'',cargo||'',area||'',fecha_ingreso||'']]);
+        sh.getRange(i+1, 1, 1, 6).setValues([[dni, nombre, ficha_buk||'', cargo||'', area||'', fecha_ingreso||'']]);
         found = true; break;
       }
     }
-    if (!found) sh.appendRow([dni,nombre,ficha_buk||'',cargo||'',area||'',fecha_ingreso||'']);
-    return jsonResp({ok:true, action: found?'updated':'created'});
+    if (!found) sh.appendRow([dni, nombre, ficha_buk||'', cargo||'', area||'', fecha_ingreso||'']);
+    return jsonResp({ ok: true, action: found ? 'updated' : 'created' });
   }
 
-  // ── SAVE RESUMEN MENSUAL ─────────────────────
+  // ── SAVE RESUMEN MENSUAL ──────────────────────────────────
   if (accion === 'saveResumen') {
-    const sh = getOrCreate(ss, 'Resumen Mensual');
-    if (sh.getLastRow() === 0) {
-      sh.appendRow(['Mes','DNI','Nombre','Horas_DM','Horas_Vacaciones','Objetivo_Horas']);
-    }
+    const sh = getOrCreate(ss, SHEET_RESUMEN, ['Mes','DNI','Nombre','Horas_DM','Horas_Vacaciones','Objetivo_Horas']);
     const { mesKey, dni, nombre, dm, vac, objetivo } = body;
-    if (!mesKey || !dni) return jsonResp({error: 'mesKey y DNI requeridos'});
+    if (!mesKey || !dni) return jsonResp({ error: 'mesKey y DNI requeridos' });
     const data = sh.getDataRange().getValues();
     let found = false;
     for (let i = 1; i < data.length; i++) {
       if (data[i][0] === mesKey && data[i][1].toString().trim() === dni.toString().trim()) {
-        sh.getRange(i+1,4,1,3).setValues([[dm||0, vac||0, objetivo||0]]);
+        sh.getRange(i+1, 4, 1, 3).setValues([[dm||0, vac||0, objetivo||0]]);
         found = true; break;
       }
     }
-    if (!found) sh.appendRow([mesKey,dni,nombre||'',dm||0,vac||0,objetivo||0]);
-    return jsonResp({ok:true, action: found?'updated':'created'});
+    if (!found) sh.appendRow([mesKey, dni, nombre||'', dm||0, vac||0, objetivo||0]);
+    return jsonResp({ ok: true, action: found ? 'updated' : 'created' });
   }
 
-  // ── SAVE DESCUENTO TARDANZA ──────────────────
+  // ── SAVE DESCUENTO TARDANZA ───────────────────────────────
   if (accion === 'saveDescuento') {
-    const sh = getOrCreate(ss, 'Tardanzas Descuentos');
-    if (sh.getLastRow() === 0) {
-      sh.appendRow(['Mes','DNI','Nombre','Ficha_Buk','Monto_Descuento']);
-    }
+    const sh = getOrCreate(ss, SHEET_TARDANZAS, ['Mes','DNI','Nombre','Ficha_Buk','Monto_Descuento']);
     const { mesKey, dni, nombre, ficha_buk, monto } = body;
-    if (!mesKey || !dni) return jsonResp({error: 'mesKey y DNI requeridos'});
+    if (!mesKey || !dni) return jsonResp({ error: 'mesKey y DNI requeridos' });
     const data = sh.getDataRange().getValues();
     let found = false;
     for (let i = 1; i < data.length; i++) {
       if (data[i][0] === mesKey && data[i][1].toString().trim() === dni.toString().trim()) {
-        sh.getRange(i+1,5).setValue(monto||0);
+        sh.getRange(i+1, 5).setValue(monto||0);
         found = true; break;
       }
     }
-    if (!found) sh.appendRow([mesKey,dni,nombre||'',ficha_buk||'',monto||0]);
-    return jsonResp({ok:true, action: found?'updated':'created'});
+    if (!found) sh.appendRow([mesKey, dni, nombre||'', ficha_buk||'', monto||0]);
+    return jsonResp({ ok: true, action: found ? 'updated' : 'created' });
   }
 
-  // ── SAVE VACACION ────────────────────────────
+  // ── SAVE VACACION ─────────────────────────────────────────
   if (accion === 'saveVacacion') {
-    const sh = getOrCreate(ss, SHEET_VACACIONES);
-    if (sh.getLastRow() === 0) {
-      sh.appendRow(['Colaborador','Año','Mes','Nombre_Mes','Dias','Dias_Detalle']);
-    }
+    const sh = getOrCreate(ss, SHEET_VACACIONES, ['Colaborador','Año','Mes','Nombre_Mes','Dias','Dias_Detalle']);
     const { colaborador, año, mes, dias, detalle } = body;
-    if (!colaborador || !año || !mes) return jsonResp({error: 'Faltan campos requeridos'});
-    const mesNombres = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+    if (!colaborador || !año || !mes) return jsonResp({ error: 'Faltan campos requeridos' });
+    const mesNombres = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio',
+                        'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
     const data = sh.getDataRange().getValues();
     let found = false;
     for (let i = 1; i < data.length; i++) {
-      if (data[i][0].toString().trim() === colaborador &&
+      if (data[i][0].toString().trim() === colaborador.toString().trim() &&
           parseInt(data[i][1]) === parseInt(año) &&
           parseInt(data[i][2]) === parseInt(mes)) {
-        sh.getRange(i+1,5).setValue(dias||0);
-        sh.getRange(i+1,6).setValue(detalle||'');
+        sh.getRange(i+1, 5).setValue(dias||0);
+        sh.getRange(i+1, 6).setValue(detalle||'');
         found = true; break;
       }
     }
-    if (!found) sh.appendRow([colaborador, año, mes, mesNombres[parseInt(mes)]||'', dias||0, detalle||'']);
-    return jsonResp({ok:true, action: found?'updated':'created'});
+    if (!found) {
+      sh.appendRow([colaborador, año, mes, mesNombres[parseInt(mes)]||'', dias||0, detalle||'']);
+    }
+    return jsonResp({ ok: true, action: found ? 'updated' : 'created' });
   }
 
-  return jsonResp({error: 'Acción no reconocida: ' + accion});
+  return jsonResp({ error: 'Acción no reconocida: ' + accion });
 }
 
-function getOrCreate(ss, name) {
-  if (!ss) ss = getSS();
-  try {
-    return ss.getSheetByName(name) || ss.insertSheet(name);
-  } catch(err) {
-    Logger.log('getOrCreate error for ' + name + ': ' + err.message);
-    throw err;
-  }
-}
-
+// ════════════════════════════════════════════════════════════
+//  HELPERS
+// ════════════════════════════════════════════════════════════
 function formatTime(val) {
   if (!val || val === '-') return '0:00:00';
   if (val instanceof Date) {
@@ -2081,7 +2098,7 @@ function formatTime(val) {
   }
   const s = val.toString().trim();
   if (!s || s === '-') return '0:00:00';
-  const m = s.match(/^(\\d{1,2}):(\\d{2})(?::(\\d{2}))?/);
+  const m = s.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?/);
   if (m) return pad(parseInt(m[1]))+':'+m[2]+':'+(m[3]||'00');
   return '0:00:00';
 }
@@ -2092,7 +2109,7 @@ function jsonResp(obj) {
   return ContentService
     .createTextOutput(JSON.stringify(obj))
     .setMimeType(ContentService.MimeType.JSON);
-}`;
+}`
 
 
 
