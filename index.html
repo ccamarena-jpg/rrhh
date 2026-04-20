@@ -133,7 +133,7 @@ tr.tr-person td.td-blank{background:var(--sf3)}
 /* Ingreso / Salida rows */
 tr.tr-ing td.td-tipo,tr.tr-sal td.td-tipo{position:sticky;left:0;background:var(--sf);z-index:4;padding:3px 7px;font-size:10px;font-weight:700;color:var(--mu);text-align:center;letter-spacing:.4px;border-right:.5px solid var(--bd2)}
 tr.tr-sal td.td-tipo{background:#fafaf8}
-tr.tr-ing td.td-time,tr.tr-sal td.td-time{padding:3px 6px;text-align:center;font-family:var(--mono);font-size:11.5px;min-width:74px}
+tr.tr-ing td.td-time,tr.tr-sal td.td-time{padding:2px 4px;text-align:center;font-family:var(--mono);font-size:11px;min-width:68px;letter-spacing:-.3px;white-space:nowrap}
 tr.tr-ing{background:var(--sf)}
 tr.tr-sal{background:#fafaf8}
 tr.tr-sep td{height:5px;background:var(--sf3);border-bottom:.5px solid var(--bd2)}
@@ -1324,17 +1324,29 @@ async function confirmarAbrirMes() {
 
 // ── REFRESH BUTTON (reload current month) ───────────────────
 async function refrescarMes() {
-  const mesKey = STATE.activeMes;
-  if (!mesKey) { toast('No hay mes activo', 'warn'); return; }
+  // Refresh whichever month is currently selected in the filter (or active month)
+  const mesKey = document.getElementById('asi-filter-mes')?.value || STATE.activeMes;
+  if (!mesKey) { toast('Selecciona un mes primero', 'warn'); return; }
   if (!STATE.sheetsUrl) { toast('Configura la URL de Apps Script primero', 'warn'); return; }
   showLoading(`Actualizando ${mesKeyToLabel(mesKey)}…`);
   try {
     const count = await syncAsistenciaFromSheets(mesKey);
+    // Also refresh personal in case new people were added
+    await syncPersonalFromSheets().catch(()=>{});
+    // Sync all active selects to include any new months
+    syncMesSelects();
+    // Re-apply the month in the filter after syncMesSelects resets it
+    const selDiaria = document.getElementById('asi-filter-mes');
+    const selResumen = document.getElementById('res-filter-mes');
+    const selTard = document.getElementById('tard-filter-mes');
+    if (selDiaria) selDiaria.value = mesKey;
+    if (selResumen) selResumen.value = mesKey;
+    if (selTard) selTard.value = mesKey;
     renderMatrix();
     renderResumen();
     renderTardanzas();
     updateDashboard();
-    toast(`✓ ${count} registros actualizados`, 'ok');
+    toast(`✓ ${count} registros actualizados para ${mesKeyToLabel(mesKey)}`, 'ok');
   } catch(err) {
     toast('Error: ' + err.message, 'err');
   } finally {
@@ -1415,7 +1427,7 @@ function renderMatrix() {
 
   persons.forEach(p => {
     const optimo = STATE.mesConfig[mesKey]?.[p.dni] || 0;
-    const optimoFmt = optimo ? `${optimo}:00:00` : '—';
+    const optimoFmt = optimo ? `${String(optimo).padStart(2,'0')}:00` : '—';
     let totalMins = 0;
 
     const dayData = days.map(d => {
@@ -1433,7 +1445,7 @@ function renderMatrix() {
       return {ing, sal, zeroIng, zeroSal, late, dow:d.getDay()};
     });
 
-    const totalFmt = totalMins>0 ? minsToHora(totalMins) : '0:00:00';
+    const totalFmt = totalMins>0 ? minsToHora(totalMins) : '00:00';
 
     // INGRESO row
     html += `<tr class="tr-person">
@@ -1447,11 +1459,11 @@ function renderMatrix() {
     dayData.forEach(dd => {
       const wk = (dd.dow===0||dd.dow===6)?' td-wk':'';
       if (dd.zeroIng) {
-        html += `<td class="td-time c-zero${wk}">0:00:00</td>`;
+        html += `<td class="td-time c-zero${wk}">00:00</td>`;
       } else if (dd.late) {
-        html += `<td class="td-time c-late${wk}">${dd.ing}</td>`;
+        html += `<td class="td-time c-late${wk}">${fmtHora(dd.ing)}</td>`;
       } else {
-        html += `<td class="td-time c-ok${wk}">${dd.ing}</td>`;
+        html += `<td class="td-time c-ok${wk}">${fmtHora(dd.ing)}</td>`;
       }
     });
     html += `<td class="td-total" rowspan="2">${totalFmt}</td></tr>`;
@@ -1461,9 +1473,9 @@ function renderMatrix() {
     dayData.forEach(dd => {
       const wk = (dd.dow===0||dd.dow===6)?' td-wk':'';
       if (dd.zeroSal) {
-        html += `<td class="td-time c-zero-sal${wk}">0:00:00</td>`;
+        html += `<td class="td-time c-zero-sal${wk}">00:00</td>`;
       } else {
-        html += `<td class="td-time c-ok${wk}">${dd.sal}</td>`;
+        html += `<td class="td-time c-ok${wk}">${fmtHora(dd.sal)}</td>`;
       }
     });
     html += `</tr><tr class="tr-sep"><td colspan="${3+days.length+1}"></td></tr>`;
@@ -1847,19 +1859,25 @@ function formatFecha(d) {
 function parseHora(val) {
   if (val===null||val===undefined||val==='') return null;
   const s=val.toString().trim();
-  if (s==='-'||s==='') return '0:00:00';
+  if (!s||s==='-') return '0:00:00';
   const m=s.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?/);
   if (m) return `${m[1].padStart(2,'0')}:${m[2]}:${m[3]||'00'}`;
   return '0:00:00';
 }
-function isZeroH(h) { return !h||h==='0:00:00'||h==='00:00:00'||h==='0:00'||h==='-'||h===null; }
+// Display format: HH:MM (drops seconds, always zero-padded)
+function fmtHora(h) {
+  if (!h || isZeroH(h)) return '00:00';
+  const p = h.split(':');
+  return `${String(parseInt(p[0])||0).padStart(2,'0')}:${String(parseInt(p[1])||0).padStart(2,'0')}`;
+}
+function isZeroH(h) { return !h||h==='0:00:00'||h==='00:00:00'||h==='0:00'||h==='00:00'||h==='-'||h===null; }
 function horaToMins(h) {
   if (!h||isZeroH(h)) return 0;
   const p=h.split(':').map(Number); return p[0]*60+(p[1]||0);
 }
 function minsToHora(t) {
   const h=Math.floor(t/60),m=t%60;
-  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:00`;
+  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
 }
 
 // ════════════════════════════════════════════════════════════
