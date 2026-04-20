@@ -236,6 +236,14 @@ table.pst tr:hover td{background:var(--sf2)}
 /* ══ SPINNER ══ */
 .spinner{width:20px;height:20px;border:2.5px solid var(--bd2);border-top-color:var(--buk);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
 @keyframes spin{to{transform:rotate(360deg)}}
+/* ══ SORTABLE HEADERS ══ */
+th.sortable{cursor:pointer;user-select:none;white-space:nowrap}
+th.sortable:hover{background:rgba(255,255,255,.15)!important}
+th.sortable::after{content:'⇅';opacity:.35;font-size:10px;margin-left:5px;display:inline-block}
+th.sortable.asc::after{content:'↑';opacity:1;color:#7dd3fc}
+th.sortable.desc::after{content:'↓';opacity:1;color:#7dd3fc}
+th.sortable.asc,th.sortable.desc{background:rgba(255,255,255,.1)!important}
+
 /* ══ SCROLLBAR ══ */
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-track{background:transparent}
@@ -533,7 +541,13 @@ table.pst tr:hover td{background:var(--sf2)}
     <div class="tbl-wrap" id="personal-wrap">
       <table class="pst" id="personal-table">
         <thead><tr>
-          <th>DNI</th><th>Nombre completo</th><th>Ficha Buk</th><th>Cargo</th><th>Área</th><th>Fecha ingreso</th><th style="text-align:center">Acciones</th>
+          <th class="sortable">DNI</th>
+          <th class="sortable">Nombre completo</th>
+          <th class="sortable">Ficha Buk</th>
+          <th class="sortable">Cargo</th>
+          <th class="sortable">Área</th>
+          <th class="sortable">Fecha ingreso</th>
+          <th style="text-align:center">Acciones</th>
         </tr></thead>
         <tbody id="personal-tbody"><tr><td colspan="7" style="text-align:center;padding:40px;color:var(--hi)">Sin colaboradores registrados. Agrega uno o carga un Excel.</td></tr></tbody>
       </table>
@@ -1017,6 +1031,70 @@ function switchTab(ns, el, tabId) {
 // ── MODAL HELPERS ───────────────────────────────────────────
 function closeModal(id) { document.getElementById(id)?.classList.remove('open'); }
 function openModal(id)  { document.getElementById(id)?.classList.add('open'); }
+// ════════════════════════════════════════════════════════════
+//  UNIVERSAL SORT ENGINE
+// ════════════════════════════════════════════════════════════
+const _sortState = {}; // { tableId: { col: N, dir: 1|-1 } }
+
+function makeSortable(tableId) {
+  const table = document.getElementById(tableId);
+  if (!table) return;
+  const ths = table.querySelectorAll('thead th.sortable');
+  ths.forEach((th, i) => {
+    th.addEventListener('click', () => sortTable(tableId, i));
+  });
+}
+
+function sortTable(tableId, colIdx) {
+  const table = document.getElementById(tableId);
+  if (!table) return;
+
+  // Toggle direction
+  const prev = _sortState[tableId];
+  const dir = (prev && prev.col === colIdx && prev.dir === 1) ? -1 : 1;
+  _sortState[tableId] = { col: colIdx, dir };
+
+  // Update header indicators
+  table.querySelectorAll('thead th.sortable').forEach((th, i) => {
+    th.classList.remove('asc','desc');
+    if (i === colIdx) th.classList.add(dir === 1 ? 'asc' : 'desc');
+  });
+
+  // Collect sortable th indexes — skip non-sortable leading cols
+  const allThs = [...table.querySelectorAll('thead th')];
+  const sortableThs = allThs.filter(th => th.classList.contains('sortable'));
+  const globalIdx = allThs.indexOf(sortableThs[colIdx]);
+
+  // Sort tbody rows (skip last row if it has class tot-row or data-nosort)
+  const tbody = table.querySelector('tbody');
+  if (!tbody) return;
+  const rows = [...tbody.querySelectorAll('tr:not(.tr-sep):not([data-nosort])')];
+  const totRows = rows.filter(r => r.classList.contains('tot-row') || r.dataset.nosort);
+  const sortRows = rows.filter(r => !r.classList.contains('tot-row') && !r.dataset.nosort);
+
+  sortRows.sort((a, b) => {
+    const aCell = a.querySelectorAll('td')[globalIdx];
+    const bCell = b.querySelectorAll('td')[globalIdx];
+    if (!aCell || !bCell) return 0;
+    const aVal = (aCell.dataset.sort || aCell.textContent || '').trim();
+    const bVal = (bCell.dataset.sort || bCell.textContent || '').trim();
+    // Numeric sort if both look like numbers
+    const aNum = parseFloat(aVal.replace(/[^0-9.-]/g,''));
+    const bNum = parseFloat(bVal.replace(/[^0-9.-]/g,''));
+    if (!isNaN(aNum) && !isNaN(bNum)) return dir * (aNum - bNum);
+    return dir * aVal.localeCompare(bVal, 'es', {sensitivity:'base'});
+  });
+
+  // Re-append sorted rows, then totals at bottom
+  sortRows.forEach(r => tbody.appendChild(r));
+  totRows.forEach(r => tbody.appendChild(r));
+}
+
+// Apply sort to dynamically rendered table (called after innerHTML is set)
+function applySortable(tableId) {
+  setTimeout(() => makeSortable(tableId), 0);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.overlay').forEach(o =>
     o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); })
@@ -1417,14 +1495,15 @@ function renderResumen() {
 
   const resMes = STATE.resumen[mesKey] || {};
 
-  let html = `<table class="rst"><thead><tr>
-    <th>Colaborador</th><th>DNI</th>
-    <th style="text-align:center">Horas trabajadas</th>
+  let html = `<table class="rst" id="tbl-resumen"><thead><tr>
+    <th class="sortable">Colaborador</th>
+    <th class="sortable">DNI</th>
+    <th class="sortable" style="text-align:center">Horas trabajadas</th>
     <th style="text-align:center">Desc. médico (h)</th>
     <th style="text-align:center">Vacaciones (h)</th>
-    <th style="text-align:center">Total (h)</th>
-    <th style="text-align:center">Objetivo (h)</th>
-    <th style="text-align:center">Estado</th>
+    <th class="sortable" style="text-align:center">Total (h)</th>
+    <th class="sortable" style="text-align:center">Objetivo (h)</th>
+    <th class="sortable" style="text-align:center">Estado</th>
   </tr></thead><tbody>`;
 
   Object.values(byPerson).sort((a,b)=>a.nombre.localeCompare(b.nombre,'es')).forEach(p => {
@@ -1448,9 +1527,9 @@ function renderResumen() {
       else                             { estado='Incompleto';    estClass='sp-danger';  }
     }
     html += `<tr>
-      <td style="font-weight:600">${p.nombre}</td>
-      <td class="mono" style="color:var(--mu)">${p.dni}</td>
-      <td class="mono" style="text-align:center">${minsToHora(totalMins)}</td>
+      <td style="font-weight:600" data-sort="${p.nombre}">${p.nombre}</td>
+      <td class="mono" style="color:var(--mu)" data-sort="${p.dni}">${p.dni}</td>
+      <td class="mono" style="text-align:center" data-sort="${totalMins}">${minsToHora(totalMins)}</td>
       <td style="text-align:center"><input type="number" step="0.5" value="${dm}"
         data-dni="${p.dni}" data-field="dm" onchange="updateResumenCell(this,'${mesKey}')" placeholder="0"></td>
       <td style="text-align:center"><input type="number" step="0.5" value="${vac}"
@@ -1462,6 +1541,7 @@ function renderResumen() {
   });
   html += '</tbody></table>';
   wrap.innerHTML = html;
+  applySortable('tbl-resumen');
 }
 
 function updateResumenCell(inp, mesKey) {
@@ -1521,11 +1601,13 @@ function renderTardanzas() {
 
   const descMes = STATE.descuentos[mesKey]||{};
 
-  let html = `<table class="tdt"><thead><tr>
-    <th>Colaborador</th><th>DNI</th><th>Ficha Buk</th>
-    <th style="text-align:center">Días con tardanza</th>
-    <th style="text-align:center">Total min. tarde</th>
-    <th style="text-align:center">Horas tarde</th>
+  let html = `<table class="tdt" id="tbl-tardanzas"><thead><tr>
+    <th class="sortable">Colaborador</th>
+    <th class="sortable">DNI</th>
+    <th class="sortable">Ficha Buk</th>
+    <th class="sortable" style="text-align:center">Días con tardanza</th>
+    <th class="sortable" style="text-align:center">Total min. tarde</th>
+    <th class="sortable" style="text-align:center">Horas tarde</th>
     <th style="text-align:right;padding-right:14px">Descuento (S/.)</th>
   </tr></thead><tbody>`;
 
@@ -1542,12 +1624,12 @@ function renderTardanzas() {
       const ficha = STATE.personal.find(x=>x.dni===p.dni)?.ficha_buk||'—';
       const monto = descMes[p.dni]??'';
       html += `<tr>
-        <td style="font-weight:600">${p.nombre}</td>
-        <td class="mono" style="color:var(--mu)">${p.dni}</td>
-        <td class="mono">${ficha}</td>
-        <td style="text-align:center">${p.tardanzas.length} días</td>
-        <td class="mono" style="text-align:center;color:var(--warn);font-weight:700">${totalMins} min</td>
-        <td class="mono" style="text-align:center">${minsToHora(totalMins)}</td>
+        <td style="font-weight:600" data-sort="${p.nombre}">${p.nombre}</td>
+        <td class="mono" style="color:var(--mu)" data-sort="${p.dni}">${p.dni}</td>
+        <td class="mono" data-sort="${ficha}">${ficha}</td>
+        <td style="text-align:center" data-sort="${p.tardanzas.length}">${p.tardanzas.length} días</td>
+        <td class="mono" style="text-align:center;color:var(--warn);font-weight:700" data-sort="${totalMins}">${totalMins} min</td>
+        <td class="mono" style="text-align:center" data-sort="${totalMins}">${minsToHora(totalMins)}</td>
         <td style="text-align:right;padding-right:14px">
           <input type="number" step="0.01" value="${monto}" data-dni="${p.dni}"
             onchange="updateDescuento(this,'${mesKey}')" placeholder="0.00">
@@ -1557,6 +1639,7 @@ function renderTardanzas() {
   }
   html += '</tbody></table>';
   wrap.innerHTML = html;
+  applySortable('tbl-tardanzas');
 }
 
 function updateDescuento(inp, mesKey) {
@@ -1653,6 +1736,7 @@ function renderPersonalTable(filter='') {
       <span style="font-size:11px;color:var(--hi)">Solo lectura</span>
     </td>
   </tr>`).join('');
+  applySortable('personal-table');
 }
 
 function filterPersonal(q) { renderPersonalTable(q); }
@@ -2149,12 +2233,12 @@ function renderVacResumen() {
 
   const names = Object.keys(VAC_DATA);
 
-  let html = `<table style="border-collapse:collapse;width:100%;font-size:12.5px">
+  let html = `<table id="tbl-vac-resumen" style="border-collapse:collapse;width:100%;font-size:12.5px">
     <thead>
       <tr style="background:var(--buk);color:#fff">
-        <th style="padding:8px 12px;text-align:left;position:sticky;top:0;z-index:10;white-space:nowrap;min-width:220px">Empleado</th>
-        <th style="padding:8px 10px;text-align:left;position:sticky;top:0;z-index:10;white-space:nowrap">Fecha Ingreso</th>
-        <th style="padding:8px 10px;text-align:center;position:sticky;top:0;z-index:10;white-space:nowrap;background:var(--buk2)">
+        <th class="sortable" style="padding:8px 12px;text-align:left;position:sticky;top:0;z-index:10;white-space:nowrap;min-width:220px">Empleado</th>
+        <th class="sortable" style="padding:8px 10px;text-align:left;position:sticky;top:0;z-index:10;white-space:nowrap">Fecha Ingreso</th>
+        <th class="sortable" style="padding:8px 10px;text-align:center;position:sticky;top:0;z-index:10;white-space:nowrap;background:var(--buk2)">
           TOTAL VAC<br>ACUM AL '25
         </th>`;
 
@@ -2217,12 +2301,13 @@ function renderVacResumen() {
     });
 
     html += `<td style="padding:8px 10px;text-align:center;background:#f0f0fa;font-family:var(--mono);font-weight:700;font-size:13px">${totalTomado}</td>
-      <td style="padding:8px 10px;text-align:center;background:#f0f0fa;font-family:var(--mono);font-size:13px;${saldoColor}">${saldo}</td>
+      <td style="padding:8px 10px;text-align:center;background:#f0f0fa;font-family:var(--mono);font-size:13px;${saldoColor}" data-sort="${saldo}">${saldo}</td>
     </tr>`;
   });
 
   html += '</tbody></table>';
   wrap.innerHTML = html;
+  applySortable('tbl-vac-resumen');
 }
 
 function saveAlocAnual(year, val) {
@@ -2275,17 +2360,17 @@ function renderVacDetalle() {
   allMonths.sort((a,b)=>a-b);
 
   // If no monthly detail available, show year totals
-  let html = `<table style="border-collapse:collapse;width:100%;font-size:13px">
+  let html = `<table id="tbl-vac-detalle" style="border-collapse:collapse;width:100%;font-size:13px">
     <thead><tr style="background:var(--buk);color:#fff">
-      <th style="padding:8px 14px;text-align:left;position:sticky;top:0;white-space:nowrap;min-width:220px">Colaborador</th>
-      <th style="padding:8px 10px;text-align:left;position:sticky;top:0">Fecha Ingreso</th>`;
+      <th class="sortable" style="padding:8px 14px;text-align:left;position:sticky;top:0;white-space:nowrap;min-width:220px">Colaborador</th>
+      <th class="sortable" style="padding:8px 10px;text-align:left;position:sticky;top:0">Fecha Ingreso</th>`;
 
   if (allMonths.length > 0) {
     allMonths.forEach(m => {
       html += `<th style="padding:8px 10px;text-align:center;position:sticky;top:0;min-width:64px">${MES_NAMES_SHORT[m]}</th>`;
     });
   }
-  html += `<th style="padding:8px 10px;text-align:center;position:sticky;top:0;background:var(--buk2)">TOTAL ${año}</th>
+  html += `<th class="sortable" style="padding:8px 10px;text-align:center;position:sticky;top:0;background:var(--buk2)">TOTAL ${año}</th>
     </tr></thead><tbody>`;
 
   names.forEach(nombre => {
@@ -2309,12 +2394,13 @@ function renderVacDetalle() {
     }
 
     const totBg = total > 0 ? 'background:#e8f5e9;color:var(--ok)' : 'color:var(--hi)';
-    html += `<td style="padding:8px 10px;text-align:center;font-family:var(--mono);font-weight:700;font-size:14px;${totBg}">${total || '—'}</td>
+    html += `<td style="padding:8px 10px;text-align:center;font-family:var(--mono);font-weight:700;font-size:14px;${totBg}" data-sort="${total}">${total || '—'}</td>
     </tr>`;
   });
 
   html += '</tbody></table>';
   wrap.innerHTML = html;
+  applySortable('tbl-vac-detalle');
 }
 
 // ── CONSOLIDADO MENSUAL ──────────────────────────────────────
@@ -2349,9 +2435,9 @@ function renderVacMensual() {
   let html = `<div style="margin-bottom:12px;font-size:13px;color:var(--mu)">
     <b>${conVac.length}</b> colaborador${conVac.length!==1?'es':''} con vacaciones en <b>${MES_NAMES_FULL[mes]} ${año}</b>
   </div>
-  <table style="border-collapse:collapse;width:100%;font-size:12.5px">
+  <table id="tbl-vac-mensual" style="border-collapse:collapse;width:100%;font-size:12.5px">
     <thead><tr style="background:var(--buk);color:#fff">
-      <th style="padding:8px 14px;text-align:left;position:sticky;top:0;z-index:5;min-width:200px">Colaborador</th>`;
+      <th class="sortable" style="padding:8px 14px;text-align:left;position:sticky;top:0;z-index:5;min-width:200px">Colaborador</th>`;
 
   if (hasDetail) {
     // Show day-by-day columns
@@ -2367,8 +2453,8 @@ function renderVacMensual() {
     });
   }
 
-  html += `<th style="padding:8px 10px;text-align:center;position:sticky;top:0;z-index:5;background:var(--buk2);white-space:nowrap">Días tomados</th>
-      <th style="padding:8px 10px;text-align:center;position:sticky;top:0;z-index:5;white-space:nowrap">Semanas</th>
+  html += `<th class="sortable" style="padding:8px 10px;text-align:center;position:sticky;top:0;z-index:5;background:var(--buk2);white-space:nowrap">Días tomados</th>
+      <th class="sortable" style="padding:8px 10px;text-align:center;position:sticky;top:0;z-index:5;white-space:nowrap">Semanas</th>
     </tr></thead><tbody>`;
 
   if (!conVac.length) {
@@ -2410,7 +2496,7 @@ function renderVacMensual() {
   if (conVac.length) {
     const totalDias = conVac.reduce((s,p)=>s+p.dias,0);
     const span = hasDetail ? daysInMonth + 2 : 2;
-    html += `<tr style="background:var(--sf2);border-top:1px solid var(--bd2)">
+    html += `<tr style="background:var(--sf2);border-top:1px solid var(--bd2)" data-nosort="1">
       <td style="padding:8px 14px;font-weight:700;color:var(--mu)">TOTAL MES</td>`;
     if (hasDetail) html += `<td colspan="${daysInMonth}"></td>`;
     html += `<td style="padding:8px 10px;text-align:center;font-weight:700;font-family:var(--mono);color:var(--buk)">${totalDias} días</td>
@@ -2420,6 +2506,7 @@ function renderVacMensual() {
 
   html += '</tbody></table>';
   wrap.innerHTML = html;
+  applySortable('tbl-vac-mensual');
 }
 
 // ── SYNC VACACIONES FROM SHEETS ─────────────────────────────
@@ -2607,6 +2694,70 @@ function exportVacCSV() {
   toast('✓ CSV exportado','ok');
 }
 
+// ════════════════════════════════════════════════════════════
+//  UNIVERSAL SORT ENGINE
+// ════════════════════════════════════════════════════════════
+const _sortState = {}; // { tableId: { col: N, dir: 1|-1 } }
+
+function makeSortable(tableId) {
+  const table = document.getElementById(tableId);
+  if (!table) return;
+  const ths = table.querySelectorAll('thead th.sortable');
+  ths.forEach((th, i) => {
+    th.addEventListener('click', () => sortTable(tableId, i));
+  });
+}
+
+function sortTable(tableId, colIdx) {
+  const table = document.getElementById(tableId);
+  if (!table) return;
+
+  // Toggle direction
+  const prev = _sortState[tableId];
+  const dir = (prev && prev.col === colIdx && prev.dir === 1) ? -1 : 1;
+  _sortState[tableId] = { col: colIdx, dir };
+
+  // Update header indicators
+  table.querySelectorAll('thead th.sortable').forEach((th, i) => {
+    th.classList.remove('asc','desc');
+    if (i === colIdx) th.classList.add(dir === 1 ? 'asc' : 'desc');
+  });
+
+  // Collect sortable th indexes — skip non-sortable leading cols
+  const allThs = [...table.querySelectorAll('thead th')];
+  const sortableThs = allThs.filter(th => th.classList.contains('sortable'));
+  const globalIdx = allThs.indexOf(sortableThs[colIdx]);
+
+  // Sort tbody rows (skip last row if it has class tot-row or data-nosort)
+  const tbody = table.querySelector('tbody');
+  if (!tbody) return;
+  const rows = [...tbody.querySelectorAll('tr:not(.tr-sep):not([data-nosort])')];
+  const totRows = rows.filter(r => r.classList.contains('tot-row') || r.dataset.nosort);
+  const sortRows = rows.filter(r => !r.classList.contains('tot-row') && !r.dataset.nosort);
+
+  sortRows.sort((a, b) => {
+    const aCell = a.querySelectorAll('td')[globalIdx];
+    const bCell = b.querySelectorAll('td')[globalIdx];
+    if (!aCell || !bCell) return 0;
+    const aVal = (aCell.dataset.sort || aCell.textContent || '').trim();
+    const bVal = (bCell.dataset.sort || bCell.textContent || '').trim();
+    // Numeric sort if both look like numbers
+    const aNum = parseFloat(aVal.replace(/[^0-9.-]/g,''));
+    const bNum = parseFloat(bVal.replace(/[^0-9.-]/g,''));
+    if (!isNaN(aNum) && !isNaN(bNum)) return dir * (aNum - bNum);
+    return dir * aVal.localeCompare(bVal, 'es', {sensitivity:'base'});
+  });
+
+  // Re-append sorted rows, then totals at bottom
+  sortRows.forEach(r => tbody.appendChild(r));
+  totRows.forEach(r => tbody.appendChild(r));
+}
+
+// Apply sort to dynamically rendered table (called after innerHTML is set)
+function applySortable(tableId) {
+  setTimeout(() => makeSortable(tableId), 0);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const pre = document.getElementById('apps-script-code');
   if (pre) pre.textContent = APPS_SCRIPT;
@@ -2619,6 +2770,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('sheets-status-label').textContent = 'Sheets: conectado';
   }
   document.getElementById('am-mes')?.addEventListener('change', renderAbrirMesPersonal);
+  // Wire sort on static tables
+  makeSortable('personal-table');
   // Init vac mensual selectors to current month
   const _now = new Date();
   const _mesEl = document.getElementById('vac-mes-num');
