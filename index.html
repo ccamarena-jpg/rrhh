@@ -2376,12 +2376,13 @@ function renderVacResumen() {
 
   YEARS.forEach(y => {
     const aloc = getAlocAnual(y);
-    html += `<th style="padding:8px 6px;text-align:center;position:sticky;top:0;z-index:10;min-width:48px;font-size:11px">
-      <div contenteditable="true" 
-           style="cursor:pointer;border-bottom:1.5px dashed rgba(255,255,255,.5);padding:1px 2px;min-width:24px;text-align:center"
-           onblur="saveAlocAnual(${y},this.textContent.trim())"
-           title="Click para editar días anuales">${aloc}</div>
-      <div style="font-size:10px;opacity:.7;margin-top:2px">${y}</div>
+    html += `<th style="padding:4px 6px;text-align:center;position:sticky;top:0;z-index:10;min-width:56px;font-size:11px">
+      <input type="number" min="0" max="365" value="${aloc}"
+             title="Días anuales ${y} — editable"
+             onchange="saveAlocAnual(${y},this.value)"
+             onclick="this.select()"
+             style="width:38px;text-align:center;background:rgba(255,255,255,.18);border:none;border-bottom:1.5px dashed rgba(255,255,255,.6);color:#fff;font-family:var(--font);font-size:13px;font-weight:700;padding:2px 3px;border-radius:3px 3px 0 0;cursor:text;outline:none">
+      <div style="font-size:10px;opacity:.7;margin-top:3px">${y}</div>
     </th>`;
   });
 
