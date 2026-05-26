@@ -1,0 +1,15 @@
+# Windows
+Thumbs.db
+desktop.ini
+*.lnk
+
+# macOS
+.DS_Store
+
+# Editor
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
