@@ -984,7 +984,7 @@ function _navigateTo(id) {
   if (id === 'personal') renderPersonalTable();
   if (id === 'dashboard') updateDashboard();
   if (id === 'config') renderConfigPage();
-  if (id === 'vacaciones') renderVacResumen();
+  if (id === 'vacaciones') { renderVacResumen(); if (STATE.sheetsUrl) syncVacaciones(); }
 }
 
 function openLock() {
@@ -2404,7 +2404,7 @@ function renderVacResumen() {
       </td>`;
 
     YEARS.forEach(y => {
-      const dias = p.byYear[y]?.total;
+      const dias = VAC_EDITS[editKey]?.years?.[y] ?? p.byYear[y]?.total;
       const val = dias != null ? dias : '';
       const bg = dias > 0 ? 'background:#eef2ff' : '';
       html += `<td style="padding:8px 6px;text-align:center;font-family:var(--mono);font-size:12px;${bg}">
