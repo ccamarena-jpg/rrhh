@@ -1945,6 +1945,21 @@ function parseHora(val) {
   return '0:00:00';
 }
 // Display format: HH:MM (drops seconds, always zero-padded)
+function fmtFecha(fi) {
+  if (!fi || fi === '—') return '—';
+  // ISO con hora: "2019-10-28T05:00:00.000Z"
+  if (typeof fi === 'string' && fi.includes('T')) {
+    const d = new Date(fi);
+    if (!isNaN(d)) return `${String(d.getUTCDate()).padStart(2,'0')}/${String(d.getUTCMonth()+1).padStart(2,'0')}/${d.getUTCFullYear()}`;
+  }
+  // YYYY-MM-DD
+  if (/^\d{4}-\d{2}-\d{2}$/.test(fi)) {
+    const [y,m,d] = fi.split('-');
+    return `${d}/${m}/${y}`;
+  }
+  return fi;
+}
+
 function fmtHora(h) {
   if (!h || isZeroH(h)) return '00:00';
   const p = h.split(':');
@@ -2385,7 +2400,7 @@ function renderVacResumen() {
 
     let totalTomado = 0;
     YEARS.forEach(y => {
-      totalTomado += p.byYear[y]?.total || 0;
+      totalTomado += (VAC_EDITS[editKey]?.years?.[y] ?? p.byYear[y]?.total) || 0;
     });
 
     const saldo = acum - totalTomado;
@@ -2395,7 +2410,7 @@ function renderVacResumen() {
 
     html += `<tr style="border-bottom:.5px solid var(--bd)" onmouseover="this.style.background='var(--sf2)'" onmouseout="this.style.background=''">
       <td style="padding:8px 12px;font-weight:600;white-space:nowrap">${nombre}</td>
-      <td style="padding:8px 10px;color:var(--mu);font-family:var(--mono);font-size:11.5px">${p.fi}</td>
+      <td style="padding:8px 10px;color:var(--mu);font-family:var(--mono);font-size:11.5px">${fmtFecha(p.fi)}</td>
       <td style="padding:8px 10px;text-align:center;background:#f0f0fa">
         <span contenteditable="true"
               style="font-family:var(--mono);font-weight:700;font-size:13px;cursor:pointer;border-bottom:1.5px dashed var(--buk);padding:1px 3px"
@@ -2433,6 +2448,7 @@ function saveAlocAnual(year, val) {
   if (!VAC_EDITS._diasAnuales) VAC_EDITS._diasAnuales = {};
   VAC_EDITS._diasAnuales[year] = n;
   persistVacEdits();
+  postToSheets({ accion: 'saveConfigVac', tipo: 'diasAnual', clave: String(year), valor: String(n) });
 }
 
 function saveVacAcum(editKey, val) {
@@ -2441,6 +2457,7 @@ function saveVacAcum(editKey, val) {
   if (!VAC_EDITS[editKey]) VAC_EDITS[editKey] = {};
   VAC_EDITS[editKey].acum = n;
   persistVacEdits();
+  postToSheets({ accion: 'saveConfigVac', tipo: 'acum', clave: editKey, valor: String(n) });
   renderVacResumen();
 }
 
@@ -2672,6 +2689,23 @@ async function syncVacaciones() {
       );
       if (match && p.fecha_ingreso) VAC_DATA[match].fi = p.fecha_ingreso;
     });
+
+    // Cargar config (diasAnual por año y acumulados editados)
+    try {
+      const cfg = await fetchFromSheets('getConfigVac');
+      if (cfg.rows && cfg.rows.length) {
+        cfg.rows.forEach(r => {
+          if (r.tipo === 'diasAnual') {
+            if (!VAC_EDITS._diasAnuales) VAC_EDITS._diasAnuales = {};
+            VAC_EDITS._diasAnuales[parseInt(r.clave)] = parseInt(r.valor) || 0;
+          } else if (r.tipo === 'acum') {
+            if (!VAC_EDITS[r.clave]) VAC_EDITS[r.clave] = {};
+            VAC_EDITS[r.clave].acum = parseFloat(r.valor) || 0;
+          }
+        });
+        persistVacEdits();
+      }
+    } catch(e) { console.warn('Config vac no disponible:', e.message); }
 
     toast(`✓ ${data.count} registros de vacaciones sincronizados`, 'ok');
     renderVacResumen();

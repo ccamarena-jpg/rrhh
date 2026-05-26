@@ -13,12 +13,13 @@
 // ══════════════════════════════════════════════════════════════════
 
 // ── Configuración ─────────────────────────────────────────────────
-const SS_ID            = '1s7r7KjxTYO_PK2obc_yQ9pXI8l-mEl3vbmrrfIqCrio';
-const SHEET_PERSONAL   = 'Datos generales personal';
-const SHEET_ASISTENCIA = 'Detalle de asistencia';
-const SHEET_VACACIONES = 'Vacaciones';
-const SHEET_RESUMEN    = 'Resumen Mensual';
-const SHEET_TARDANZAS  = 'Tardanzas Descuentos';
+const SS_ID              = '1s7r7KjxTYO_PK2obc_yQ9pXI8l-mEl3vbmrrfIqCrio';
+const SHEET_PERSONAL     = 'Datos generales personal';
+const SHEET_ASISTENCIA   = 'Detalle de asistencia';
+const SHEET_VACACIONES   = 'Vacaciones';
+const SHEET_RESUMEN      = 'Resumen Mensual';
+const SHEET_TARDANZAS    = 'Tardanzas Descuentos';
+const SHEET_CONFIG_VAC   = 'Config Vacaciones';
 
 // ── Obtener el Spreadsheet (activo o por ID) ───────────────────────
 function getSS() {
@@ -55,6 +56,7 @@ function initSheets() {
   getOrCreate(ss, SHEET_VACACIONES, ['Colaborador','Año','Mes','Nombre_Mes','Dias','Dias_Detalle']);
   getOrCreate(ss, SHEET_RESUMEN,    ['Mes','DNI','Nombre','Horas_DM','Horas_Vacaciones','Objetivo_Horas']);
   getOrCreate(ss, SHEET_TARDANZAS,  ['Mes','DNI','Nombre','Ficha_Buk','Monto_Descuento']);
+  getOrCreate(ss, SHEET_CONFIG_VAC, ['Tipo','Clave','Valor']);
   Logger.log('initSheets OK');
   return 'OK — pestañas creadas';
 }
@@ -198,6 +200,23 @@ function handleGet(e) {
       monto:     parseFloat(r[4]) || 0,
     }));
     return jsonResp({ rows: result, count: result.length });
+  }
+
+  // ── GET CONFIG VACACIONES ───────────────────────────────────────
+  if (accion === 'getConfigVac') {
+    const sh = ss.getSheetByName(SHEET_CONFIG_VAC);
+    if (!sh) return jsonResp({ rows: [], count: 0 });
+    const data = sh.getDataRange().getValues();
+    if (data.length < 2) return jsonResp({ rows: [], count: 0 });
+    // Columnas: Tipo(0), Clave(1), Valor(2)
+    const rows = data.slice(1)
+      .filter(r => r[0] && r[1])
+      .map(r => ({
+        tipo:  r[0].toString().trim(),
+        clave: r[1].toString().trim(),
+        valor: r[2] !== undefined ? r[2].toString().trim() : '',
+      }));
+    return jsonResp({ rows, count: rows.length });
   }
 
   return jsonResp({ status: 'TT Audit API v4 activa', sheet: ss.getName() });
@@ -344,6 +363,26 @@ function handlePost(e) {
     } else {
       sh.appendRow([colaborador, parseInt(año), parseInt(mes),
                     mesNombres[parseInt(mes)] || '', dias || 0, detalle || '']);
+    }
+    return jsonResp({ ok: true, action: found > 0 ? 'updated' : 'created' });
+  }
+
+  // ── SAVE CONFIG VACACIONES ──────────────────────────────────────
+  if (accion === 'saveConfigVac') {
+    const sh = getOrCreate(ss, SHEET_CONFIG_VAC, ['Tipo','Clave','Valor']);
+    const { tipo, clave, valor } = body;
+    if (!tipo || !clave) return jsonResp({ error: 'tipo y clave son requeridos' });
+    const data  = sh.getDataRange().getValues();
+    let found   = -1;
+    for (let i = 1; i < data.length; i++) {
+      if (data[i][0].toString().trim() === tipo && data[i][1].toString().trim() === clave) {
+        found = i; break;
+      }
+    }
+    if (found > 0) {
+      sh.getRange(found + 1, 3).setValue(valor !== undefined ? valor : '');
+    } else {
+      sh.appendRow([tipo, clave, valor !== undefined ? valor : '']);
     }
     return jsonResp({ ok: true, action: found > 0 ? 'updated' : 'created' });
   }
