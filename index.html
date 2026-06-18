@@ -377,11 +377,11 @@ th.sortable.asc,th.sortable.desc{background:rgba(255,255,255,.1)!important}
     <!-- Asistencia Campo -->
     <div class="sb-section">
       <div class="sb-section-title">Personal Campo</div>
-      <div class="sb-item" data-page="asistencia" data-tipo="Campo" onclick="TIPO_FILTRO_ASIST='Campo';showPage('asistencia')">
+      <div class="sb-item" data-page="asistencia" data-tipo="Campo" onclick="showPageCampo('asistencia')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         Asistencia Campo
       </div>
-      <div class="sb-item" data-page="vacaciones" data-tipo="Campo" onclick="TIPO_FILTRO_VAC='Campo';showPage('vacaciones')">
+      <div class="sb-item" data-page="vacaciones" data-tipo="Campo" onclick="showPageCampo('vacaciones')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l4-8 4 4 4-6 4 10"/><path d="M3 21h18"/></svg>
         Vacaciones Campo
       </div>
@@ -993,8 +993,11 @@ function persist(key) {
 
 // ── NAVIGATION ─────────────────────────────────────────────
 const SISTEMA_PAGES = ['personal','config'];
-let _sistemaUnlocked = sessionStorage.getItem('tt_sis_ok') === '1';
-let _pendingPage = null;
+let _sistemaUnlocked = sessionStorage.getItem('tt_sis_ok')    === '1';
+let _campoUnlocked   = sessionStorage.getItem('tt_campo_ok')  === '1';
+let _pendingPage      = null;
+let _pendingTipoAsist = null;
+let _pendingTipoVac   = null;
 
 function showPage(id) {
   if (SISTEMA_PAGES.includes(id) && !_sistemaUnlocked) {
@@ -1003,6 +1006,19 @@ function showPage(id) {
     return;
   }
   _navigateTo(id);
+}
+
+function showPageCampo(page) {
+  if (!_campoUnlocked) {
+    _pendingPage = page;
+    _pendingTipoAsist = page === 'asistencia' ? 'Campo' : null;
+    _pendingTipoVac   = page === 'vacaciones'  ? 'Campo' : null;
+    openLock();
+    return;
+  }
+  if (page === 'asistencia') TIPO_FILTRO_ASIST = 'Campo';
+  if (page === 'vacaciones')  TIPO_FILTRO_VAC   = 'Campo';
+  _navigateTo(page);
 }
 
 function _navigateTo(id) {
@@ -1041,6 +1057,8 @@ function closeLock() {
   document.getElementById('lock-inp').value = '';
   document.getElementById('lock-err').textContent = '';
   _pendingPage = null;
+  _pendingTipoAsist = null;
+  _pendingTipoVac   = null;
 }
 
 function clearLockErr() {
@@ -1052,9 +1070,13 @@ function checkLock() {
   const val = document.getElementById('lock-inp').value;
   if (val === 'Bota') {
     _sistemaUnlocked = true;
-    sessionStorage.setItem('tt_sis_ok', '1');
+    _campoUnlocked   = true;
+    sessionStorage.setItem('tt_sis_ok',   '1');
+    sessionStorage.setItem('tt_campo_ok', '1');
     document.getElementById('sistema-lock').classList.remove('open');
     document.getElementById('lock-inp').value = '';
+    if (_pendingTipoAsist) { TIPO_FILTRO_ASIST = _pendingTipoAsist; _pendingTipoAsist = null; }
+    if (_pendingTipoVac)   { TIPO_FILTRO_VAC   = _pendingTipoVac;   _pendingTipoVac   = null; }
     const target = _pendingPage || 'config';
     _pendingPage = null;
     _navigateTo(target);
