@@ -2944,6 +2944,21 @@ async function syncVacaciones() {
       }
     });
 
+    // Propagar totales de Sheets a VAC_EDITS para que el resumen muestre datos frescos
+    Object.keys(VAC_DATA).forEach(nombre => {
+      const editKey = nombre.replace(/\s+/g,'_');
+      const byYear = VAC_DATA[nombre].byYear;
+      YEARS.forEach(y => {
+        const sheetTotal = byYear[y]?.total;
+        if (sheetTotal != null) {
+          if (!VAC_EDITS[editKey]) VAC_EDITS[editKey] = {};
+          if (!VAC_EDITS[editKey].years) VAC_EDITS[editKey].years = {};
+          VAC_EDITS[editKey].years[y] = sheetTotal;
+        }
+      });
+    });
+    persistVacEdits();
+
     // Also update fecha_ingreso from personal if available
     STATE.personal.forEach(p => {
       const match = Object.keys(VAC_DATA).find(n =>
