@@ -2045,7 +2045,7 @@ function minsToHora(t) {
 //  APPS SCRIPT CODE (for display in Config)
 // ════════════════════════════════════════════════════════════
 const APPS_SCRIPT = `// ══════════════════════════════════════════════════════════
-// TT Audit RRHH — Apps Script v3
+// TT Audit RRHH — Apps Script v4
 // 1. Ve a Extensiones → Apps Script
 // 2. Reemplaza TODO el código con este
 // 3. Implementar → Nueva implementación
@@ -2119,7 +2119,7 @@ function doGet(e) {
     if (!sh) return jsonResp({ error: 'Pestaña no encontrada: ' + SHEET_PERSONAL });
     const data = sh.getDataRange().getValues();
     const rows = data.slice(1).filter(r => r[0] && r[1]).map(r => [
-      r[0], r[1], r[2]||'', r[3]||'', r[4]||'', r[5]||''
+      r[0], r[1], r[2]||'', r[3]||'', r[4]||'', r[5]||'', r[6]||'Staff'
     ]);
     return jsonResp({ rows, count: rows.length });
   }
@@ -2191,18 +2191,18 @@ function doPost(e) {
 
   // ── SAVE PERSONAL ─────────────────────────────────────────
   if (accion === 'savePersonal') {
-    const sh = getOrCreate(ss, SHEET_PERSONAL, ['DNI','Nombre','Ficha_Buk','Cargo','Area','Fecha_Ingreso']);
-    const { dni, nombre, ficha_buk, cargo, area, fecha_ingreso } = body;
+    const sh = getOrCreate(ss, SHEET_PERSONAL, ['DNI','Nombre','Ficha_Buk','Cargo','Area','Fecha_Ingreso','Tipo']);
+    const { dni, nombre, ficha_buk, cargo, area, fecha_ingreso, tipo } = body;
     if (!dni || !nombre) return jsonResp({ error: 'DNI y Nombre requeridos' });
     const data = sh.getDataRange().getValues();
     let found = false;
     for (let i = 1; i < data.length; i++) {
       if (data[i][0].toString().trim() === dni.toString().trim()) {
-        sh.getRange(i+1, 1, 1, 6).setValues([[dni, nombre, ficha_buk||'', cargo||'', area||'', fecha_ingreso||'']]);
+        sh.getRange(i+1, 1, 1, 7).setValues([[dni, nombre, ficha_buk||'', cargo||'', area||'', fecha_ingreso||'', tipo||'Staff']]);
         found = true; break;
       }
     }
-    if (!found) sh.appendRow([dni, nombre, ficha_buk||'', cargo||'', area||'', fecha_ingreso||'']);
+    if (!found) sh.appendRow([dni, nombre, ficha_buk||'', cargo||'', area||'', fecha_ingreso||'', tipo||'Staff']);
     return jsonResp({ ok: true, action: found ? 'updated' : 'created' });
   }
 
