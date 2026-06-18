@@ -1658,6 +1658,26 @@ function updateResumenCell(inp, mesKey) {
   if (!STATE.resumen[mesKey][inp.dataset.dni]) STATE.resumen[mesKey][inp.dataset.dni]={};
   STATE.resumen[mesKey][inp.dataset.dni][inp.dataset.field] = parseFloat(inp.value)||0;
   persist('resumen');
+
+  // Actualizar total y estado en el DOM sin re-renderizar toda la tabla
+  const row = inp.closest('tr');
+  if (!row) return;
+  const cells = row.querySelectorAll('td');
+  const totalMins = parseInt(cells[2]?.dataset.sort) || 0;
+  const hTrab = totalMins / 60;
+  const saved = STATE.resumen[mesKey][inp.dataset.dni] || {};
+  const dm  = saved.dm  || 0;
+  const vac = saved.vac || 0;
+  const total = hTrab + dm + vac;
+  const objetivo = STATE.mesConfig[mesKey]?.[inp.dataset.dni] || 0;
+  if (cells[5]) cells[5].textContent = total.toFixed(1);
+  let estado = 'Sin objetivo', estClass = '';
+  if (objetivo > 0) {
+    if (total >= objetivo)          { estado = 'Completo';      estClass = 'sp-ok'; }
+    else if (total >= objetivo*0.9) { estado = 'Casi completo'; estClass = 'sp-warn'; }
+    else                            { estado = 'Incompleto';    estClass = 'sp-danger'; }
+  }
+  if (cells[7]) cells[7].innerHTML = `<span class="status-pill ${estClass}">${estado}</span>`;
 }
 
 async function saveResumen() {
