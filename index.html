@@ -2196,7 +2196,7 @@ function doGet(e) {
         colaborador: (r[0]||'').toString().trim(),
         año:         parseInt(r[1]) || 0,
         mes:         parseInt(r[2]) || 0,
-        dias:        parseInt(r[3]) || 0,
+        dias:        parseInt(r[4]) || 0,
         detalle:     (r[5]||'').toString().trim(),
       }))
       .filter(r => r.colaborador && r.año);
@@ -2590,7 +2590,12 @@ function renderVacDetalle() {
   const año = parseInt(document.getElementById('vac-det-año')?.value || 2026);
   if (!wrap) return;
 
-  const names = Object.keys(VAC_DATA);
+  const tipoNombresDetalle = new Set(
+    STATE.personal.filter(p => (p.tipo||'Staff') === TIPO_FILTRO_VAC).map(p => p.nombre)
+  );
+  const allDetNames = Object.keys(VAC_DATA);
+  const hasMatchDetalle = tipoNombresDetalle.size > 0 && allDetNames.some(n => tipoNombresDetalle.has(n));
+  const names = hasMatchDetalle ? allDetNames.filter(n => tipoNombresDetalle.has(n)) : allDetNames;
   const allMonths = [];
   names.forEach(n => {
     const byYear = VAC_DATA[n].byYear[año];
@@ -2624,7 +2629,7 @@ function renderVacDetalle() {
 
     html += `<tr style="border-bottom:.5px solid var(--bd)" onmouseover="this.style.background='var(--sf2)'" onmouseout="this.style.background=''">
       <td style="padding:8px 14px;font-weight:600">${nombre}</td>
-      <td style="padding:8px 10px;color:var(--mu);font-size:12px;font-family:var(--mono)">${p.fi}</td>`;
+      <td style="padding:8px 10px;color:var(--mu);font-size:12px;font-family:var(--mono)">${fmtFecha(p.fi)}</td>`;
 
     if (allMonths.length > 0) {
       allMonths.forEach(m => {
@@ -2651,7 +2656,12 @@ function renderVacMensual() {
   const mes  = parseInt(document.getElementById('vac-mes-num')?.value || 1);
   const año  = parseInt(document.getElementById('vac-mes-año')?.value || 2026);
 
-  const names = Object.keys(VAC_DATA);
+  const tipoNombresMens = new Set(
+    STATE.personal.filter(p => (p.tipo||'Staff') === TIPO_FILTRO_VAC).map(p => p.nombre)
+  );
+  const allMensNames = Object.keys(VAC_DATA);
+  const hasMatchMens = tipoNombresMens.size > 0 && allMensNames.some(n => tipoNombresMens.has(n));
+  const names = hasMatchMens ? allMensNames.filter(n => tipoNombresMens.has(n)) : allMensNames;
   const conVac = [];
 
   names.forEach(nombre => {
