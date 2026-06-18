@@ -1566,7 +1566,11 @@ function renderResumen() {
   const empty = document.getElementById('resumen-empty');
   if (!mesKey) { wrap.style.display='none'; empty.style.display='flex'; return; }
 
-  const rows = STATE.asistencia.filter(r => r.mes_key === mesKey);
+  let rows = STATE.asistencia.filter(r => r.mes_key === mesKey);
+  const tipoPersonasRes = new Set(
+    STATE.personal.filter(p => (p.tipo||'Staff') === TIPO_FILTRO_ASIST).map(p => p.dni)
+  );
+  if (tipoPersonasRes.size > 0) rows = rows.filter(r => tipoPersonasRes.has(r.dni));
   if (!rows.length) { wrap.style.display='none'; empty.style.display='flex'; return; }
   wrap.style.display=''; empty.style.display='none';
 
@@ -1668,7 +1672,11 @@ function renderTardanzas() {
   const empty = document.getElementById('tardanzas-empty');
   if (!mesKey) { wrap.style.display='none'; empty.style.display='flex'; return; }
 
-  const rows = STATE.asistencia.filter(r => r.mes_key === mesKey);
+  let rows = STATE.asistencia.filter(r => r.mes_key === mesKey);
+  const tipoPersonasTard = new Set(
+    STATE.personal.filter(p => (p.tipo||'Staff') === TIPO_FILTRO_ASIST).map(p => p.dni)
+  );
+  if (tipoPersonasTard.size > 0) rows = rows.filter(r => tipoPersonasTard.has(r.dni));
   if (!rows.length) { wrap.style.display='none'; empty.style.display='flex'; return; }
   wrap.style.display=''; empty.style.display='none';
 
