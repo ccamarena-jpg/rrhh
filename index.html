@@ -1835,7 +1835,7 @@ function renderPersonalTable(filter='') {
     <td class="mono">${p.ficha_buk||'—'}</td>
     <td>${p.cargo||'—'}</td>
     <td>${p.area?`<span class="tag-area">${p.area}</span>`:'—'}</td>
-    <td style="color:var(--mu);font-size:12px">${p.fecha_ingreso||'—'}</td>
+    <td style="color:var(--mu);font-size:12px">${fmtFecha(p.fecha_ingreso)||'—'}</td>
     <td style="text-align:center">${tipoBadge}</td>
     <td style="text-align:center"><span style="font-size:11px;color:var(--hi)">Solo lectura</span></td>
   </tr>`;
@@ -2007,16 +2007,14 @@ function parseHora(val) {
 // Display format: HH:MM (drops seconds, always zero-padded)
 function fmtFecha(fi) {
   if (!fi || fi === '—') return '—';
-  // ISO con hora: "2019-10-28T05:00:00.000Z"
-  if (typeof fi === 'string' && fi.includes('T')) {
-    const d = new Date(fi);
-    if (!isNaN(d)) return `${String(d.getUTCDate()).padStart(2,'0')}/${String(d.getUTCMonth()+1).padStart(2,'0')}/${d.getUTCFullYear()}`;
-  }
-  // YYYY-MM-DD
+  // YYYY-MM-DD (más frecuente, evaluar primero)
   if (/^\d{4}-\d{2}-\d{2}$/.test(fi)) {
     const [y,m,d] = fi.split('-');
     return `${d}/${m}/${y}`;
   }
+  // ISO con hora "2019-10-28T05:00:00.000Z" o cualquier string parseable por Date
+  const d = new Date(fi);
+  if (!isNaN(d)) return `${String(d.getUTCDate()).padStart(2,'0')}/${String(d.getUTCMonth()+1).padStart(2,'0')}/${d.getUTCFullYear()}`;
   return fi;
 }
 
