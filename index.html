@@ -475,7 +475,7 @@ th.sortable.asc,th.sortable.desc{background:rgba(255,255,255,.1)!important}
       <span><b>Formato:</b> INGRESO y SALIDA por día.</span>
       <div class="l-dot" style="background:var(--danger)"></div><span style="color:var(--danger);font-weight:600">Rojo</span><span>= sin marca (0:00:00)</span>
       <div class="l-dot" style="background:var(--warn)"></div><span style="color:var(--warn);font-weight:600">Naranja</span><span>= tardanza.</span>
-      <span>Hora de corte: <b style="color:var(--buk)">10:30</b></span>
+      <span>Hora de corte: <b id="lbl-cutoff" style="color:var(--buk)">10:30</b></span>
     </div>
     <div class="tbl-wrap" id="matrix-wrap" style="display:none"></div>
     <div class="empty" id="matrix-empty">
@@ -938,7 +938,11 @@ th.sortable.asc,th.sortable.desc{background:rgba(255,255,255,.1)!important}
 //  Sheet ID: 1s7r7KjxTYO_PK2obc_yQ9pXI8l-mEl3vbmrrfIqCrio
 // ════════════════════════════════════════════════════════════
 
-const CUTOFF_MIN = 10 * 60 + 30; // 10:30
+function getCutoffMin(mesKey) {
+  // Desde mayo 2026 el ingreso es 10:00; antes era 10:30
+  return (mesKey && mesKey >= '2026-05') ? 10 * 60 : 10 * 60 + 30;
+}
+const CUTOFF_MIN = 10 * 60 + 30; // legado — usar getCutoffMin(mesKey) donde se tenga el mes
 const SHEET_ID = '1s7r7KjxTYO_PK2obc_yQ9pXI8l-mEl3vbmrrfIqCrio';
 
 // ── STATE ──────────────────────────────────────────────────
@@ -1450,7 +1454,7 @@ function renderMatrix() {
       const sal = rec.salida  || null;
       const zeroIng = isZeroH(ing);
       const zeroSal = isZeroH(sal);
-      const late = !zeroIng && horaToMins(ing) > CUTOFF_MIN;
+      const late = !zeroIng && horaToMins(ing) > getCutoffMin(mesKey);
       if (!zeroIng && !zeroSal) {
         const mi=horaToMins(ing), ms=horaToMins(sal);
         if (ms>mi) totalMins += ms-mi;
@@ -1603,6 +1607,9 @@ async function saveResumen() {
 // ════════════════════════════════════════════════════════════
 function renderTardanzas() {
   const mesKey = document.getElementById('tard-filter-mes')?.value || '';
+  const cutoff = getCutoffMin(mesKey);
+  const lbl = document.getElementById('lbl-cutoff');
+  if (lbl) lbl.textContent = cutoff === 600 ? '10:00' : '10:30';
   const wrap  = document.getElementById('tardanzas-wrap');
   const empty = document.getElementById('tardanzas-empty');
   if (!mesKey) { wrap.style.display='none'; empty.style.display='flex'; return; }
@@ -1615,11 +1622,11 @@ function renderTardanzas() {
   const byPerson = {};
   rows.forEach(r => {
     if (!byPerson[r.dni]) byPerson[r.dni]={dni:r.dni,nombre:r.nombre,tardanzas:[]};
-    if (!isZeroH(r.ingreso) && horaToMins(r.ingreso)>CUTOFF_MIN) {
+    if (!isZeroH(r.ingreso) && horaToMins(r.ingreso)>getCutoffMin(mesKey)) {
       byPerson[r.dni].tardanzas.push({
         fecha: r.fecha,
         ingreso: r.ingreso,
-        minsTard: horaToMins(r.ingreso)-CUTOFF_MIN,
+        minsTard: horaToMins(r.ingreso)-getCutoffMin(mesKey),
       });
     }
   });
@@ -1723,8 +1730,8 @@ function exportCSVTardanzas() {
   const byPerson = {};
   rows.forEach(r => {
     if (!byPerson[r.dni]) byPerson[r.dni]={dni:r.dni,nombre:r.nombre,totalMins:0};
-    if (!isZeroH(r.ingreso)&&horaToMins(r.ingreso)>CUTOFF_MIN)
-      byPerson[r.dni].totalMins+=horaToMins(r.ingreso)-CUTOFF_MIN;
+    if (!isZeroH(r.ingreso)&&horaToMins(r.ingreso)>getCutoffMin(mesKey))
+      byPerson[r.dni].totalMins+=horaToMins(r.ingreso)-getCutoffMin(mesKey);
   });
   const descMes = STATE.descuentos[mesKey]||{};
   let csv = 'RUT;FICHA_BUK;NOMBRE;CONCEPTO;MONTO\n';
@@ -1848,7 +1855,7 @@ function updateDashboard() {
 
     // Con tardanza — count unique persons with at least one late day
     const conTard = new Set(
-      rows.filter(r => !isZeroH(r.ingreso) && horaToMins(r.ingreso) > CUTOFF_MIN).map(r => r.dni)
+      rows.filter(r => !isZeroH(r.ingreso) && horaToMins(r.ingreso) > getCutoffMin(mes)).map(r => r.dni)
     ).size;
     const tardEl = document.getElementById('dc-tard');
     if (tardEl) tardEl.textContent = conTard;
