@@ -51,7 +51,7 @@ function getOrCreate(ss, name, headers) {
 // ── Inicializar todas las pestañas (ejecutar una sola vez) ─────────
 function initSheets() {
   const ss = getSS();
-  getOrCreate(ss, SHEET_PERSONAL,   ['DNI','Nombre','Ficha_Buk','Cargo','Area','Fecha_Ingreso']);
+  getOrCreate(ss, SHEET_PERSONAL,   ['DNI','Nombre','Ficha_Buk','Cargo','Area','Fecha_Ingreso','Tipo']);
   getOrCreate(ss, SHEET_ASISTENCIA, ['Documento','Fecha','Ingreso','Salida','Proyecto','DIA']);
   getOrCreate(ss, SHEET_VACACIONES, ['Colaborador','Año','Mes','Nombre_Mes','Dias','Dias_Detalle']);
   getOrCreate(ss, SHEET_RESUMEN,    ['Mes','DNI','Nombre','Horas_DM','Horas_Vacaciones','Objetivo_Horas']);
@@ -91,12 +91,13 @@ function handleGet(e) {
     const rows = data.slice(1)
       .filter(r => r[0] && r[1])
       .map(r => [
-        r[0].toString().trim(),  // DNI
-        r[1].toString().trim(),  // Nombre
+        r[0].toString().trim(),              // DNI
+        r[1].toString().trim(),              // Nombre
         r[2] ? r[2].toString().trim() : '',  // Ficha_Buk
         r[3] ? r[3].toString().trim() : '',  // Cargo
         r[4] ? r[4].toString().trim() : '',  // Area
         r[5] ? r[5].toString().trim() : '',  // Fecha_Ingreso
+        r[6] ? r[6].toString().trim() : 'Staff', // Tipo
       ]);
     return jsonResp({ rows, count: rows.length });
   }
@@ -247,7 +248,7 @@ function handlePost(e) {
   // ── SAVE PERSONAL ───────────────────────────────────────────────
   if (accion === 'savePersonal') {
     const sh = getOrCreate(ss, SHEET_PERSONAL, ['DNI','Nombre','Ficha_Buk','Cargo','Area','Fecha_Ingreso']);
-    const { dni, nombre, ficha_buk, cargo, area, fecha_ingreso } = body;
+    const { dni, nombre, ficha_buk, cargo, area, fecha_ingreso, tipo } = body;
     if (!dni || !nombre) return jsonResp({ error: 'DNI y Nombre son requeridos' });
     const dniStr = dni.toString().trim();
     const data   = sh.getDataRange().getValues();
@@ -255,9 +256,9 @@ function handlePost(e) {
     for (let i = 1; i < data.length; i++) {
       if (data[i][0].toString().trim() === dniStr) { found = i; break; }
     }
-    const row = [dniStr, nombre.toString().trim(), ficha_buk||'', cargo||'', area||'', fecha_ingreso||''];
+    const row = [dniStr, nombre.toString().trim(), ficha_buk||'', cargo||'', area||'', fecha_ingreso||'', tipo||'Staff'];
     if (found > 0) {
-      sh.getRange(found + 1, 1, 1, 6).setValues([row]);
+      sh.getRange(found + 1, 1, 1, 7).setValues([row]);
     } else {
       sh.appendRow(row);
     }

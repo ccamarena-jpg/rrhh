@@ -361,29 +361,29 @@ th.sortable.asc,th.sortable.desc{background:rgba(255,255,255,.1)!important}
       </div>
     </div>
     <div class="sb-sep"></div>
-    <!-- Asistencia -->
+    <!-- Asistencia Staff -->
     <div class="sb-section">
-      <div class="sb-section-title">Asistencia</div>
-      <div class="sb-item" data-page="asistencia" onclick="showPage('asistencia')">
+      <div class="sb-section-title">Personal Staff</div>
+      <div class="sb-item" data-page="asistencia" onclick="TIPO_FILTRO_ASIST='Staff';showPage('asistencia')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        Ver asistencia
+        Asistencia Staff
+      </div>
+      <div class="sb-item" data-page="vacaciones" onclick="TIPO_FILTRO_VAC='Staff';showPage('vacaciones')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l4-8 4 4 4-6 4 10"/><path d="M3 21h18"/></svg>
+        Vacaciones Staff
       </div>
     </div>
     <div class="sb-sep"></div>
-    <!-- Vacaciones -->
+    <!-- Asistencia Campo -->
     <div class="sb-section">
-      <div class="sb-section-title">Vacaciones</div>
-      <div class="sb-item" data-page="vacaciones" onclick="showPage('vacaciones');setTimeout(()=>document.querySelectorAll('#page-vacaciones .tab')[0]?.click(),50)">
+      <div class="sb-section-title">Personal Campo</div>
+      <div class="sb-item" data-page="asistencia" onclick="TIPO_FILTRO_ASIST='Campo';showPage('asistencia')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Asistencia Campo
+      </div>
+      <div class="sb-item" data-page="vacaciones" onclick="TIPO_FILTRO_VAC='Campo';showPage('vacaciones')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l4-8 4 4 4-6 4 10"/><path d="M3 21h18"/></svg>
-        Resumen consolidado
-      </div>
-      <div class="sb-item" data-page="vacaciones" onclick="showPage('vacaciones');setTimeout(()=>document.querySelectorAll('#page-vacaciones .tab')[1]?.click(),50)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg>
-        Detalle por año
-      </div>
-      <div class="sb-item" data-page="vacaciones" onclick="showPage('vacaciones');setTimeout(()=>document.querySelectorAll('#page-vacaciones .tab')[2]?.click(),50)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-        Consolidado mensual
+        Vacaciones Campo
       </div>
     </div>
     <div class="sb-sep"></div>
@@ -437,7 +437,7 @@ th.sortable.asc,th.sortable.desc{background:rgba(255,255,255,.1)!important}
 ════════════════════════════════════ -->
 <div class="page" id="page-asistencia">
   <div class="ph">
-    <h1>Ver asistencia</h1>
+    <h1 id="asi-page-title">Ver asistencia</h1>
     <div class="ph-row">
       <button class="btn btn-primary" onclick="openAbrirMes()">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -560,9 +560,10 @@ th.sortable.asc,th.sortable.desc{background:rgba(255,255,255,.1)!important}
           <th class="sortable">Cargo</th>
           <th class="sortable">Área</th>
           <th class="sortable">Fecha ingreso</th>
+          <th class="sortable" style="text-align:center">Tipo</th>
           <th style="text-align:center">Acciones</th>
         </tr></thead>
-        <tbody id="personal-tbody"><tr><td colspan="7" style="text-align:center;padding:40px;color:var(--hi)">Sin colaboradores registrados. Agrega uno o carga un Excel.</td></tr></tbody>
+        <tbody id="personal-tbody"><tr><td colspan="8" style="text-align:center;padding:40px;color:var(--hi)">Sin colaboradores registrados. Agrega uno o carga un Excel.</td></tr></tbody>
       </table>
     </div>
   </div>
@@ -573,7 +574,7 @@ th.sortable.asc,th.sortable.desc{background:rgba(255,255,255,.1)!important}
 ════════════════════════════════════ -->
 <div class="page" id="page-vacaciones">
   <div class="ph">
-    <h1>Vacaciones</h1>
+    <h1 id="vac-page-title">Vacaciones</h1>
     <div class="ph-row">
       <p style="margin:0">Gestión y seguimiento de vacaciones del equipo</p>
       <div class="fgap"></div>
@@ -835,6 +836,7 @@ th.sortable.asc,th.sortable.desc{background:rgba(255,255,255,.1)!important}
       <div class="fg"><label>Cargo</label><input type="text" id="np-cargo" placeholder="Analista SR"></div>
       <div class="fg"><label>Área</label><input type="text" id="np-area" placeholder="Operaciones"></div>
       <div class="fg"><label>Fecha de ingreso</label><input type="date" id="np-ingreso"></div>
+      <div class="fg"><label>Tipo *</label><select id="np-tipo" class="fsel" style="width:100%;height:34px"><option value="Staff">Staff</option><option value="Campo">Campo</option></select></div>
     </div>
     <div class="mfooter">
       <button class="btn btn-outline" onclick="closeModal('modal-nuevo-personal')">Cancelar</button>
@@ -966,6 +968,10 @@ const CUTOFF_MIN = 10 * 60 + 30; // legado — usar getCutoffMin(mesKey) donde s
 const SHEET_ID = '1s7r7KjxTYO_PK2obc_yQ9pXI8l-mEl3vbmrrfIqCrio';
 
 // ── STATE ──────────────────────────────────────────────────
+// Tipo de vista activo: 'Staff' o 'Campo'
+let TIPO_FILTRO_ASIST = 'Staff';
+let TIPO_FILTRO_VAC   = 'Staff';
+
 const STATE = {
   sheetsUrl: localStorage.getItem('tt_sheets_url') || '',
   personal: JSON.parse(localStorage.getItem('tt_personal') || '[]'),
@@ -1246,6 +1252,7 @@ async function syncPersonalFromSheets() {
     cargo: (r[3]||'').toString().trim(),
     area: (r[4]||'').toString().trim(),
     fecha_ingreso: (r[5]||'').toString().trim(),
+    tipo: (r[6]||'Staff').toString().trim() || 'Staff',
   })).filter(p => p.dni && p.nombre);
   persist('personal');
 }
@@ -1426,8 +1433,20 @@ function renderMatrix() {
   const empty = document.getElementById('matrix-empty');
   if (!wrap) return;
 
+  // Actualizar título y label cutoff
+  const titleEl = document.getElementById('asi-page-title');
+  if (titleEl) titleEl.textContent = TIPO_FILTRO_ASIST === 'Campo' ? 'Asistencia Campo' : 'Asistencia Staff';
+  const lbl = document.getElementById('lbl-cutoff');
+  if (lbl) lbl.textContent = getCutoffMin(mesKey) === 600 ? '10:00' : '10:30';
+
   let rows = STATE.asistencia.filter(r => r.mes_key === mesKey);
   if (proyFilt) rows = rows.filter(r => r.proyecto === proyFilt);
+
+  // Filtrar por tipo (Staff / Campo)
+  const tipoPersonas = new Set(
+    STATE.personal.filter(p => (p.tipo || 'Staff') === TIPO_FILTRO_ASIST).map(p => p.dni)
+  );
+  rows = rows.filter(r => tipoPersonas.has(r.dni));
 
   if (!rows.length) {
     wrap.style.display = 'none'; empty.style.display = 'flex'; return;
@@ -1795,20 +1814,25 @@ function renderPersonalTable(filter='') {
     data=data.filter(p=>p.nombre.toLowerCase().includes(q)||p.dni.includes(q));
   }
   if (!data.length) {
-    tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--hi)">Sin colaboradores. Haz clic en "Sincronizar desde Sheets".</td></tr>';
+    tbody.innerHTML='<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--hi)">Sin colaboradores. Haz clic en "Sincronizar desde Sheets".</td></tr>';
     return;
   }
-  tbody.innerHTML=data.map(p=>`<tr>
+  tbody.innerHTML=data.map(p=>{
+    const tipo = p.tipo || 'Staff';
+    const tipoBadge = tipo === 'Campo'
+      ? `<span style="background:#dcfce7;color:#15803d;border:1px solid #86efac;border-radius:10px;padding:2px 8px;font-size:11px;font-weight:600">Campo</span>`
+      : `<span style="background:#dbeafe;color:#1d4ed8;border:1px solid #93c5fd;border-radius:10px;padding:2px 8px;font-size:11px;font-weight:600">Staff</span>`;
+    return `<tr>
     <td class="mono" style="color:var(--mu)">${p.dni}</td>
     <td style="font-weight:600">${p.nombre}</td>
     <td class="mono">${p.ficha_buk||'—'}</td>
     <td>${p.cargo||'—'}</td>
     <td>${p.area?`<span class="tag-area">${p.area}</span>`:'—'}</td>
     <td style="color:var(--mu);font-size:12px">${p.fecha_ingreso||'—'}</td>
-    <td style="text-align:center">
-      <span style="font-size:11px;color:var(--hi)">Solo lectura</span>
-    </td>
-  </tr>`).join('');
+    <td style="text-align:center">${tipoBadge}</td>
+    <td style="text-align:center"><span style="font-size:11px;color:var(--hi)">Solo lectura</span></td>
+  </tr>`;
+  }).join('');
   applySortable('personal-table');
 }
 
@@ -1818,6 +1842,7 @@ function openNuevoPersonal() {
   ['np-dni','np-ficha','np-nombre','np-cargo','np-area'].forEach(id => {
     const el = document.getElementById(id); if(el) el.value='';
   });
+  const tipoSel = document.getElementById('np-tipo'); if(tipoSel) tipoSel.value='Staff';
   const fi = document.getElementById('np-ingreso');
   if(fi) fi.value = '';
   openModal('modal-nuevo-personal');
@@ -1830,14 +1855,15 @@ async function guardarPersonal() {
   const cargo  = document.getElementById('np-cargo')?.value.trim();
   const area   = document.getElementById('np-area')?.value.trim();
   const fi     = document.getElementById('np-ingreso')?.value.trim();
+  const tipo   = document.getElementById('np-tipo')?.value || 'Staff';
   if (!dni || !nombre) { toast('DNI y Nombre son obligatorios','warn'); return; }
 
   // Check duplicate
   const exists = STATE.personal.find(p => p.dni === dni);
   if (exists) {
-    Object.assign(exists, {nombre, ficha_buk:ficha, cargo, area, fecha_ingreso:fi});
+    Object.assign(exists, {nombre, ficha_buk:ficha, cargo, area, fecha_ingreso:fi, tipo});
   } else {
-    STATE.personal.push({dni, nombre, ficha_buk:ficha, cargo, area, fecha_ingreso:fi});
+    STATE.personal.push({dni, nombre, ficha_buk:ficha, cargo, area, fecha_ingreso:fi, tipo});
   }
   persist('personal');
   renderPersonalTable();
@@ -1847,7 +1873,7 @@ async function guardarPersonal() {
 
   // Sync to Sheets in background
   if (STATE.sheetsUrl) {
-    const ok = await postToSheets({accion:'savePersonal',dni,nombre,ficha_buk:ficha,cargo,area,fecha_ingreso:fi});
+    const ok = await postToSheets({accion:'savePersonal',dni,nombre,ficha_buk:ficha,cargo,area,fecha_ingreso:fi,tipo});
     if (ok) { flashSync(); toast(`✓ ${nombre} sincronizado en Sheets`,'ok'); }
   }
 }
@@ -2391,7 +2417,16 @@ function renderVacResumen() {
   const wrap = document.getElementById('vac-resumen-wrap');
   if (!wrap) return;
 
-  const names = Object.keys(VAC_DATA);
+  const titleEl = document.getElementById('vac-page-title');
+  if (titleEl) titleEl.textContent = TIPO_FILTRO_VAC === 'Campo' ? 'Vacaciones Campo' : 'Vacaciones Staff';
+
+  // Filtrar colaboradores por tipo
+  const tipoNombres = new Set(
+    STATE.personal.filter(p => (p.tipo||'Staff') === TIPO_FILTRO_VAC).map(p => p.nombre)
+  );
+  const names = Object.keys(VAC_DATA).filter(n =>
+    tipoNombres.size === 0 || tipoNombres.has(n)
+  );
 
   let html = `<table id="tbl-vac-resumen" style="border-collapse:collapse;width:100%;font-size:12.5px">
     <thead>
@@ -2695,13 +2730,19 @@ function renderVacCalendario() {
 
   // Poblar select de personas (una sola vez)
   const sel = document.getElementById('vac-cal-persona');
-  const names = Object.keys(VAC_DATA).sort((a,b)=>a.localeCompare(b,'es'));
-  if (sel.options.length <= 1) {
-    names.forEach(n => {
-      const o = document.createElement('option');
-      o.value = n; o.textContent = n; sel.appendChild(o);
-    });
-  }
+  const tipoNombresSet = new Set(
+    STATE.personal.filter(p => (p.tipo||'Staff') === TIPO_FILTRO_VAC).map(p => p.nombre)
+  );
+  const names = Object.keys(VAC_DATA)
+    .filter(n => tipoNombresSet.size === 0 || tipoNombresSet.has(n))
+    .sort((a,b)=>a.localeCompare(b,'es'));
+  const prev = sel.value;
+  sel.innerHTML = '<option value="">Todos los colaboradores</option>';
+  names.forEach(n => {
+    const o = document.createElement('option');
+    o.value = n; o.textContent = n; sel.appendChild(o);
+  });
+  if (prev && names.includes(prev)) sel.value = prev;
 
   // Asignar color a cada persona
   const colorIdx = {};
