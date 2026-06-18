@@ -1015,11 +1015,19 @@ function _navigateTo(id) {
     if (dt && id === 'vacaciones'  && dt !== TIPO_FILTRO_VAC)   return;
     el.classList.add('active');
   });
-  if (id === 'asistencia') { syncMesSelects(); renderMatrix(); }
+  if (id === 'asistencia') {
+    syncMesSelects(); renderMatrix();
+    if (STATE.sheetsUrl) syncPersonalFromSheets().then(() => renderMatrix()).catch(() => {});
+  }
   if (id === 'personal') renderPersonalTable();
   if (id === 'dashboard') updateDashboard();
   if (id === 'config') renderConfigPage();
-  if (id === 'vacaciones') { renderVacResumen(); if (STATE.sheetsUrl) syncVacaciones(); }
+  if (id === 'vacaciones') {
+    renderVacResumen();
+    if (STATE.sheetsUrl) {
+      syncPersonalFromSheets().then(() => { renderVacResumen(); if (STATE.sheetsUrl) syncVacaciones(); }).catch(() => { if (STATE.sheetsUrl) syncVacaciones(); });
+    }
+  }
 }
 
 function openLock() {
