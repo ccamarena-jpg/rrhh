@@ -584,9 +584,29 @@ th.sortable.asc,th.sortable.desc{background:rgba(255,255,255,.1)!important}
     </div>
   </div>
   <div class="tabs">
+    <div class="tab" onclick="switchVacTab(this,'vac-calendario')">📅 Calendario</div>
     <div class="tab active" onclick="switchVacTab(this,'vac-resumen')">Resumen consolidado</div>
     <div class="tab" onclick="switchVacTab(this,'vac-detalle')">Detalle por año</div>
     <div class="tab" onclick="switchVacTab(this,'vac-mensual')">Consolidado mensual</div>
+  </div>
+
+  <!-- TAB 0: CALENDARIO ANUAL -->
+  <div class="tp" id="vac-calendario">
+    <div class="ctrl" style="flex-wrap:wrap;gap:8px;align-items:center">
+      <select class="fsel" id="vac-cal-año" onchange="renderVacCalendario()">
+        <option value="2026">2026</option>
+        <option value="2025">2025</option>
+        <option value="2024">2024</option>
+        <option value="2023">2023</option>
+        <option value="2022">2022</option>
+      </select>
+      <select class="fsel" id="vac-cal-persona" onchange="renderVacCalendario()" style="min-width:210px">
+        <option value="">Todos los colaboradores</option>
+      </select>
+      <div class="fgap"></div>
+      <div id="vac-cal-legend" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:11.5px"></div>
+    </div>
+    <div id="vac-cal-wrap" style="padding-bottom:24px"></div>
   </div>
 
   <!-- TAB 1: RESUMEN CONSOLIDADO (Resumen VF) -->
@@ -2353,6 +2373,7 @@ function switchVacTab(el, tabId) {
   page.querySelectorAll('.tp').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
   document.getElementById(tabId).classList.add('active');
+  if(tabId==='vac-calendario') renderVacCalendario();
   if(tabId==='vac-resumen') renderVacResumen();
   if(tabId==='vac-detalle') renderVacDetalle();
   if(tabId==='vac-mensual') renderVacMensual();
@@ -2652,6 +2673,145 @@ function renderVacMensual() {
 }
 
 // ── SYNC VACACIONES FROM SHEETS ─────────────────────────────
+// ════════════════════════════════════════════════════════════
+//  CALENDARIO ANUAL DE VACACIONES
+// ════════════════════════════════════════════════════════════
+const VAC_PAL = [
+  {bg:'#bfdbfe',br:'#3b82f6'}, {bg:'#bbf7d0',br:'#16a34a'},
+  {bg:'#fde68a',br:'#d97706'}, {bg:'#fecaca',br:'#dc2626'},
+  {bg:'#e9d5ff',br:'#7c3aed'}, {bg:'#fbcfe8',br:'#db2777'},
+  {bg:'#a7f3d0',br:'#059669'}, {bg:'#fda4af',br:'#e11d48'},
+  {bg:'#fef08a',br:'#ca8a04'}, {bg:'#c7d2fe',br:'#4338ca'},
+  {bg:'#fed7aa',br:'#ea580c'}, {bg:'#d9f99d',br:'#65a30d'},
+];
+
+function renderVacCalendario() {
+  const wrap = document.getElementById('vac-cal-wrap');
+  const legend = document.getElementById('vac-cal-legend');
+  if (!wrap) return;
+
+  const año = parseInt(document.getElementById('vac-cal-año')?.value || 2026);
+  const personaFilt = document.getElementById('vac-cal-persona')?.value || '';
+
+  // Poblar select de personas (una sola vez)
+  const sel = document.getElementById('vac-cal-persona');
+  const names = Object.keys(VAC_DATA).sort((a,b)=>a.localeCompare(b,'es'));
+  if (sel.options.length <= 1) {
+    names.forEach(n => {
+      const o = document.createElement('option');
+      o.value = n; o.textContent = n; sel.appendChild(o);
+    });
+  }
+
+  // Asignar color a cada persona
+  const colorIdx = {};
+  names.forEach((n,i) => { colorIdx[n] = i % VAC_PAL.length; });
+
+  // Construir mapa de días: 'YYYY-MM-DD' → [{nombre,ci}]
+  const dayMap = {};
+  names.forEach(nombre => {
+    if (personaFilt && nombre !== personaFilt) return;
+    const byYear = VAC_DATA[nombre]?.byYear?.[año];
+    if (!byYear) return;
+    const ci = colorIdx[nombre];
+    Object.entries(byYear.mes || {}).forEach(([mStr, count]) => {
+      if (!count) return;
+      const m = parseInt(mStr);
+      const dias = byYear.diasDetalle?.[m];
+      if (dias && dias.length) {
+        dias.forEach(d => {
+          const key = `${año}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+          if (!dayMap[key]) dayMap[key] = [];
+          dayMap[key].push({nombre, ci});
+        });
+      } else {
+        // Sin detalle de días: marca los primeros N días hábiles del mes
+        let added = 0, day = 1;
+        const dmax = new Date(año, m, 0).getDate();
+        while (added < count && day <= dmax) {
+          const dow = new Date(año, m-1, day).getDay();
+          if (dow !== 0 && dow !== 6) {
+            const key = `${año}-${String(m).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+            if (!dayMap[key]) dayMap[key] = [];
+            dayMap[key].push({nombre, ci});
+            added++;
+          }
+          day++;
+        }
+      }
+    });
+  });
+
+  // Leyenda — solo personas con vacaciones en el año
+  const conVac = names.filter(n => {
+    if (personaFilt && n !== personaFilt) return false;
+    const by = VAC_DATA[n]?.byYear?.[año];
+    return by && Object.values(by.mes||{}).some(d=>d>0);
+  });
+  legend.innerHTML = conVac.map(n => {
+    const p = VAC_PAL[colorIdx[n]];
+    const short = n.split(' ').slice(0,2).join(' ');
+    return `<span style="display:inline-flex;align-items:center;gap:4px;white-space:nowrap">
+      <span style="width:11px;height:11px;border-radius:2px;background:${p.bg};border:1.5px solid ${p.br};display:inline-block;flex-shrink:0"></span>
+      <span style="font-size:11.5px;color:var(--mu)">${short}</span>
+    </span>`;
+  }).join('');
+
+  // Render 12 meses en grid 3 columnas
+  const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
+                 'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const DIAS_HDR = ['D','L','M','M','J','V','S'];
+  const today = new Date();
+  const todayKey = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+
+  let html = '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">';
+
+  for (let mes = 1; mes <= 12; mes++) {
+    const dmax   = new Date(año, mes, 0).getDate();
+    const startDow = new Date(año, mes-1, 1).getDay();
+
+    html += `<div style="background:var(--sf);border-radius:10px;padding:14px 12px;box-shadow:var(--sh);border:.5px solid var(--bd)">
+      <div style="font-weight:700;font-size:13px;color:var(--tx);margin-bottom:10px">
+        ${MESES[mes-1]} <span style="color:var(--mu);font-weight:400;font-size:11.5px">${año}</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center">`;
+
+    // Headers días
+    DIAS_HDR.forEach((d,i) => {
+      const we = i===0||i===6;
+      html += `<div style="font-size:9.5px;font-weight:700;color:${we?'var(--hi)':'var(--mu)'};padding-bottom:5px">${d}</div>`;
+    });
+
+    // Celdas vacías antes del día 1
+    for (let i=0; i<startDow; i++) html += '<div></div>';
+
+    // Días del mes
+    for (let dia=1; dia<=dmax; dia++) {
+      const dow  = (startDow + dia - 1) % 7;
+      const we   = dow===0||dow===6;
+      const key  = `${año}-${String(mes).padStart(2,'0')}-${String(dia).padStart(2,'0')}`;
+      const vacs = dayMap[key] || [];
+      const isToday = key === todayKey;
+      const p0   = vacs.length ? VAC_PAL[vacs[0].ci] : null;
+
+      const bgStyle   = p0 ? `background:${p0.bg};border:1.5px solid ${p0.br}` : isToday ? 'background:var(--buk);color:#fff' : '';
+      const txtColor  = p0 ? 'color:var(--tx)' : we ? 'color:var(--hi)' : 'color:var(--tx)';
+      const dots      = vacs.slice(1).map(v=>`<span style="width:4px;height:4px;border-radius:50%;background:${VAC_PAL[v.ci].br};display:inline-block;flex-shrink:0"></span>`).join('');
+      const title     = vacs.map(v=>v.nombre.split(' ').slice(0,2).join(' ')).join(', ');
+
+      html += `<div title="${title}" style="border-radius:4px;padding:3px 1px;font-size:11px;line-height:1.3;${bgStyle};${txtColor};${vacs.length?'cursor:pointer':''}">
+        <div>${dia}</div>
+        ${dots ? `<div style="display:flex;justify-content:center;gap:1px;flex-wrap:nowrap">${dots}</div>` : ''}
+      </div>`;
+    }
+
+    html += '</div></div>';
+  }
+
+  html += '</div>';
+  wrap.innerHTML = html;
+}
+
 async function syncVacaciones() {
   if (!STATE.sheetsUrl) { toast('Configura la URL de Apps Script primero','warn'); return; }
   showLoading('Sincronizando vacaciones desde Sheets…');
