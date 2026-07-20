@@ -2598,6 +2598,9 @@ function saveVacYear(editKey, year, val) {
   if (!VAC_EDITS[editKey]) VAC_EDITS[editKey] = {};
   if (!VAC_EDITS[editKey].years) VAC_EDITS[editKey].years = {};
   VAC_EDITS[editKey].years[year] = n;
+  // Marcar como edición manual para que el sync NO la pise
+  if (!VAC_EDITS._manualYears) VAC_EDITS._manualYears = {};
+  VAC_EDITS._manualYears[editKey + '|' + year] = true;
   // Also update VAC_DATA runtime
   const nombre = Object.keys(VAC_DATA).find(k => k.replace(/\s+/g,'_') === editKey);
   if (nombre) {
@@ -2977,6 +2980,8 @@ async function syncVacaciones() {
       YEARS.forEach(y => {
         const sheetTotal = byYear[y]?.total;
         if (sheetTotal != null) {
+          // No pisar celdas editadas manualmente en el Resumen consolidado
+          if (VAC_EDITS._manualYears && VAC_EDITS._manualYears[editKey + '|' + y]) return;
           if (!VAC_EDITS[editKey]) VAC_EDITS[editKey] = {};
           if (!VAC_EDITS[editKey].years) VAC_EDITS[editKey].years = {};
           VAC_EDITS[editKey].years[y] = sheetTotal;
@@ -3012,6 +3017,8 @@ async function syncVacaciones() {
               if (!VAC_EDITS[ek]) VAC_EDITS[ek] = {};
               if (!VAC_EDITS[ek].years) VAC_EDITS[ek].years = {};
               VAC_EDITS[ek].years[parseInt(yr)] = parseInt(r.valor) || 0;
+              if (!VAC_EDITS._manualYears) VAC_EDITS._manualYears = {};
+              VAC_EDITS._manualYears[ek + '|' + parseInt(yr)] = true;
             }
           }
         });
