@@ -2817,7 +2817,9 @@ function renderVacCalendario() {
   );
   const allCalNames = Object.keys(VAC_DATA);
   const hasAnyMatchCal = tipoNombresCalNorm.size > 0 && allCalNames.some(n => tipoNombresCalNorm.has(normNombre(n)));
+  const vistosCal = new Set();
   const names = (hasAnyMatchCal ? allCalNames.filter(n => tipoNombresCalNorm.has(normNombre(n))) : allCalNames)
+    .filter(n => { const k = normNombre(n); if (vistosCal.has(k)) return false; vistosCal.add(k); return true; })
     .sort((a,b)=>a.localeCompare(b,'es'));
   const prev = sel.value;
   sel.innerHTML = '<option value="">Todos los colaboradores</option>';
@@ -3050,12 +3052,20 @@ async function saveVacacionToSheets(colaborador, año, mes, dias, detalle) {
 // ── MODAL VACACIONES ─────────────────────────────────────────
 function openModalVac() {
   // Populate colaborador selector from VAC_DATA keys + personal list
+  // Deduplicado por nombre normalizado (evita repetidos con/sin coma).
+  // Se prefiere la ortografía del historial (VAC_DATA) para no crear filas fantasma.
   const sel = document.getElementById('mv-colaborador');
-  const nombres = Object.keys(VAC_DATA).sort((a,b)=>a.localeCompare(b,'es'));
-  // Also add from personal list if not already in VAC_DATA
-  STATE.personal.forEach(p => {
-    if (!nombres.includes(p.nombre)) nombres.push(p.nombre);
+  const nombres = [];
+  const vistos = new Set();
+  Object.keys(VAC_DATA).forEach(n => {
+    const k = normNombre(n);
+    if (!vistos.has(k)) { vistos.add(k); nombres.push(n); }
   });
+  STATE.personal.forEach(p => {
+    const k = normNombre(p.nombre);
+    if (!vistos.has(k)) { vistos.add(k); nombres.push(p.nombre); }
+  });
+  nombres.sort((a,b)=>a.localeCompare(b,'es'));
   sel.innerHTML = '<option value="">— Seleccionar —</option>' +
     nombres.map(n=>`<option value="${n}">${n}</option>`).join('');
 
