@@ -2605,6 +2605,8 @@ function saveVacYear(editKey, year, val) {
     VAC_DATA[nombre].byYear[year].total = n;
   }
   persistVacEdits();
+  // Persistir en Sheets para que el edit sobreviva al sync (igual que acum)
+  postToSheets({ accion: 'saveConfigVac', tipo: 'year', clave: editKey + '|' + year, valor: String(n) });
   renderVacResumen();
 }
 
@@ -3003,6 +3005,14 @@ async function syncVacaciones() {
           } else if (r.tipo === 'acum') {
             if (!VAC_EDITS[r.clave]) VAC_EDITS[r.clave] = {};
             VAC_EDITS[r.clave].acum = parseFloat(r.valor) || 0;
+          } else if (r.tipo === 'year') {
+            // Edits manuales por año — deben ganar sobre el total del Sheet
+            const [ek, yr] = r.clave.split('|');
+            if (ek && yr) {
+              if (!VAC_EDITS[ek]) VAC_EDITS[ek] = {};
+              if (!VAC_EDITS[ek].years) VAC_EDITS[ek].years = {};
+              VAC_EDITS[ek].years[parseInt(yr)] = parseInt(r.valor) || 0;
+            }
           }
         });
         persistVacEdits();
