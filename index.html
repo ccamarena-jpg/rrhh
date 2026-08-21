@@ -741,13 +741,12 @@ th.sortable.asc,th.sortable.desc{background:rgba(255,255,255,.1)!important}
     <!-- Horarios Personal Campo -->
     <div class="card" style="max-width:560px;padding:22px 24px;box-shadow:var(--sh2);margin-top:14px">
       <div class="card-label" style="margin-bottom:4px">Horarios · Personal de campo</div>
-      <p style="font-size:12.5px;color:var(--mu);margin:0 0 14px">Define la hora de entrada, la duración de jornada (horas/día) y las horas objetivo al mes para cada tipo de personal de campo. Se usa en la vista Personal de campo.</p>
+      <p style="font-size:12.5px;color:var(--mu);margin:0 0 14px">Define la hora de entrada y la duración de jornada (horas/día) para cada tipo de personal de campo. Las horas objetivo <b>al mes</b> se ingresan en la vista Personal de campo (varían mes a mes).</p>
       <table class="pst" style="width:100%">
         <thead><tr>
           <th>Subtipo</th>
           <th style="text-align:center">Hora de entrada</th>
           <th style="text-align:center">Jornada (h/día)</th>
-          <th style="text-align:center">Horas / mes</th>
         </tr></thead>
         <tbody id="cfg-campo-tbody">
           <tr><td colspan="3" style="text-align:center;padding:20px;color:var(--hi)">Cargando…</td></tr>
@@ -776,7 +775,7 @@ th.sortable.asc,th.sortable.desc{background:rgba(255,255,255,.1)!important}
   </div>
   <div class="tp active">
     <div class="cards" id="campo-cards" style="margin-bottom:16px"></div>
-    <div class="ctrl" style="gap:8px">
+    <div class="ctrl" style="gap:8px;flex-wrap:wrap">
       <select class="fsel" id="campo-filtro-sub" onchange="renderCampoTable()" style="min-width:170px">
         <option value="">Todos los subtipos</option>
         <option value="Merch">Merch</option>
@@ -786,6 +785,21 @@ th.sortable.asc,th.sortable.desc{background:rgba(255,255,255,.1)!important}
         <option value="__none__">Sin subtipo</option>
       </select>
       <input class="finp" id="campo-buscar" placeholder="Buscar por nombre o DNI…" oninput="renderCampoTable()" style="width:220px">
+      <div class="fgap"></div>
+      <span style="font-size:12px;color:var(--mu)">Horas objetivo de:</span>
+      <select class="fsel" id="campo-mes" onchange="renderCampoTable()" style="min-width:120px">
+        <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option>
+        <option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option>
+        <option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option>
+        <option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
+      </select>
+      <select class="fsel" id="campo-año" onchange="onCampoAñoChange()" style="min-width:100px">
+        <option value="2026">2026</option><option value="2025">2025</option><option value="2027">2027</option>
+      </select>
+      <button class="btn btn-outline" onclick="openHorasCampoModal()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Ingresar horas del mes
+      </button>
     </div>
     <div class="tbl-wrap">
       <table class="pst" id="campo-table">
@@ -813,26 +827,73 @@ th.sortable.asc,th.sortable.desc{background:rgba(255,255,255,.1)!important}
   <div class="ph">
     <h1>Costo de personal</h1>
     <div class="ph-row">
-      <p style="margin:0">Costo mensual por categoría y quincena.</p>
+      <p style="margin:0">Dashboard de gasto de planilla por cuenta, proyecto y tipo de personal.</p>
       <div class="fgap"></div>
-      <select class="fsel" id="costo-año" onchange="syncCosto()" style="min-width:110px">
+      <select class="fsel" id="costo-año" onchange="syncPlanilla()" style="min-width:100px">
         <option value="2026">2026</option>
         <option value="2025">2025</option>
         <option value="2027">2027</option>
       </select>
-      <button class="btn btn-outline" onclick="syncCosto()">
+      <button class="btn btn-outline" onclick="syncPlanilla()">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
         Sincronizar
       </button>
-      <button class="btn btn-primary" onclick="openCostoEdit()">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        Ingresar montos
+      <button class="btn btn-outline" onclick="openPlanillaBulk()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Cargar consolidado
+      </button>
+      <button class="btn btn-primary" onclick="openPlanillaModal()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Agregar registro
       </button>
     </div>
   </div>
-  <div class="tp active">
-    <div class="cards" id="costo-cards" style="margin-bottom:16px"></div>
-    <div class="tbl-wrap" id="costo-wrap" style="overflow-x:auto"></div>
+  <div class="tabs">
+    <div class="tab active" onclick="switchCostoTab(this,'costo-dashtab')">📊 Dashboard</div>
+    <div class="tab" onclick="switchCostoTab(this,'costo-detalletab')">📋 Detalle</div>
+  </div>
+  <!-- Filtros comunes -->
+  <div class="ctrl" style="gap:8px;flex-wrap:wrap;margin-top:6px">
+    <select class="fsel" id="pl-f-mes" onchange="renderPlanilla()" style="min-width:120px">
+      <option value="">Todos los meses</option>
+      <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option>
+      <option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option>
+      <option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option>
+      <option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
+    </select>
+    <select class="fsel" id="pl-f-tipo" onchange="renderPlanilla()" style="min-width:140px">
+      <option value="">Todos los tipos</option>
+      <option value="Staff">Staff</option><option value="RxH">RxH</option>
+      <option value="Campo">Campo</option><option value="Practicantes">Practicantes</option>
+    </select>
+    <select class="fsel" id="pl-f-cuenta" data-all="Todas las cuentas" onchange="renderPlanilla()" style="min-width:160px"><option value="">Todas las cuentas</option></select>
+    <select class="fsel" id="pl-f-proy" data-all="Todos los proyectos" onchange="renderPlanilla()" style="min-width:180px"><option value="">Todos los proyectos</option></select>
+  </div>
+  <div class="tp active" id="costo-dashtab">
+    <div class="cards" id="costo-cards" style="margin:14px 0 4px"></div>
+    <div id="costo-dash"></div>
+  </div>
+  <div class="tp" id="costo-detalletab">
+    <div class="ctrl" style="gap:8px;margin-top:10px">
+      <input class="finp" id="pl-buscar" placeholder="Buscar por nombre, DNI, cuenta, proyecto…" oninput="renderPlanillaDetalle()" style="width:300px">
+    </div>
+    <div class="tbl-wrap">
+      <table class="pst" id="pl-table">
+        <thead><tr>
+          <th class="sortable" style="text-align:center">Periodo</th>
+          <th class="sortable">Tipo</th>
+          <th class="sortable">Apellidos y nombres</th>
+          <th class="sortable">DNI</th>
+          <th class="sortable">Cuenta</th>
+          <th class="sortable">Proyecto</th>
+          <th class="sortable">Supervisor</th>
+          <th class="sortable">Ciudad</th>
+          <th class="sortable" style="text-align:right">Total a pagar</th>
+          <th style="text-align:center">Acciones</th>
+        </tr></thead>
+        <tbody id="pl-tbody"><tr><td colspan="10" style="text-align:center;padding:40px;color:var(--hi)">Sin registros de planilla. Usa "Cargar consolidado".</td></tr></tbody>
+      </table>
+    </div>
   </div>
 </div>
 
@@ -1065,28 +1126,83 @@ th.sortable.asc,th.sortable.desc{background:rgba(255,255,255,.1)!important}
 </div>
 
 <!-- Ingresar montos de Costo de personal -->
-<div class="overlay" id="modal-costo">
+<!-- Alta / edición de registro de planilla -->
+<div class="overlay" id="modal-planilla">
   <div class="modal wide">
-    <span class="mclose" onclick="closeModal('modal-costo')">✕</span>
-    <h2>Ingresar montos de costo</h2>
-    <p class="msub">Ingresa el monto por categoría para la quincena seleccionada. Deja en blanco lo que no aplique.</p>
+    <span class="mclose" onclick="closeModal('modal-planilla')">✕</span>
+    <h2 id="pl-modal-title">Nuevo registro de planilla</h2>
+    <p class="msub">Registro de pago por persona y quincena.</p>
+    <input type="hidden" id="pl-id">
+    <div class="form-grid">
+      <div class="fg"><label>Razón social</label><input type="text" id="pl-razon" placeholder="TT AUDIT SAC"></div>
+      <div class="fg"><label>Tipo de personal *</label><select id="pl-tipo" class="fsel" style="width:100%;height:34px"><option value="Staff">Staff</option><option value="RxH">RxH</option><option value="Campo">Campo</option><option value="Practicantes">Practicantes</option></select></div>
+      <div class="fg"><label>Año *</label><input type="number" id="pl-anio" placeholder="2026"></div>
+      <div class="fg"><label>Mes *</label><select id="pl-mes" class="fsel" style="width:100%;height:34px"><option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option><option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option><option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option><option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option></select></div>
+      <div class="fg"><label>Quincena</label><select id="pl-quincena" class="fsel" style="width:100%;height:34px"><option value="Q1">Q1</option><option value="Q2">Q2</option></select></div>
+      <div class="fg"><label>Cuenta</label><input type="text" id="pl-cuenta"></div>
+      <div class="fg"><label>Proyecto</label><input type="text" id="pl-proyecto"></div>
+      <div class="fg"><label>Gerente</label><input type="text" id="pl-gerente"></div>
+      <div class="fg"><label>Supervisor</label><input type="text" id="pl-supervisor"></div>
+      <div class="fg full"><label>Apellidos y nombres *</label><input type="text" id="pl-nombres" placeholder="Apellidos, Nombre"></div>
+      <div class="fg"><label>DNI</label><input type="text" id="pl-dni"></div>
+      <div class="fg"><label>Ubigeo</label><input type="text" id="pl-ubigeo"></div>
+      <div class="fg"><label>Ciudad</label><input type="text" id="pl-ciudad"></div>
+      <div class="fg"><label>Banco</label><input type="text" id="pl-banco"></div>
+      <div class="fg"><label># Cuenta</label><input type="text" id="pl-numcuenta"></div>
+      <div class="fg"><label># CCI</label><input type="text" id="pl-numcci"></div>
+      <div class="fg"><label>Total a pagar (S/) *</label><input type="number" step="0.01" id="pl-total" placeholder="0.00"></div>
+    </div>
+    <div class="mfooter">
+      <button class="btn btn-outline" onclick="closeModal('modal-planilla')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarPlanilla()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Carga masiva de planilla (CSV) -->
+<div class="overlay" id="modal-planilla-bulk">
+  <div class="modal wide">
+    <span class="mclose" onclick="closeModal('modal-planilla-bulk')">✕</span>
+    <h2>Cargar consolidado de planilla</h2>
+    <p class="msub">Descarga la plantilla, llénala en Excel y <b>guárdala como CSV</b>, luego súbela aquí.</p>
+    <div style="margin-bottom:12px">
+      <button class="btn btn-outline" onclick="descargarPlantillaPlanilla()">⬇ Descargar plantilla CSV</button>
+    </div>
+    <div class="upzone" onclick="document.getElementById('file-planilla').click()" style="cursor:pointer">
+      <span class="upzone-ico">📄</span>
+      <h3>Haz clic para seleccionar tu CSV</h3>
+      <p>Columnas: Razón social · Tipo · Año · Mes · Quincena · Cuenta · Proyecto · Gerente · Supervisor · Nombres · DNI · Ubigeo · Ciudad · Banco · # Cuenta · # CCI · Total</p>
+    </div>
+    <input type="file" id="file-planilla" accept=".csv" style="display:none" onchange="handlePlanillaCSV(this)">
+    <div id="pl-bulk-info" style="margin-top:12px;font-size:13px;color:var(--tx)"></div>
+    <div class="mfooter">
+      <button class="btn btn-outline" onclick="closeModal('modal-planilla-bulk')">Cancelar</button>
+      <button class="btn btn-primary" id="pl-bulk-confirm" style="display:none" onclick="confirmarPlanillaBulk()">Confirmar carga</button>
+    </div>
+  </div>
+</div>
+
+<!-- Ingresar horas objetivo del mes (personal de campo) -->
+<div class="overlay" id="modal-horas-campo">
+  <div class="modal">
+    <span class="mclose" onclick="closeModal('modal-horas-campo')">✕</span>
+    <h2>Horas objetivo del mes</h2>
+    <p class="msub">Ingresa las horas objetivo al mes por subtipo, para el mes y año seleccionados.</p>
     <div class="ctrl" style="gap:8px;margin-bottom:14px">
-      <select class="fsel" id="costo-edit-mes" style="min-width:130px">
+      <select class="fsel" id="hc-mes" style="min-width:130px" onchange="loadHorasCampoValues()">
         <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option>
         <option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option>
         <option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option>
         <option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
       </select>
-      <select class="fsel" id="costo-edit-q" style="min-width:110px">
-        <option value="Q1">Quincena 1</option>
-        <option value="Q2">Quincena 2</option>
+      <select class="fsel" id="hc-año" style="min-width:100px" onchange="loadHorasCampoValues()">
+        <option value="2026">2026</option><option value="2025">2025</option><option value="2027">2027</option>
       </select>
-      <button class="btn btn-outline" onclick="loadCostoEditValues()">Cargar valores</button>
     </div>
-    <div class="form-grid" id="costo-edit-grid"></div>
+    <div class="form-grid" id="hc-grid"></div>
     <div class="mfooter">
-      <button class="btn btn-outline" onclick="closeModal('modal-costo')">Cancelar</button>
-      <button class="btn btn-primary" onclick="guardarCosto()">Guardar montos</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-horas-campo')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarHorasCampo()">Guardar horas</button>
     </div>
   </div>
 </div>
@@ -1228,20 +1344,21 @@ const STATE = {
   activeMes: localStorage.getItem('tt_active_mes') || '',
   lastSync: localStorage.getItem('tt_last_sync') || '',
   configCampo: JSON.parse(localStorage.getItem('tt_config_campo') || '[]'),
-  costo: JSON.parse(localStorage.getItem('tt_costo') || '[]'),
+  horasCampo: JSON.parse(localStorage.getItem('tt_horas_campo') || '[]'),
+  planilla: JSON.parse(localStorage.getItem('tt_planilla') || '[]'),
   inventario: JSON.parse(localStorage.getItem('tt_inventario') || '[]'),
   invHist: JSON.parse(localStorage.getItem('tt_inv_hist') || '[]'),
 };
 
-// Subtipos de personal de campo y categorías de costo
+// Subtipos de personal de campo y tipos de personal (planilla)
 const SUBTIPOS_CAMPO = ['Merch','Promotor','Operaciones','Practicantes'];
-const COSTO_CATS = ['TRAD','PRACTICANTES','TTA','RXH','LIQUIDACIONES'];
+const TIPOS_PLANILLA = ['Staff','RxH','Campo','Practicantes'];
 
 function persist(key) {
   const map = {
     personal:'tt_personal', asistencia:'tt_asistencia',
     mesConfig:'tt_mes_config', resumen:'tt_resumen', descuentos:'tt_descuentos',
-    configCampo:'tt_config_campo', costo:'tt_costo',
+    configCampo:'tt_config_campo', horasCampo:'tt_horas_campo', planilla:'tt_planilla',
     inventario:'tt_inventario', invHist:'tt_inv_hist',
   };
   if (map[key]) localStorage.setItem(map[key], JSON.stringify(STATE[key]));
@@ -1296,11 +1413,11 @@ function _navigateTo(id) {
   if (id === 'config') { renderConfigPage(); renderConfigCampo(); if (STATE.sheetsUrl) syncConfigCampo().then(renderConfigCampo).catch(()=>{}); }
   if (id === 'campo') {
     renderCampoTable();
-    if (STATE.sheetsUrl) Promise.all([syncPersonalFromSheets(), syncConfigCampo()]).then(renderCampoTable).catch(()=>{});
+    if (STATE.sheetsUrl) Promise.all([syncPersonalFromSheets(), syncConfigCampo(), syncHorasCampo(campoAñoSel())]).then(renderCampoTable).catch(()=>{});
   }
   if (id === 'costo') {
-    renderCosto();
-    if (STATE.sheetsUrl) syncCosto();
+    renderPlanilla();
+    if (STATE.sheetsUrl) syncPlanilla();
   }
   if (id === 'inventario') {
     renderInventario(); renderInvHistorial();
@@ -2404,14 +2521,13 @@ async function syncConfigCampo() {
     subtipo: (r.subtipo||'').toString().trim(),
     entrada: (r.entrada||'').toString().trim(),
     jornada: parseFloat(r.jornada) || 0,
-    horasMes: parseFloat(r.horasMes) || 0,
   }));
   persist('configCampo');
 }
 
 function getCampoCfg(subtipo) {
   return STATE.configCampo.find(c => (c.subtipo||'').toLowerCase() === (subtipo||'').toLowerCase())
-      || { subtipo, entrada:'', jornada:0, horasMes:0 };
+      || { subtipo, entrada:'', jornada:0 };
 }
 
 function renderConfigCampo() {
@@ -2423,7 +2539,6 @@ function renderConfigCampo() {
       <td style="font-weight:600">${sub}</td>
       <td style="text-align:center"><input type="time" class="finp" id="cfg-ent-${sub}" value="${c.entrada||''}" style="width:120px"></td>
       <td style="text-align:center"><input type="number" step="0.5" min="0" class="finp" id="cfg-jor-${sub}" value="${c.jornada||''}" placeholder="8" style="width:90px;text-align:center"></td>
-      <td style="text-align:center"><input type="number" step="1" min="0" class="finp" id="cfg-hm-${sub}" value="${c.horasMes||''}" placeholder="208" style="width:90px;text-align:center"></td>
     </tr>`;
   }).join('');
 }
@@ -2434,8 +2549,7 @@ async function saveConfigCampo() {
   for (const sub of SUBTIPOS_CAMPO) {
     const entrada = document.getElementById('cfg-ent-'+sub)?.value || '';
     const jornada = parseFloat(document.getElementById('cfg-jor-'+sub)?.value) || 0;
-    const horasMes = parseFloat(document.getElementById('cfg-hm-'+sub)?.value) || 0;
-    nuevos.push({ subtipo: sub, entrada, jornada, horasMes });
+    nuevos.push({ subtipo: sub, entrada, jornada });
   }
   STATE.configCampo = nuevos;
   persist('configCampo');
@@ -2443,7 +2557,7 @@ async function saveConfigCampo() {
   if (STATE.sheetsUrl) {
     let ok = true;
     for (const c of nuevos) {
-      const r = await postToSheets({ accion:'saveConfigCampo', subtipo:c.subtipo, entrada:c.entrada, jornada:c.jornada, horasMes:c.horasMes });
+      const r = await postToSheets({ accion:'saveConfigCampo', subtipo:c.subtipo, entrada:c.entrada, jornada:c.jornada });
       ok = ok && r;
     }
     if (ok) { flashSync(); if (msg) { msg.textContent = '✓ Horarios guardados'; setTimeout(()=>msg.textContent='',3000); } }
@@ -2459,7 +2573,7 @@ async function syncCampo() {
   if (!STATE.sheetsUrl) { toast('Conecta Google Sheets primero','warn'); return; }
   showLoading('Sincronizando personal de campo…');
   try {
-    await Promise.all([syncPersonalFromSheets(), syncConfigCampo()]);
+    await Promise.all([syncPersonalFromSheets(), syncConfigCampo(), syncHorasCampo(campoAñoSel())]);
     renderCampoTable();
     flashSync();
     toast('✓ Personal de campo actualizado','ok');
@@ -2468,11 +2582,21 @@ async function syncCampo() {
   } finally { hideLoading(); }
 }
 
+function campoMesSel() { return parseInt(document.getElementById('campo-mes')?.value || (new Date().getMonth()+1)); }
+function campoAñoSel() { return parseInt(document.getElementById('campo-año')?.value || 2026); }
+
+// Horas objetivo al mes por subtipo (mensual)
+function horasCampoLookup(anio, mes, subtipo) {
+  const row = STATE.horasCampo.find(h => h.anio==anio && h.mes==mes && (h.subtipo||'').toLowerCase()===(subtipo||'').toLowerCase());
+  return row ? row.horas : 0;
+}
+
 function renderCampoTable() {
   const tb = document.getElementById('campo-tbody');
   if (!tb) return;
   const fSub = document.getElementById('campo-filtro-sub')?.value || '';
   const q = (document.getElementById('campo-buscar')?.value || '').toLowerCase().trim();
+  const mes = campoMesSel(), año = campoAñoSel();
 
   let data = STATE.personal.filter(p => (p.tipo||'') === 'Campo');
   // KPIs
@@ -2482,7 +2606,10 @@ function renderCampoTable() {
     const sinSub = data.filter(p => !p.subtipo).length;
     cardsEl.innerHTML =
       `<div class="card"><div class="card-label">Total campo</div><div class="card-value">${data.length}</div><div class="card-sub">colaboradores</div></div>` +
-      SUBTIPOS_CAMPO.map(s => `<div class="card"><div class="card-label">${s}</div><div class="card-value">${cnt(s)}</div><div class="card-sub">${horarioSub(s)}</div></div>`).join('') +
+      SUBTIPOS_CAMPO.map(s => {
+        const hm = horasCampoLookup(año, mes, s);
+        return `<div class="card"><div class="card-label">${s}</div><div class="card-value">${cnt(s)}</div><div class="card-sub">${horarioSub(s)}${hm?` · ${hm}h/mes`:''}</div></div>`;
+      }).join('') +
       (sinSub?`<div class="card"><div class="card-label">Sin subtipo</div><div class="card-value warn">${sinSub}</div><div class="card-sub">asignar en Base personal</div></div>`:'');
   }
 
@@ -2500,6 +2627,7 @@ function renderCampoTable() {
       ? `<span style="background:#dcfce7;color:#15803d;border:1px solid #86efac;border-radius:10px;padding:2px 8px;font-size:11px;font-weight:600">${p.subtipo}</span>`
       : `<span style="background:#fee2e2;color:#b91c1c;border:1px solid #fecaca;border-radius:10px;padding:2px 8px;font-size:11px;font-weight:600">Sin subtipo</span>`;
     const salida = (c.entrada && c.jornada) ? addHoras(c.entrada, c.jornada) : '—';
+    const hm = p.subtipo ? horasCampoLookup(año, mes, p.subtipo) : 0;
     return `<tr>
       <td class="mono" style="color:var(--mu)">${p.dni}</td>
       <td style="font-weight:600">${escHtml(p.nombre)}</td>
@@ -2509,7 +2637,7 @@ function renderCampoTable() {
       <td style="text-align:center">${c.entrada||'—'}</td>
       <td style="text-align:center">${c.jornada?c.jornada+' h':'—'}</td>
       <td style="text-align:center">${salida}</td>
-      <td style="text-align:center">${c.horasMes?c.horasMes+' h':'—'}</td>
+      <td style="text-align:center">${hm?hm+' h':'—'}</td>
     </tr>`;
   }).join('');
   applySortable && applySortable('campo-table');
@@ -2517,135 +2645,386 @@ function renderCampoTable() {
 
 function horarioSub(sub) {
   const c = getCampoCfg(sub);
-  if (!c.entrada && !c.jornada && !c.horasMes) return 'sin horario';
-  let s = (c.entrada||'—') + ' · ' + (c.jornada?c.jornada+'h/día':'—');
-  if (c.horasMes) s += ' · ' + c.horasMes + 'h/mes';
-  return s;
+  if (!c.entrada && !c.jornada) return 'sin horario';
+  return (c.entrada||'—') + ' · ' + (c.jornada?c.jornada+'h/día':'—');
 }
 
-// ════════════════════════════════════════════════════════════
-//  COSTO DE PERSONAL — por categoría y quincena
-// ════════════════════════════════════════════════════════════
-const COSTO_MESES = ['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+async function onCampoAñoChange() {
+  if (STATE.sheetsUrl) { await syncHorasCampo(campoAñoSel()); }
+  renderCampoTable();
+}
 
-async function syncCosto() {
-  if (!STATE.sheetsUrl) { renderCosto(); return; }
-  const año = document.getElementById('costo-año')?.value || '2026';
+async function syncHorasCampo(anio) {
+  if (!STATE.sheetsUrl) return;
   try {
-    const data = await fetchFromSheets('getCostoPersonal', { anio: año });
-    STATE.costo = (data.rows||[]).map(r => ({
-      anio: parseInt(r.anio)||0, mes: parseInt(r.mes)||0,
-      quincena: (r.quincena||'').toString().trim(),
-      categoria: (r.categoria||'').toString().trim(),
-      monto: parseFloat(r.monto)||0,
-    }));
-    persist('costo');
-    renderCosto();
-    flashSync();
-  } catch(e) { console.warn(e); renderCosto(); }
+    const data = await fetchFromSheets('getHorasCampo', { anio: anio || campoAñoSel() });
+    // Reemplaza solo las horas del año consultado
+    const añoQ = parseInt(anio || campoAñoSel());
+    STATE.horasCampo = STATE.horasCampo.filter(h => h.anio !== añoQ)
+      .concat((data.rows||[]).map(r => ({ anio:parseInt(r.anio)||0, mes:parseInt(r.mes)||0, subtipo:(r.subtipo||'').toString().trim(), horas:parseFloat(r.horas)||0 })));
+    persist('horasCampo');
+  } catch(e) { console.warn(e); }
 }
 
-function costoLookup(año, mes, q, cat) {
-  const row = STATE.costo.find(r => r.anio==año && r.mes==mes && r.quincena===q && r.categoria===cat);
-  return row ? row.monto : 0;
+function openHorasCampoModal() {
+  const mes = campoMesSel(), año = campoAñoSel();
+  document.getElementById('hc-mes').value = mes;
+  document.getElementById('hc-año').value = año;
+  loadHorasCampoValues();
+  openModal('modal-horas-campo');
 }
 
-function renderCosto() {
-  const wrap = document.getElementById('costo-wrap');
-  if (!wrap) return;
-  const año = parseInt(document.getElementById('costo-año')?.value || '2026');
-  // Meses/quincenas con al menos un dato registrado ese año
-  const colsConDatos = [];
-  for (let m=1; m<=12; m++) {
-    for (const q of ['Q1','Q2']) {
-      const hay = STATE.costo.some(r => r.anio===año && r.mes===m && r.quincena===q);
-      if (hay) colsConDatos.push({m,q});
-    }
-  }
-  // Si no hay datos aún, muestra hasta el mes actual
-  let cols = colsConDatos;
-  if (!cols.length) {
-    const hoyMes = (año === new Date().getFullYear()) ? (new Date().getMonth()+1) : 12;
-    for (let m=1; m<=hoyMes; m++) for (const q of ['Q1','Q2']) cols.push({m,q});
-  }
-
-  // KPIs
-  const totalAnual = STATE.costo.filter(r=>r.anio===año).reduce((a,r)=>a+r.monto,0);
-  const cardsEl = document.getElementById('costo-cards');
-  if (cardsEl) {
-    const porCat = COSTO_CATS.map(cat => {
-      const t = STATE.costo.filter(r=>r.anio===año && r.categoria===cat).reduce((a,r)=>a+r.monto,0);
-      return {cat, t};
-    });
-    cardsEl.innerHTML =
-      `<div class="card"><div class="card-label">Costo total ${año}</div><div class="card-value" style="font-size:18px">${fmtSoles(totalAnual)}</div><div class="card-sub">acumulado del año</div></div>` +
-      porCat.map(x=>`<div class="card"><div class="card-label">${x.cat}</div><div class="card-value" style="font-size:15px">${fmtSoles(x.t)}</div><div class="card-sub">acumulado ${año}</div></div>`).join('');
-  }
-
-  if (!cols.length) { wrap.innerHTML = '<div class="empty" style="padding:40px;text-align:center;color:var(--hi)">Sin datos. Usa "Ingresar montos".</div>'; return; }
-
-  let html = '<table class="pst" style="min-width:'+(180+cols.length*120)+'px"><thead><tr>';
-  html += '<th style="position:sticky;left:0;background:var(--sf2);z-index:2">PLANILLA</th>';
-  cols.forEach(c => { html += `<th style="text-align:right">${COSTO_MESES[c.m]} ${c.q}</th>`; });
-  html += '</tr></thead><tbody>';
-  COSTO_CATS.forEach(cat => {
-    html += `<tr><td style="font-weight:600;position:sticky;left:0;background:#fff;z-index:1">${cat}</td>`;
-    cols.forEach(c => {
-      const v = costoLookup(año, c.m, c.q, cat);
-      html += `<td style="text-align:right;${v?'':'color:var(--hi)'}">${v?fmtSoles(v):'—'}</td>`;
-    });
-    html += '</tr>';
-  });
-  // Fila TOTAL
-  html += `<tr style="border-top:2px solid var(--bd);font-weight:700;background:var(--sf3)"><td style="position:sticky;left:0;background:var(--sf3);z-index:1">TOTAL</td>`;
-  cols.forEach(c => {
-    const t = COSTO_CATS.reduce((a,cat)=>a+costoLookup(año,c.m,c.q,cat),0);
-    html += `<td style="text-align:right">${t?fmtSoles(t):'—'}</td>`;
-  });
-  html += '</tr></tbody></table>';
-  wrap.innerHTML = html;
-}
-
-function openCostoEdit() {
-  const año = document.getElementById('costo-año')?.value || '2026';
-  const now = new Date();
-  const mesEl = document.getElementById('costo-edit-mes');
-  if (mesEl) mesEl.value = (parseInt(año)===now.getFullYear()) ? (now.getMonth()+1) : 1;
-  loadCostoEditValues();
-  openModal('modal-costo');
-}
-
-function loadCostoEditValues() {
-  const año = parseInt(document.getElementById('costo-año')?.value || '2026');
-  const mes = parseInt(document.getElementById('costo-edit-mes')?.value || '1');
-  const q   = document.getElementById('costo-edit-q')?.value || 'Q1';
-  const grid = document.getElementById('costo-edit-grid');
-  if (!grid) return;
-  grid.innerHTML = COSTO_CATS.map(cat => {
-    const v = costoLookup(año, mes, q, cat);
-    return `<div class="fg"><label>${cat} (S/)</label><input type="number" step="0.01" min="0" class="finp" id="costo-in-${cat}" value="${v||''}" placeholder="0.00"></div>`;
+function loadHorasCampoValues() {
+  const mes = parseInt(document.getElementById('hc-mes').value);
+  const año = parseInt(document.getElementById('hc-año').value);
+  const grid = document.getElementById('hc-grid');
+  grid.innerHTML = SUBTIPOS_CAMPO.map(s => {
+    const v = horasCampoLookup(año, mes, s);
+    return `<div class="fg"><label>${s} (horas/mes)</label><input type="number" step="1" min="0" class="finp" id="hc-in-${s}" value="${v||''}" placeholder="Ej. 208"></div>`;
   }).join('');
 }
 
-async function guardarCosto() {
-  const año = parseInt(document.getElementById('costo-año')?.value || '2026');
-  const mes = parseInt(document.getElementById('costo-edit-mes')?.value || '1');
-  const q   = document.getElementById('costo-edit-q')?.value || 'Q1';
-  for (const cat of COSTO_CATS) {
-    const monto = parseFloat(document.getElementById('costo-in-'+cat)?.value) || 0;
-    // upsert local
-    let row = STATE.costo.find(r => r.anio===año && r.mes===mes && r.quincena===q && r.categoria===cat);
-    if (row) row.monto = monto;
-    else STATE.costo.push({anio:año, mes, quincena:q, categoria:cat, monto});
-    if (STATE.sheetsUrl) {
-      await postToSheets({accion:'saveCostoPersonal', anio:año, mes, quincena:q, categoria:cat, monto});
-    }
+async function guardarHorasCampo() {
+  const mes = parseInt(document.getElementById('hc-mes').value);
+  const año = parseInt(document.getElementById('hc-año').value);
+  for (const s of SUBTIPOS_CAMPO) {
+    const horas = parseFloat(document.getElementById('hc-in-'+s)?.value) || 0;
+    let row = STATE.horasCampo.find(h => h.anio===año && h.mes===mes && (h.subtipo||'').toLowerCase()===s.toLowerCase());
+    if (row) row.horas = horas;
+    else STATE.horasCampo.push({anio:año, mes, subtipo:s, horas});
+    if (STATE.sheetsUrl) await postToSheets({accion:'saveHorasCampo', anio:año, mes, subtipo:s, horas});
   }
-  persist('costo');
-  renderCosto();
-  closeModal('modal-costo');
+  persist('horasCampo');
+  // reflejar en la vista si el mes/año coincide
+  document.getElementById('campo-mes').value = mes;
+  document.getElementById('campo-año').value = año;
+  renderCampoTable();
+  closeModal('modal-horas-campo');
   flashSync();
-  toast(`✓ Montos guardados (${COSTO_MESES[mes]} ${q})`,'ok');
+  toast(`✓ Horas guardadas (${['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'][mes]} ${año})`,'ok');
+}
+
+// ════════════════════════════════════════════════════════════
+//  COSTO DE PERSONAL — dashboard sobre base de planilla
+// ════════════════════════════════════════════════════════════
+const COSTO_MESES = ['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+function costoAnioSel(){ return parseInt(document.getElementById('costo-año')?.value || 2026); }
+function fmtMiles(n){ const v=Math.round(Number(n)||0); return v>=1000? (v/1000).toFixed(0)+'k' : String(v); }
+
+async function syncPlanilla() {
+  if (!STATE.sheetsUrl) { renderPlanilla(); return; }
+  const anio = costoAnioSel();
+  try {
+    const data = await fetchFromSheets('getPlanilla', { anio });
+    const anioQ = parseInt(anio);
+    STATE.planilla = STATE.planilla.filter(r => r.anio !== anioQ)
+      .concat((data.rows||[]).map(mapPlanillaRow));
+    persist('planilla');
+    renderPlanilla();
+    flashSync();
+  } catch(e) { console.warn(e); renderPlanilla(); }
+}
+function mapPlanillaRow(r){
+  return {
+    id:(r.id||'').toString(), razon:(r.razon||'').toString(), tipo:(r.tipo||'').toString(),
+    anio:parseInt(r.anio)||0, mes:parseInt(r.mes)||0, quincena:(r.quincena||'').toString(),
+    cuenta:(r.cuenta||'').toString(), proyecto:(r.proyecto||'').toString(),
+    gerente:(r.gerente||'').toString(), supervisor:(r.supervisor||'').toString(),
+    nombres:(r.nombres||'').toString(), dni:(r.dni||'').toString(),
+    ubigeo:(r.ubigeo||'').toString(), ciudad:(r.ciudad||'').toString(),
+    banco:(r.banco||'').toString(), numCuenta:(r.numCuenta||'').toString(),
+    numCCI:(r.numCCI||'').toString(), total:parseFloat(r.total)||0,
+  };
+}
+
+function planillaFiltrada() {
+  const anio = costoAnioSel();
+  const fTipo = document.getElementById('pl-f-tipo')?.value || '';
+  const fCuenta = document.getElementById('pl-f-cuenta')?.value || '';
+  const fProy = document.getElementById('pl-f-proy')?.value || '';
+  const fMes = document.getElementById('pl-f-mes')?.value || '';
+  return STATE.planilla.filter(r =>
+    r.anio===anio &&
+    (!fTipo || (r.tipo||'').toLowerCase()===fTipo.toLowerCase()) &&
+    (!fCuenta || r.cuenta===fCuenta) &&
+    (!fProy || r.proyecto===fProy) &&
+    (!fMes || r.mes===parseInt(fMes))
+  );
+}
+
+function aggBy(rows, keyFn) {
+  const m = {};
+  rows.forEach(r => { const k = keyFn(r) || '(sin dato)'; m[k]=(m[k]||0)+r.total; });
+  return Object.keys(m).map(k=>({k, v:m[k]})).sort((a,b)=>b.v-a.v);
+}
+function barList(items, max, color) {
+  if (!items.length) return '<div style="color:var(--hi);padding:12px">Sin datos</div>';
+  const mx = max || Math.max(...items.map(i=>i.v), 1);
+  return items.map(i=>{
+    const pct = mx? Math.round(i.v/mx*100):0;
+    return `<div style="margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:2px"><span style="font-weight:600">${escHtml(i.k)}</span><span style="color:var(--mu)">${fmtSoles(i.v)}</span></div>
+      <div style="background:var(--sf3);border-radius:5px;height:9px;overflow:hidden"><div style="width:${pct}%;height:100%;background:${color||'var(--buk)'}"></div></div>
+    </div>`;
+  }).join('');
+}
+
+function poblarFiltrosPlanilla() {
+  const anio = costoAnioSel();
+  const rows = STATE.planilla.filter(r=>r.anio===anio);
+  const fill = (id, vals) => {
+    const el = document.getElementById(id); if(!el) return;
+    const prev = el.value;
+    const uniq = [...new Set(vals.filter(Boolean))].sort((a,b)=>a.localeCompare(b,'es'));
+    el.innerHTML = '<option value="">'+(el.dataset.all||'Todos')+'</option>' + uniq.map(v=>`<option value="${escHtml(v)}">${escHtml(v)}</option>`).join('');
+    if (uniq.includes(prev)) el.value = prev;
+  };
+  fill('pl-f-cuenta', rows.map(r=>r.cuenta));
+  fill('pl-f-proy', rows.map(r=>r.proyecto));
+}
+
+function renderPlanilla() {
+  poblarFiltrosPlanilla();
+  renderPlanillaDash();
+  renderPlanillaDetalle();
+}
+
+function renderPlanillaDash() {
+  const wrap = document.getElementById('costo-dash');
+  if (!wrap) return;
+  const anio = costoAnioSel();
+  const rows = planillaFiltrada();
+  const total = rows.reduce((a,r)=>a+r.total,0);
+
+  const cardsEl = document.getElementById('costo-cards');
+  if (cardsEl) {
+    const porTipo = TIPOS_PLANILLA.map(t => ({t, v: rows.filter(r=>(r.tipo||'').toLowerCase()===t.toLowerCase()).reduce((a,r)=>a+r.total,0)}));
+    cardsEl.innerHTML =
+      `<div class="card"><div class="card-label">Total planilla ${anio}</div><div class="card-value" style="font-size:18px">${fmtSoles(total)}</div><div class="card-sub">${rows.length} registros</div></div>` +
+      porTipo.map(x=>`<div class="card"><div class="card-label">${x.t}</div><div class="card-value" style="font-size:15px">${fmtSoles(x.v)}</div><div class="card-sub">${total?Math.round(x.v/total*100):0}% del total</div></div>`).join('');
+  }
+
+  if (!rows.length) { wrap.innerHTML = '<div class="empty" style="padding:40px;text-align:center;color:var(--hi)">Sin datos de planilla para estos filtros. Usa "Cargar consolidado".</div>'; return; }
+
+  const porMes = [];
+  for (let m=1;m<=12;m++){ const v = rows.filter(r=>r.mes===m).reduce((a,r)=>a+r.total,0); porMes.push({m,v}); }
+  const mxMes = Math.max(...porMes.map(x=>x.v),1);
+  const trend = `<div class="card" style="padding:16px 18px"><div class="card-label" style="margin-bottom:12px">Histórico mensual ${anio}</div>
+    <div style="display:flex;align-items:flex-end;gap:6px;height:160px">${porMes.map(x=>{
+      const h = Math.round(x.v/mxMes*130);
+      return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px" title="${COSTO_MESES[x.m]}: ${fmtSoles(x.v)}">
+        <div style="font-size:9px;color:var(--mu)">${x.v?fmtMiles(x.v):''}</div>
+        <div style="width:100%;background:var(--buk);border-radius:4px 4px 0 0;height:${h}px;min-height:${x.v?2:0}px"></div>
+        <div style="font-size:10px;color:var(--mu)">${COSTO_MESES[x.m]}</div>
+      </div>`;
+    }).join('')}</div></div>`;
+
+  const card = (title, items, color) => `<div class="card" style="padding:16px 18px"><div class="card-label" style="margin-bottom:12px">${title}</div>${barList(items, null, color)}</div>`;
+
+  wrap.innerHTML = trend +
+    `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-top:14px">` +
+      card('Por tipo de personal', aggBy(rows, r=>r.tipo), '#1d3b78') +
+      card('Por cuenta', aggBy(rows, r=>r.cuenta).slice(0,12), '#2c8a4a') +
+      card('Por proyecto', aggBy(rows, r=>r.proyecto).slice(0,12), '#b45309') +
+      card('Por gerente', aggBy(rows, r=>r.gerente).slice(0,10), '#6d28d9') +
+      card('Por supervisor', aggBy(rows, r=>r.supervisor).slice(0,10), '#0e7490') +
+      card('Por ciudad', aggBy(rows, r=>r.ciudad).slice(0,10), '#be123c') +
+    `</div>`;
+}
+
+function renderPlanillaDetalle() {
+  const tb = document.getElementById('pl-tbody');
+  if (!tb) return;
+  const q = (document.getElementById('pl-buscar')?.value||'').toLowerCase().trim();
+  let rows = planillaFiltrada();
+  if (q) rows = rows.filter(r => (r.nombres+' '+r.dni+' '+r.cuenta+' '+r.proyecto+' '+r.ciudad).toLowerCase().includes(q));
+  rows = rows.slice().sort((a,b)=> a.mes-b.mes || a.nombres.localeCompare(b.nombres,'es'));
+  if (!rows.length){ tb.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:40px;color:var(--hi)">Sin registros.</td></tr>'; return; }
+  const shown = rows.slice(0,300);
+  tb.innerHTML = shown.map(r=>`<tr>
+    <td style="text-align:center;white-space:nowrap">${COSTO_MESES[r.mes]||r.mes} ${escHtml(r.quincena)}</td>
+    <td>${escHtml(r.tipo)}</td>
+    <td style="font-weight:600">${escHtml(r.nombres)}</td>
+    <td class="mono" style="color:var(--mu)">${escHtml(r.dni)}</td>
+    <td>${escHtml(r.cuenta)}</td>
+    <td>${escHtml(r.proyecto)}</td>
+    <td>${escHtml(r.supervisor)}</td>
+    <td>${escHtml(r.ciudad)}</td>
+    <td style="text-align:right;font-weight:600">${fmtSoles(r.total)}</td>
+    <td style="text-align:center;white-space:nowrap">
+      <button class="btn btn-outline" style="padding:3px 8px;font-size:11px" onclick="openPlanillaModal('${r.id}')">Editar</button>
+      <button class="btn btn-outline" style="padding:3px 8px;font-size:11px" onclick="deletePlanilla('${r.id}')">✕</button>
+    </td>
+  </tr>`).join('') + (rows.length>300?`<tr><td colspan="10" style="text-align:center;color:var(--hi);padding:10px">Mostrando 300 de ${rows.length}. Usa filtros o busca para refinar.</td></tr>`:'');
+  applySortable && applySortable('pl-table');
+}
+
+function switchCostoTab(el, id) {
+  document.querySelectorAll('#page-costo .tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('#page-costo .tp').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(id)?.classList.add('active');
+}
+
+function openPlanillaModal(id) {
+  const isEdit = !!id;
+  document.getElementById('pl-modal-title').textContent = isEdit ? 'Editar registro' : 'Nuevo registro de planilla';
+  const r = isEdit ? STATE.planilla.find(x=>x.id===id) : null;
+  const g = (k)=> r? (r[k]!=null?r[k]:'') : '';
+  document.getElementById('pl-id').value = r? r.id : '';
+  document.getElementById('pl-razon').value = g('razon');
+  document.getElementById('pl-tipo').value = r? r.tipo : 'Staff';
+  document.getElementById('pl-anio').value = r? r.anio : costoAnioSel();
+  document.getElementById('pl-mes').value = r? r.mes : (new Date().getMonth()+1);
+  document.getElementById('pl-quincena').value = r? (r.quincena||'Q1') : 'Q1';
+  document.getElementById('pl-cuenta').value = g('cuenta');
+  document.getElementById('pl-proyecto').value = g('proyecto');
+  document.getElementById('pl-gerente').value = g('gerente');
+  document.getElementById('pl-supervisor').value = g('supervisor');
+  document.getElementById('pl-nombres').value = g('nombres');
+  document.getElementById('pl-dni').value = g('dni');
+  document.getElementById('pl-ubigeo').value = g('ubigeo');
+  document.getElementById('pl-ciudad').value = g('ciudad');
+  document.getElementById('pl-banco').value = g('banco');
+  document.getElementById('pl-numcuenta').value = g('numCuenta');
+  document.getElementById('pl-numcci').value = g('numCCI');
+  document.getElementById('pl-total').value = r? r.total : '';
+  openModal('modal-planilla');
+}
+
+function planillaFormData() {
+  return {
+    id: document.getElementById('pl-id').value.trim(),
+    razon: document.getElementById('pl-razon').value.trim(),
+    tipo: document.getElementById('pl-tipo').value,
+    anio: parseInt(document.getElementById('pl-anio').value)||0,
+    mes: parseInt(document.getElementById('pl-mes').value)||0,
+    quincena: document.getElementById('pl-quincena').value,
+    cuenta: document.getElementById('pl-cuenta').value.trim(),
+    proyecto: document.getElementById('pl-proyecto').value.trim(),
+    gerente: document.getElementById('pl-gerente').value.trim(),
+    supervisor: document.getElementById('pl-supervisor').value.trim(),
+    nombres: document.getElementById('pl-nombres').value.trim(),
+    dni: document.getElementById('pl-dni').value.trim(),
+    ubigeo: document.getElementById('pl-ubigeo').value.trim(),
+    ciudad: document.getElementById('pl-ciudad').value.trim(),
+    banco: document.getElementById('pl-banco').value.trim(),
+    numCuenta: document.getElementById('pl-numcuenta').value.trim(),
+    numCCI: document.getElementById('pl-numcci').value.trim(),
+    total: parseFloat(document.getElementById('pl-total').value)||0,
+  };
+}
+
+async function guardarPlanilla() {
+  const d = planillaFormData();
+  if (!d.nombres || !d.anio || !d.mes) { toast('Nombres, año y mes son obligatorios','warn'); return; }
+  if (STATE.sheetsUrl) {
+    showLoading('Guardando registro…');
+    try {
+      const res = await fetch(STATE.sheetsUrl,{method:'POST',body:JSON.stringify(Object.assign({accion:'savePlanilla'}, d))});
+      await res.json().catch(()=>({}));
+      await syncPlanilla();
+      flashSync(); toast('✓ Registro guardado','ok');
+    } catch(e){ toast('Error: '+e.message,'warn'); } finally { hideLoading(); }
+  } else {
+    if (d.id){ const r = STATE.planilla.find(x=>x.id===d.id); if(r) Object.assign(r,d); }
+    else { d.id = 'L'+(STATE.planilla.length+1); STATE.planilla.push(d); }
+    persist('planilla'); renderPlanilla(); toast('✓ Guardado localmente','ok');
+  }
+  closeModal('modal-planilla');
+}
+
+async function deletePlanilla(id) {
+  const r = STATE.planilla.find(x=>x.id===id);
+  if (!r) return;
+  if (!confirm(`¿Eliminar el registro de ${r.nombres} (${COSTO_MESES[r.mes]} ${r.quincena})?`)) return;
+  STATE.planilla = STATE.planilla.filter(x=>x.id!==id);
+  persist('planilla'); renderPlanilla();
+  if (STATE.sheetsUrl){ await postToSheets({accion:'deletePlanilla', id}); flashSync(); }
+  toast('Registro eliminado','ok');
+}
+
+// ---- Carga masiva CSV ----
+const PLANILLA_HEADERS = ['Razon Social','Tipo de Personal','Año','Mes','Quincena','Cuenta','Proyecto','Gerente','Supervisor','Apellidos y Nombres','DNI','Ubigeo','Ciudad','Banco','# Cuenta','# CCI','Total a Pagar'];
+
+function descargarPlantillaPlanilla() {
+  const ejemplo = ['TT AUDIT SAC','Staff','2026','1','Q1','Cuenta Demo','Proyecto Demo','Gerente X','Supervisor Y','Perez, Juan','12345678','150101','Lima','BCP','1234567890','00212300123456789012','1500.00'];
+  const csv = PLANILLA_HEADERS.join(';') + '\n' + ejemplo.join(';') + '\n';
+  const blob = new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'plantilla_planilla.csv'; a.click();
+}
+
+function parseCSV(text) {
+  const firstLine = text.split(/\r?\n/)[0]||'';
+  const sep = (firstLine.split(';').length > firstLine.split(',').length) ? ';' : ',';
+  const rows = []; let i=0, field='', row=[], inQ=false;
+  const pushF=()=>{ row.push(field); field=''; };
+  const pushR=()=>{ rows.push(row); row=[]; };
+  while (i<text.length) {
+    const c=text[i];
+    if (inQ){ if(c==='"'){ if(text[i+1]==='"'){field+='"';i+=2;continue;} inQ=false;i++;continue;} field+=c;i++;continue; }
+    if (c==='"'){ inQ=true;i++;continue; }
+    if (c===sep){ pushF();i++;continue; }
+    if (c==='\n'){ pushF();pushR();i++;continue; }
+    if (c==='\r'){ i++;continue; }
+    field+=c;i++;
+  }
+  if (field.length||row.length){ pushF(); pushR(); }
+  return rows.filter(r=>r.some(c=>(c||'').trim()!==''));
+}
+
+function numPE(s){ if(s==null) return 0; let t=s.toString().trim().replace(/[^\d.,-]/g,''); if(t.includes(',')&&t.includes('.')){ t=t.replace(/\./g,'').replace(',','.'); } else if(t.includes(',')){ t=t.replace(',','.'); } return parseFloat(t)||0; }
+
+let _planillaBulkRows = [];
+function openPlanillaBulk() {
+  _planillaBulkRows = [];
+  document.getElementById('pl-bulk-info').textContent = '';
+  document.getElementById('pl-bulk-confirm').style.display = 'none';
+  const f = document.getElementById('file-planilla'); if(f) f.value = '';
+  openModal('modal-planilla-bulk');
+}
+function handlePlanillaCSV(input) {
+  const file = input.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const rows = parseCSV(e.target.result);
+      if (rows.length<2){ toast('El archivo no tiene datos','warn'); return; }
+      _planillaBulkRows = rows.slice(1).map(r => ({
+        razon:(r[0]||'').trim(), tipo:(r[1]||'').trim(), anio:parseInt(r[2])||0, mes:parseInt(r[3])||0,
+        quincena:(r[4]||'').trim(), cuenta:(r[5]||'').trim(), proyecto:(r[6]||'').trim(),
+        gerente:(r[7]||'').trim(), supervisor:(r[8]||'').trim(), nombres:(r[9]||'').trim(),
+        dni:(r[10]||'').trim(), ubigeo:(r[11]||'').trim(), ciudad:(r[12]||'').trim(),
+        banco:(r[13]||'').trim(), numCuenta:(r[14]||'').trim(), numCCI:(r[15]||'').trim(),
+        total:numPE(r[16]),
+      })).filter(x=>x.nombres && x.anio && x.mes);
+      const tot = _planillaBulkRows.reduce((a,r)=>a+r.total,0);
+      document.getElementById('pl-bulk-info').innerHTML = `Se detectaron <b>${_planillaBulkRows.length}</b> filas válidas · total ${fmtSoles(tot)}. Revisa y confirma la carga.`;
+      document.getElementById('pl-bulk-confirm').style.display = _planillaBulkRows.length?'':'none';
+    } catch(err){ toast('Error leyendo CSV: '+err.message,'warn'); }
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+async function confirmarPlanillaBulk() {
+  if (!_planillaBulkRows.length){ toast('Nada que cargar','warn'); return; }
+  if (STATE.sheetsUrl) {
+    showLoading(`Cargando ${_planillaBulkRows.length} registros…`);
+    try {
+      for (let i=0;i<_planillaBulkRows.length;i+=200) {
+        const lote = _planillaBulkRows.slice(i,i+200);
+        await fetch(STATE.sheetsUrl,{method:'POST',body:JSON.stringify({accion:'savePlanillaBulk', rows:lote})});
+      }
+      await syncPlanilla();
+      flashSync(); toast(`✓ ${_planillaBulkRows.length} registros cargados`,'ok');
+    } catch(e){ toast('Error: '+e.message,'warn'); } finally { hideLoading(); }
+  } else {
+    _planillaBulkRows.forEach((r,idx)=>{ r.id='L'+(STATE.planilla.length+idx+1); });
+    STATE.planilla = STATE.planilla.concat(_planillaBulkRows);
+    persist('planilla'); renderPlanilla(); toast(`✓ ${_planillaBulkRows.length} cargados localmente`,'ok');
+  }
+  closeModal('modal-planilla-bulk');
 }
 
 // ════════════════════════════════════════════════════════════
@@ -2857,7 +3236,9 @@ const SHEET_RESUMEN      = 'Resumen Mensual';
 const SHEET_TARDANZAS    = 'Tardanzas Descuentos';
 const SHEET_CONFIG_VAC   = 'Config Vacaciones';
 const SHEET_CONFIG_CAMPO = 'Config Campo';        // horario entrada + jornada por subtipo
-const SHEET_COSTO        = 'Costo Personal';       // costo por categoria/quincena
+const SHEET_HORAS_CAMPO  = 'Horas Campo';          // horas objetivo al mes por subtipo (mensual)
+const SHEET_COSTO        = 'Costo Personal';       // (legado) costo por categoria/quincena
+const SHEET_PLANILLA     = 'Planilla';             // base detallada de planilla por persona/quincena
 const SHEET_INVENTARIO   = 'Inventario';           // activos de la empresa
 const SHEET_INV_HIST     = 'Inventario Historial'; // historial de movimientos de activos
 
@@ -2917,21 +3298,24 @@ function initSheets() {
   getOrCreate(ss, SHEET_TARDANZAS,  ['Mes','DNI','Nombre','Ficha_Buk','Monto_Descuento']);
   getOrCreate(ss, SHEET_CONFIG_VAC, ['Tipo','Clave','Valor']);
 
-  // Config Campo — horario de entrada, jornada y horas/mes por subtipo de personal de campo
-  const shCC = getOrCreate(ss, SHEET_CONFIG_CAMPO, ['Subtipo','Hora_Entrada','Horas_Jornada','Horas_Mes']);
-  ensureHeaders(shCC, { 4: 'Horas_Mes' }); // migración si ya existía con 3 columnas
+  // Config Campo — horario de entrada y jornada (h/día) por subtipo de personal de campo
+  const shCC = getOrCreate(ss, SHEET_CONFIG_CAMPO, ['Subtipo','Hora_Entrada','Horas_Jornada']);
   if (shCC.getLastRow() <= 1) {
-    shCC.appendRow(['Merch',        '', '', '']);
-    shCC.appendRow(['Promotor',     '', '', '']);
-    shCC.appendRow(['Operaciones',  '', '', '']);
-    shCC.appendRow(['Practicantes', '', '', '']);
+    shCC.appendRow(['Merch',        '', '']);
+    shCC.appendRow(['Promotor',     '', '']);
+    shCC.appendRow(['Operaciones',  '', '']);
+    shCC.appendRow(['Practicantes', '', '']);
   } else {
     // Asegura que exista la fila Practicantes aunque la pestaña ya tuviera datos
     const vals = shCC.getRange(1, 1, shCC.getLastRow(), 1).getValues().map(r => (r[0]||'').toString().trim().toLowerCase());
-    if (vals.indexOf('practicantes') === -1) shCC.appendRow(['Practicantes', '', '', '']);
+    if (vals.indexOf('practicantes') === -1) shCC.appendRow(['Practicantes', '', '']);
   }
 
+  // Horas Campo — horas objetivo al mes por subtipo, editable mes a mes
+  getOrCreate(ss, SHEET_HORAS_CAMPO, ['Anio','Mes','Subtipo','Horas']);
+
   getOrCreate(ss, SHEET_COSTO,      ['Anio','Mes','Quincena','Categoria','Monto']);
+  getOrCreate(ss, SHEET_PLANILLA,   ['ID','Razon_Social','Tipo_Personal','Anio','Mes','Quincena','Cuenta','Proyecto','Gerente','Supervisor','Nombres','DNI','Ubigeo','Ciudad','Banco','Num_Cuenta','Num_CCI','Total_Pagar']);
   getOrCreate(ss, SHEET_INVENTARIO, ['ID','Nombre','Categoria','Estado','Asignado','Fecha_Creacion','Obs']);
   getOrCreate(ss, SHEET_INV_HIST,   ['Fecha','ID_Activo','Nombre','Estado','Asignado','Admin','Comentario']);
 
@@ -3105,16 +3489,69 @@ function handleGet(e) {
     if (!sh) return jsonResp({ rows: [], count: 0 });
     const data = sh.getDataRange().getValues();
     if (data.length < 2) return jsonResp({ rows: [], count: 0 });
-    // Columnas: Subtipo(0), Hora_Entrada(1), Horas_Jornada(2), Horas_Mes(3)
+    // Columnas: Subtipo(0), Hora_Entrada(1), Horas_Jornada(2)
     const rows = data.slice(1)
       .filter(r => r[0])
       .map(r => ({
         subtipo:  r[0].toString().trim(),
         entrada:  formatTime(r[1]) || (r[1] !== undefined && r[1] !== '' ? r[1].toString().trim() : ''),
         jornada:  r[2] !== undefined && r[2] !== '' ? parseFloat(r[2]) || 0 : 0,
-        horasMes: r[3] !== undefined && r[3] !== '' ? parseFloat(r[3]) || 0 : 0,
       }));
     return jsonResp({ rows, count: rows.length });
+  }
+
+  // ── GET HORAS CAMPO (horas objetivo al mes por subtipo) ─────────
+  if (accion === 'getHorasCampo') {
+    const anio = p.anio || '';
+    const sh = ss.getSheetByName(SHEET_HORAS_CAMPO);
+    if (!sh) return jsonResp({ rows: [], count: 0 });
+    const data = sh.getDataRange().getValues();
+    if (data.length < 2) return jsonResp({ rows: [], count: 0 });
+    // Columnas: Anio(0), Mes(1), Subtipo(2), Horas(3)
+    let rows = data.slice(1).filter(r => r[0] !== '' && r[2]);
+    if (anio) rows = rows.filter(r => r[0].toString().trim() === anio.toString().trim());
+    const result = rows.map(r => ({
+      anio:    parseInt(r[0]) || 0,
+      mes:     parseInt(r[1]) || 0,
+      subtipo: r[2].toString().trim(),
+      horas:   parseFloat(r[3]) || 0,
+    }));
+    return jsonResp({ rows: result, count: result.length });
+  }
+
+  // ── GET PLANILLA (base detallada de costo de personal) ──────────
+  if (accion === 'getPlanilla') {
+    const anio = p.anio || '';
+    const sh   = ss.getSheetByName(SHEET_PLANILLA);
+    if (!sh) return jsonResp({ rows: [], count: 0 });
+    const data = sh.getDataRange().getValues();
+    if (data.length < 2) return jsonResp({ rows: [], count: 0 });
+    // Columnas: ID(0),Razon_Social(1),Tipo_Personal(2),Anio(3),Mes(4),Quincena(5),Cuenta(6),
+    //           Proyecto(7),Gerente(8),Supervisor(9),Nombres(10),DNI(11),Ubigeo(12),Ciudad(13),
+    //           Banco(14),Num_Cuenta(15),Num_CCI(16),Total_Pagar(17)
+    let rows = data.slice(1).filter(r => r[0]);
+    if (anio) rows = rows.filter(r => r[3].toString().trim() === anio.toString().trim());
+    const result = rows.map(r => ({
+      id:         r[0].toString().trim(),
+      razon:      r[1] ? r[1].toString().trim() : '',
+      tipo:       r[2] ? r[2].toString().trim() : '',
+      anio:       parseInt(r[3]) || 0,
+      mes:        parseInt(r[4]) || 0,
+      quincena:   r[5] ? r[5].toString().trim() : '',
+      cuenta:     r[6] ? r[6].toString().trim() : '',
+      proyecto:   r[7] ? r[7].toString().trim() : '',
+      gerente:    r[8] ? r[8].toString().trim() : '',
+      supervisor: r[9] ? r[9].toString().trim() : '',
+      nombres:    r[10] ? r[10].toString().trim() : '',
+      dni:        r[11] ? r[11].toString().trim() : '',
+      ubigeo:     r[12] ? r[12].toString().trim() : '',
+      ciudad:     r[13] ? r[13].toString().trim() : '',
+      banco:      r[14] ? r[14].toString().trim() : '',
+      numCuenta:  r[15] ? r[15].toString().trim() : '',
+      numCCI:     r[16] ? r[16].toString().trim() : '',
+      total:      parseFloat(r[17]) || 0,
+    }));
+    return jsonResp({ rows: result, count: result.length });
   }
 
   // ── GET COSTO PERSONAL ──────────────────────────────────────────
@@ -3350,22 +3787,83 @@ function handlePost(e) {
 
   // ── SAVE CONFIG CAMPO (horario/jornada por subtipo) ─────────────
   if (accion === 'saveConfigCampo') {
-    const sh = getOrCreate(ss, SHEET_CONFIG_CAMPO, ['Subtipo','Hora_Entrada','Horas_Jornada','Horas_Mes']);
-    const { subtipo, entrada, jornada, horasMes } = body;
+    const sh = getOrCreate(ss, SHEET_CONFIG_CAMPO, ['Subtipo','Hora_Entrada','Horas_Jornada']);
+    const { subtipo, entrada, jornada } = body;
     if (!subtipo) return jsonResp({ error: 'subtipo requerido' });
     const jVal = (jornada !== undefined && jornada !== '') ? jornada : '';
-    const hmVal = (horasMes !== undefined && horasMes !== '') ? horasMes : '';
     const data  = sh.getDataRange().getValues();
     let found   = -1;
     for (let i = 1; i < data.length; i++) {
       if (data[i][0].toString().trim().toLowerCase() === subtipo.toString().trim().toLowerCase()) { found = i; break; }
     }
     if (found > 0) {
-      sh.getRange(found + 1, 2, 1, 3).setValues([[entrada || '', jVal, hmVal]]);
+      sh.getRange(found + 1, 2, 1, 2).setValues([[entrada || '', jVal]]);
     } else {
-      sh.appendRow([subtipo, entrada || '', jVal, hmVal]);
+      sh.appendRow([subtipo, entrada || '', jVal]);
     }
     return jsonResp({ ok: true, action: found > 0 ? 'updated' : 'created' });
+  }
+
+  // ── SAVE HORAS CAMPO (horas objetivo al mes por subtipo) ────────
+  if (accion === 'saveHorasCampo') {
+    const sh = getOrCreate(ss, SHEET_HORAS_CAMPO, ['Anio','Mes','Subtipo','Horas']);
+    const { anio, mes, subtipo, horas } = body;
+    if (!anio || !mes || !subtipo) return jsonResp({ error: 'anio, mes y subtipo son requeridos' });
+    const data = sh.getDataRange().getValues();
+    let found  = -1;
+    for (let i = 1; i < data.length; i++) {
+      if (parseInt(data[i][0]) === parseInt(anio) &&
+          parseInt(data[i][1]) === parseInt(mes) &&
+          data[i][2].toString().trim().toLowerCase() === subtipo.toString().trim().toLowerCase()) { found = i; break; }
+    }
+    if (found > 0) {
+      sh.getRange(found + 1, 4).setValue(parseFloat(horas) || 0);
+    } else {
+      sh.appendRow([parseInt(anio), parseInt(mes), subtipo, parseFloat(horas) || 0]);
+    }
+    return jsonResp({ ok: true, action: found > 0 ? 'updated' : 'created' });
+  }
+
+  // ── SAVE PLANILLA (una fila; upsert por ID) ─────────────────────
+  if (accion === 'savePlanilla') {
+    const sh = getOrCreate(ss, SHEET_PLANILLA, ['ID','Razon_Social','Tipo_Personal','Anio','Mes','Quincena','Cuenta','Proyecto','Gerente','Supervisor','Nombres','DNI','Ubigeo','Ciudad','Banco','Num_Cuenta','Num_CCI','Total_Pagar']);
+    let b = body;
+    const data = sh.getDataRange().getValues();
+    let id = b.id ? b.id.toString().trim() : '';
+    let found = -1;
+    if (id) { for (let i = 1; i < data.length; i++) { if (data[i][0].toString().trim() === id) { found = i; break; } } }
+    if (!id) id = nextPlanillaId(data);
+    const row = planillaRow(id, b);
+    if (found > 0) sh.getRange(found + 1, 1, 1, 18).setValues([row]);
+    else sh.appendRow(row);
+    return jsonResp({ ok: true, action: found > 0 ? 'updated' : 'created', id: id });
+  }
+
+  // ── SAVE PLANILLA BULK (carga masiva) ───────────────────────────
+  if (accion === 'savePlanillaBulk') {
+    const sh = getOrCreate(ss, SHEET_PLANILLA, ['ID','Razon_Social','Tipo_Personal','Anio','Mes','Quincena','Cuenta','Proyecto','Gerente','Supervisor','Nombres','DNI','Ubigeo','Ciudad','Banco','Num_Cuenta','Num_CCI','Total_Pagar']);
+    const items = body.rows || [];
+    if (!items.length) return jsonResp({ error: 'Sin filas para cargar' });
+    const data = sh.getDataRange().getValues();
+    let maxId = 0;
+    for (let i = 1; i < data.length; i++) { const n = parseInt((data[i][0]||'').toString().replace(/\\D/g,''),10); if (!isNaN(n) && n>maxId) maxId=n; }
+    const nuevas = items.map(b => planillaRow(String(++maxId).padStart(5,'0'), b));
+    if (nuevas.length) sh.getRange(sh.getLastRow() + 1, 1, nuevas.length, 18).setValues(nuevas);
+    return jsonResp({ ok: true, count: nuevas.length });
+  }
+
+  // ── DELETE PLANILLA ─────────────────────────────────────────────
+  if (accion === 'deletePlanilla') {
+    const sh = ss.getSheetByName(SHEET_PLANILLA);
+    if (!sh) return jsonResp({ error: 'Pestaña no encontrada' });
+    const { id } = body;
+    if (!id) return jsonResp({ error: 'id requerido' });
+    const idStr = id.toString().trim();
+    const data  = sh.getDataRange().getValues();
+    for (let i = 1; i < data.length; i++) {
+      if (data[i][0].toString().trim() === idStr) { sh.deleteRow(i + 1); return jsonResp({ ok: true, action: 'deleted' }); }
+    }
+    return jsonResp({ ok: false, error: 'ID no encontrado' });
   }
 
   // ── SAVE COSTO PERSONAL ─────────────────────────────────────────
@@ -3446,6 +3944,26 @@ function handlePost(e) {
 // ════════════════════════════════════════════════════════════════════
 //  HELPERS
 // ════════════════════════════════════════════════════════════════════
+// Construye la fila de Planilla (18 columnas) desde el objeto del front
+function planillaRow(id, b) {
+  return [
+    id,
+    b.razon || '', b.tipo || '', parseInt(b.anio) || '', parseInt(b.mes) || '', b.quincena || '',
+    b.cuenta || '', b.proyecto || '', b.gerente || '', b.supervisor || '', b.nombres || '',
+    b.dni || '', b.ubigeo || '', b.ciudad || '', b.banco || '', b.numCuenta || '', b.numCCI || '',
+    parseFloat(b.total) || 0,
+  ];
+}
+// ID incremental de 5 dígitos para planilla
+function nextPlanillaId(data) {
+  let max = 0;
+  for (let i = 1; i < data.length; i++) {
+    const n = parseInt((data[i][0] || '').toString().replace(/\\D/g, ''), 10);
+    if (!isNaN(n) && n > max) max = n;
+  }
+  return String(max + 1).padStart(5, '0');
+}
+
 // Genera un ID numérico incremental de 3 dígitos para inventario
 function nextInvId(data) {
   let max = 0;
@@ -4335,6 +4853,9 @@ document.addEventListener('DOMContentLoaded', () => {
   if (_mesEl) _mesEl.value = _now.getMonth() + 1;
   if (_añoEl) _añoEl.value = _now.getFullYear();
   document.getElementById('am-año')?.addEventListener('input', renderAbrirMesPersonal);
+  // Inicializar selector de mes en Personal de campo
+  const _cm = document.getElementById('campo-mes');
+  if (_cm) _cm.value = _now.getMonth() + 1;
 });
 
 function copyScript() {

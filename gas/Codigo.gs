@@ -21,7 +21,9 @@ const SHEET_RESUMEN      = 'Resumen Mensual';
 const SHEET_TARDANZAS    = 'Tardanzas Descuentos';
 const SHEET_CONFIG_VAC   = 'Config Vacaciones';
 const SHEET_CONFIG_CAMPO = 'Config Campo';        // horario entrada + jornada por subtipo
-const SHEET_COSTO        = 'Costo Personal';       // costo por categoria/quincena
+const SHEET_HORAS_CAMPO  = 'Horas Campo';          // horas objetivo al mes por subtipo (mensual)
+const SHEET_COSTO        = 'Costo Personal';       // (legado) costo por categoria/quincena
+const SHEET_PLANILLA     = 'Planilla';             // base detallada de planilla por persona/quincena
 const SHEET_INVENTARIO   = 'Inventario';           // activos de la empresa
 const SHEET_INV_HIST     = 'Inventario Historial'; // historial de movimientos de activos
 
@@ -81,21 +83,24 @@ function initSheets() {
   getOrCreate(ss, SHEET_TARDANZAS,  ['Mes','DNI','Nombre','Ficha_Buk','Monto_Descuento']);
   getOrCreate(ss, SHEET_CONFIG_VAC, ['Tipo','Clave','Valor']);
 
-  // Config Campo — horario de entrada, jornada y horas/mes por subtipo de personal de campo
-  const shCC = getOrCreate(ss, SHEET_CONFIG_CAMPO, ['Subtipo','Hora_Entrada','Horas_Jornada','Horas_Mes']);
-  ensureHeaders(shCC, { 4: 'Horas_Mes' }); // migración si ya existía con 3 columnas
+  // Config Campo — horario de entrada y jornada (h/día) por subtipo de personal de campo
+  const shCC = getOrCreate(ss, SHEET_CONFIG_CAMPO, ['Subtipo','Hora_Entrada','Horas_Jornada']);
   if (shCC.getLastRow() <= 1) {
-    shCC.appendRow(['Merch',        '', '', '']);
-    shCC.appendRow(['Promotor',     '', '', '']);
-    shCC.appendRow(['Operaciones',  '', '', '']);
-    shCC.appendRow(['Practicantes', '', '', '']);
+    shCC.appendRow(['Merch',        '', '']);
+    shCC.appendRow(['Promotor',     '', '']);
+    shCC.appendRow(['Operaciones',  '', '']);
+    shCC.appendRow(['Practicantes', '', '']);
   } else {
     // Asegura que exista la fila Practicantes aunque la pestaña ya tuviera datos
     const vals = shCC.getRange(1, 1, shCC.getLastRow(), 1).getValues().map(r => (r[0]||'').toString().trim().toLowerCase());
-    if (vals.indexOf('practicantes') === -1) shCC.appendRow(['Practicantes', '', '', '']);
+    if (vals.indexOf('practicantes') === -1) shCC.appendRow(['Practicantes', '', '']);
   }
 
+  // Horas Campo — horas objetivo al mes por subtipo, editable mes a mes
+  getOrCreate(ss, SHEET_HORAS_CAMPO, ['Anio','Mes','Subtipo','Horas']);
+
   getOrCreate(ss, SHEET_COSTO,      ['Anio','Mes','Quincena','Categoria','Monto']);
+  getOrCreate(ss, SHEET_PLANILLA,   ['ID','Razon_Social','Tipo_Personal','Anio','Mes','Quincena','Cuenta','Proyecto','Gerente','Supervisor','Nombres','DNI','Ubigeo','Ciudad','Banco','Num_Cuenta','Num_CCI','Total_Pagar']);
   getOrCreate(ss, SHEET_INVENTARIO, ['ID','Nombre','Categoria','Estado','Asignado','Fecha_Creacion','Obs']);
   getOrCreate(ss, SHEET_INV_HIST,   ['Fecha','ID_Activo','Nombre','Estado','Asignado','Admin','Comentario']);
 
@@ -269,16 +274,69 @@ function handleGet(e) {
     if (!sh) return jsonResp({ rows: [], count: 0 });
     const data = sh.getDataRange().getValues();
     if (data.length < 2) return jsonResp({ rows: [], count: 0 });
-    // Columnas: Subtipo(0), Hora_Entrada(1), Horas_Jornada(2), Horas_Mes(3)
+    // Columnas: Subtipo(0), Hora_Entrada(1), Horas_Jornada(2)
     const rows = data.slice(1)
       .filter(r => r[0])
       .map(r => ({
         subtipo:  r[0].toString().trim(),
         entrada:  formatTime(r[1]) || (r[1] !== undefined && r[1] !== '' ? r[1].toString().trim() : ''),
         jornada:  r[2] !== undefined && r[2] !== '' ? parseFloat(r[2]) || 0 : 0,
-        horasMes: r[3] !== undefined && r[3] !== '' ? parseFloat(r[3]) || 0 : 0,
       }));
     return jsonResp({ rows, count: rows.length });
+  }
+
+  // ── GET HORAS CAMPO (horas objetivo al mes por subtipo) ─────────
+  if (accion === 'getHorasCampo') {
+    const anio = p.anio || '';
+    const sh = ss.getSheetByName(SHEET_HORAS_CAMPO);
+    if (!sh) return jsonResp({ rows: [], count: 0 });
+    const data = sh.getDataRange().getValues();
+    if (data.length < 2) return jsonResp({ rows: [], count: 0 });
+    // Columnas: Anio(0), Mes(1), Subtipo(2), Horas(3)
+    let rows = data.slice(1).filter(r => r[0] !== '' && r[2]);
+    if (anio) rows = rows.filter(r => r[0].toString().trim() === anio.toString().trim());
+    const result = rows.map(r => ({
+      anio:    parseInt(r[0]) || 0,
+      mes:     parseInt(r[1]) || 0,
+      subtipo: r[2].toString().trim(),
+      horas:   parseFloat(r[3]) || 0,
+    }));
+    return jsonResp({ rows: result, count: result.length });
+  }
+
+  // ── GET PLANILLA (base detallada de costo de personal) ──────────
+  if (accion === 'getPlanilla') {
+    const anio = p.anio || '';
+    const sh   = ss.getSheetByName(SHEET_PLANILLA);
+    if (!sh) return jsonResp({ rows: [], count: 0 });
+    const data = sh.getDataRange().getValues();
+    if (data.length < 2) return jsonResp({ rows: [], count: 0 });
+    // Columnas: ID(0),Razon_Social(1),Tipo_Personal(2),Anio(3),Mes(4),Quincena(5),Cuenta(6),
+    //           Proyecto(7),Gerente(8),Supervisor(9),Nombres(10),DNI(11),Ubigeo(12),Ciudad(13),
+    //           Banco(14),Num_Cuenta(15),Num_CCI(16),Total_Pagar(17)
+    let rows = data.slice(1).filter(r => r[0]);
+    if (anio) rows = rows.filter(r => r[3].toString().trim() === anio.toString().trim());
+    const result = rows.map(r => ({
+      id:         r[0].toString().trim(),
+      razon:      r[1] ? r[1].toString().trim() : '',
+      tipo:       r[2] ? r[2].toString().trim() : '',
+      anio:       parseInt(r[3]) || 0,
+      mes:        parseInt(r[4]) || 0,
+      quincena:   r[5] ? r[5].toString().trim() : '',
+      cuenta:     r[6] ? r[6].toString().trim() : '',
+      proyecto:   r[7] ? r[7].toString().trim() : '',
+      gerente:    r[8] ? r[8].toString().trim() : '',
+      supervisor: r[9] ? r[9].toString().trim() : '',
+      nombres:    r[10] ? r[10].toString().trim() : '',
+      dni:        r[11] ? r[11].toString().trim() : '',
+      ubigeo:     r[12] ? r[12].toString().trim() : '',
+      ciudad:     r[13] ? r[13].toString().trim() : '',
+      banco:      r[14] ? r[14].toString().trim() : '',
+      numCuenta:  r[15] ? r[15].toString().trim() : '',
+      numCCI:     r[16] ? r[16].toString().trim() : '',
+      total:      parseFloat(r[17]) || 0,
+    }));
+    return jsonResp({ rows: result, count: result.length });
   }
 
   // ── GET COSTO PERSONAL ──────────────────────────────────────────
@@ -514,22 +572,83 @@ function handlePost(e) {
 
   // ── SAVE CONFIG CAMPO (horario/jornada por subtipo) ─────────────
   if (accion === 'saveConfigCampo') {
-    const sh = getOrCreate(ss, SHEET_CONFIG_CAMPO, ['Subtipo','Hora_Entrada','Horas_Jornada','Horas_Mes']);
-    const { subtipo, entrada, jornada, horasMes } = body;
+    const sh = getOrCreate(ss, SHEET_CONFIG_CAMPO, ['Subtipo','Hora_Entrada','Horas_Jornada']);
+    const { subtipo, entrada, jornada } = body;
     if (!subtipo) return jsonResp({ error: 'subtipo requerido' });
     const jVal = (jornada !== undefined && jornada !== '') ? jornada : '';
-    const hmVal = (horasMes !== undefined && horasMes !== '') ? horasMes : '';
     const data  = sh.getDataRange().getValues();
     let found   = -1;
     for (let i = 1; i < data.length; i++) {
       if (data[i][0].toString().trim().toLowerCase() === subtipo.toString().trim().toLowerCase()) { found = i; break; }
     }
     if (found > 0) {
-      sh.getRange(found + 1, 2, 1, 3).setValues([[entrada || '', jVal, hmVal]]);
+      sh.getRange(found + 1, 2, 1, 2).setValues([[entrada || '', jVal]]);
     } else {
-      sh.appendRow([subtipo, entrada || '', jVal, hmVal]);
+      sh.appendRow([subtipo, entrada || '', jVal]);
     }
     return jsonResp({ ok: true, action: found > 0 ? 'updated' : 'created' });
+  }
+
+  // ── SAVE HORAS CAMPO (horas objetivo al mes por subtipo) ────────
+  if (accion === 'saveHorasCampo') {
+    const sh = getOrCreate(ss, SHEET_HORAS_CAMPO, ['Anio','Mes','Subtipo','Horas']);
+    const { anio, mes, subtipo, horas } = body;
+    if (!anio || !mes || !subtipo) return jsonResp({ error: 'anio, mes y subtipo son requeridos' });
+    const data = sh.getDataRange().getValues();
+    let found  = -1;
+    for (let i = 1; i < data.length; i++) {
+      if (parseInt(data[i][0]) === parseInt(anio) &&
+          parseInt(data[i][1]) === parseInt(mes) &&
+          data[i][2].toString().trim().toLowerCase() === subtipo.toString().trim().toLowerCase()) { found = i; break; }
+    }
+    if (found > 0) {
+      sh.getRange(found + 1, 4).setValue(parseFloat(horas) || 0);
+    } else {
+      sh.appendRow([parseInt(anio), parseInt(mes), subtipo, parseFloat(horas) || 0]);
+    }
+    return jsonResp({ ok: true, action: found > 0 ? 'updated' : 'created' });
+  }
+
+  // ── SAVE PLANILLA (una fila; upsert por ID) ─────────────────────
+  if (accion === 'savePlanilla') {
+    const sh = getOrCreate(ss, SHEET_PLANILLA, ['ID','Razon_Social','Tipo_Personal','Anio','Mes','Quincena','Cuenta','Proyecto','Gerente','Supervisor','Nombres','DNI','Ubigeo','Ciudad','Banco','Num_Cuenta','Num_CCI','Total_Pagar']);
+    let b = body;
+    const data = sh.getDataRange().getValues();
+    let id = b.id ? b.id.toString().trim() : '';
+    let found = -1;
+    if (id) { for (let i = 1; i < data.length; i++) { if (data[i][0].toString().trim() === id) { found = i; break; } } }
+    if (!id) id = nextPlanillaId(data);
+    const row = planillaRow(id, b);
+    if (found > 0) sh.getRange(found + 1, 1, 1, 18).setValues([row]);
+    else sh.appendRow(row);
+    return jsonResp({ ok: true, action: found > 0 ? 'updated' : 'created', id: id });
+  }
+
+  // ── SAVE PLANILLA BULK (carga masiva) ───────────────────────────
+  if (accion === 'savePlanillaBulk') {
+    const sh = getOrCreate(ss, SHEET_PLANILLA, ['ID','Razon_Social','Tipo_Personal','Anio','Mes','Quincena','Cuenta','Proyecto','Gerente','Supervisor','Nombres','DNI','Ubigeo','Ciudad','Banco','Num_Cuenta','Num_CCI','Total_Pagar']);
+    const items = body.rows || [];
+    if (!items.length) return jsonResp({ error: 'Sin filas para cargar' });
+    const data = sh.getDataRange().getValues();
+    let maxId = 0;
+    for (let i = 1; i < data.length; i++) { const n = parseInt((data[i][0]||'').toString().replace(/\D/g,''),10); if (!isNaN(n) && n>maxId) maxId=n; }
+    const nuevas = items.map(b => planillaRow(String(++maxId).padStart(5,'0'), b));
+    if (nuevas.length) sh.getRange(sh.getLastRow() + 1, 1, nuevas.length, 18).setValues(nuevas);
+    return jsonResp({ ok: true, count: nuevas.length });
+  }
+
+  // ── DELETE PLANILLA ─────────────────────────────────────────────
+  if (accion === 'deletePlanilla') {
+    const sh = ss.getSheetByName(SHEET_PLANILLA);
+    if (!sh) return jsonResp({ error: 'Pestaña no encontrada' });
+    const { id } = body;
+    if (!id) return jsonResp({ error: 'id requerido' });
+    const idStr = id.toString().trim();
+    const data  = sh.getDataRange().getValues();
+    for (let i = 1; i < data.length; i++) {
+      if (data[i][0].toString().trim() === idStr) { sh.deleteRow(i + 1); return jsonResp({ ok: true, action: 'deleted' }); }
+    }
+    return jsonResp({ ok: false, error: 'ID no encontrado' });
   }
 
   // ── SAVE COSTO PERSONAL ─────────────────────────────────────────
@@ -610,6 +729,26 @@ function handlePost(e) {
 // ════════════════════════════════════════════════════════════════════
 //  HELPERS
 // ════════════════════════════════════════════════════════════════════
+// Construye la fila de Planilla (18 columnas) desde el objeto del front
+function planillaRow(id, b) {
+  return [
+    id,
+    b.razon || '', b.tipo || '', parseInt(b.anio) || '', parseInt(b.mes) || '', b.quincena || '',
+    b.cuenta || '', b.proyecto || '', b.gerente || '', b.supervisor || '', b.nombres || '',
+    b.dni || '', b.ubigeo || '', b.ciudad || '', b.banco || '', b.numCuenta || '', b.numCCI || '',
+    parseFloat(b.total) || 0,
+  ];
+}
+// ID incremental de 5 dígitos para planilla
+function nextPlanillaId(data) {
+  let max = 0;
+  for (let i = 1; i < data.length; i++) {
+    const n = parseInt((data[i][0] || '').toString().replace(/\D/g, ''), 10);
+    if (!isNaN(n) && n > max) max = n;
+  }
+  return String(max + 1).padStart(5, '0');
+}
+
 // Genera un ID numérico incremental de 3 dígitos para inventario
 function nextInvId(data) {
   let max = 0;
