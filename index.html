@@ -346,6 +346,16 @@ th.sortable.asc,th.sortable.desc{background:rgba(255,255,255,.1)!important}
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
     </div>
     <div class="sb-icon-sep"></div>
+    <!-- Costo de personal -->
+    <div class="sb-icon" data-page="costo" onclick="showPage('costo')" title="Costo de personal">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+    </div>
+    <div class="sb-icon-sep"></div>
+    <!-- Inventario -->
+    <div class="sb-icon" data-page="inventario" onclick="showPage('inventario')" title="Inventario de activos">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+    </div>
+    <div class="sb-icon-sep"></div>
     <!-- Config -->
     <div class="sb-icon" data-page="config" onclick="showPage('config')" title="Configuración">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M12 2v2M12 20v2M2 12h2M20 12h2M17.66 17.66l-1.41-1.41M6.34 17.66l1.41-1.41"/></svg>
@@ -377,6 +387,10 @@ th.sortable.asc,th.sortable.desc{background:rgba(255,255,255,.1)!important}
     <!-- Asistencia Campo -->
     <div class="sb-section">
       <div class="sb-section-title">Personal Campo</div>
+      <div class="sb-item" data-page="campo" onclick="showPageCampo('campo')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Personal de campo
+      </div>
       <div class="sb-item" data-page="asistencia" data-tipo="Campo" onclick="showPageCampo('asistencia')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         Asistencia Campo
@@ -384,6 +398,19 @@ th.sortable.asc,th.sortable.desc{background:rgba(255,255,255,.1)!important}
       <div class="sb-item" data-page="vacaciones" data-tipo="Campo" onclick="showPageCampo('vacaciones')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l4-8 4 4 4-6 4 10"/><path d="M3 21h18"/></svg>
         Vacaciones Campo
+      </div>
+    </div>
+    <div class="sb-sep"></div>
+    <!-- Gestión -->
+    <div class="sb-section">
+      <div class="sb-section-title">Gestión</div>
+      <div class="sb-item" data-page="costo" onclick="showPage('costo')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Costo de personal
+      </div>
+      <div class="sb-item" data-page="inventario" onclick="showPage('inventario')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+        Inventario
       </div>
     </div>
     <div class="sb-sep"></div>
@@ -710,6 +737,170 @@ th.sortable.asc,th.sortable.desc{background:rgba(255,255,255,.1)!important}
         <button class="btn btn-outline" style="margin-top:8px" onclick="copyScript()">Copiar código</button>
       </div>
     </div>
+
+    <!-- Horarios Personal Campo -->
+    <div class="card" style="max-width:560px;padding:22px 24px;box-shadow:var(--sh2);margin-top:14px">
+      <div class="card-label" style="margin-bottom:4px">Horarios · Personal de campo</div>
+      <p style="font-size:12.5px;color:var(--mu);margin:0 0 14px">Define la hora de entrada y la duración de jornada (horas) para cada tipo de personal de campo. Se usa en la vista Personal de campo.</p>
+      <table class="pst" style="width:100%">
+        <thead><tr>
+          <th>Subtipo</th>
+          <th style="text-align:center">Hora de entrada</th>
+          <th style="text-align:center">Jornada (horas)</th>
+        </tr></thead>
+        <tbody id="cfg-campo-tbody">
+          <tr><td colspan="3" style="text-align:center;padding:20px;color:var(--hi)">Cargando…</td></tr>
+        </tbody>
+      </table>
+      <button class="btn btn-primary" style="margin-top:12px" onclick="saveConfigCampo()">Guardar horarios</button>
+      <span id="cfg-campo-msg" style="margin-left:10px;font-size:12.5px;color:var(--ok)"></span>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     PAGE: PERSONAL DE CAMPO
+════════════════════════════════════ -->
+<div class="page" id="page-campo">
+  <div class="ph">
+    <h1>Personal de campo</h1>
+    <div class="ph-row">
+      <p style="margin:0">Colaboradores de campo con su subtipo, horario de entrada y jornada.</p>
+      <div class="fgap"></div>
+      <button class="btn btn-outline" onclick="syncCampo()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        Sincronizar desde Sheets
+      </button>
+    </div>
+  </div>
+  <div class="tp active">
+    <div class="cards" id="campo-cards" style="margin-bottom:16px"></div>
+    <div class="ctrl" style="gap:8px">
+      <select class="fsel" id="campo-filtro-sub" onchange="renderCampoTable()" style="min-width:170px">
+        <option value="">Todos los subtipos</option>
+        <option value="Merch">Merch</option>
+        <option value="Promotor">Promotor</option>
+        <option value="Operaciones">Operaciones</option>
+        <option value="__none__">Sin subtipo</option>
+      </select>
+      <input class="finp" id="campo-buscar" placeholder="Buscar por nombre o DNI…" oninput="renderCampoTable()" style="width:220px">
+    </div>
+    <div class="tbl-wrap">
+      <table class="pst" id="campo-table">
+        <thead><tr>
+          <th class="sortable">DNI</th>
+          <th class="sortable">Nombre completo</th>
+          <th class="sortable">Cargo</th>
+          <th class="sortable">Área</th>
+          <th class="sortable" style="text-align:center">Subtipo</th>
+          <th style="text-align:center">Hora entrada</th>
+          <th style="text-align:center">Jornada</th>
+          <th style="text-align:center">Salida estimada</th>
+        </tr></thead>
+        <tbody id="campo-tbody"><tr><td colspan="8" style="text-align:center;padding:40px;color:var(--hi)">Sin personal de campo. Sincroniza desde Sheets.</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     PAGE: COSTO DE PERSONAL
+════════════════════════════════════ -->
+<div class="page" id="page-costo">
+  <div class="ph">
+    <h1>Costo de personal</h1>
+    <div class="ph-row">
+      <p style="margin:0">Costo mensual por categoría y quincena.</p>
+      <div class="fgap"></div>
+      <select class="fsel" id="costo-año" onchange="syncCosto()" style="min-width:110px">
+        <option value="2026">2026</option>
+        <option value="2025">2025</option>
+        <option value="2027">2027</option>
+      </select>
+      <button class="btn btn-outline" onclick="syncCosto()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        Sincronizar
+      </button>
+      <button class="btn btn-primary" onclick="openCostoEdit()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Ingresar montos
+      </button>
+    </div>
+  </div>
+  <div class="tp active">
+    <div class="cards" id="costo-cards" style="margin-bottom:16px"></div>
+    <div class="tbl-wrap" id="costo-wrap" style="overflow-x:auto"></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     PAGE: INVENTARIO
+════════════════════════════════════ -->
+<div class="page" id="page-inventario">
+  <div class="ph">
+    <h1>Inventario de activos</h1>
+    <div class="ph-row">
+      <p style="margin:0">Control de activos: disponible, asignado, mantenimiento o inactivo.</p>
+      <div class="fgap"></div>
+      <button class="btn btn-outline" onclick="syncInventario()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        Sincronizar
+      </button>
+      <button class="btn btn-primary" onclick="openInvModal()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Crear activo
+      </button>
+    </div>
+  </div>
+  <div class="tabs">
+    <div class="tab active" onclick="switchInvTab(this,'inv-lista')">📦 Inventario</div>
+    <div class="tab" onclick="switchInvTab(this,'inv-hist')">🕑 Historial de movimientos</div>
+  </div>
+  <div class="tp active" id="inv-lista">
+    <div class="cards" id="inv-cards" style="margin-bottom:16px"></div>
+    <div class="ctrl" style="gap:8px">
+      <select class="fsel" id="inv-filtro-estado" onchange="renderInventario()" style="min-width:160px">
+        <option value="">Todos los estados</option>
+        <option value="Disponible">Disponible</option>
+        <option value="Asignado">Asignado</option>
+        <option value="Mantenimiento">Mantenimiento</option>
+        <option value="Inactivo">Inactivo</option>
+      </select>
+      <input class="finp" id="inv-buscar" placeholder="Buscar por nombre, categoría o asignado…" oninput="renderInventario()" style="width:260px">
+    </div>
+    <div class="tbl-wrap">
+      <table class="pst" id="inv-table">
+        <thead><tr>
+          <th class="sortable">ID</th>
+          <th class="sortable">Nombre del activo</th>
+          <th class="sortable">Categoría</th>
+          <th class="sortable" style="text-align:center">Estado</th>
+          <th class="sortable">Asignado a</th>
+          <th>Observación</th>
+          <th style="text-align:center">Acciones</th>
+        </tr></thead>
+        <tbody id="inv-tbody"><tr><td colspan="7" style="text-align:center;padding:40px;color:var(--hi)">Sin activos registrados. Crea uno o sincroniza.</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="tp" id="inv-hist">
+    <div class="ctrl" style="gap:8px">
+      <button class="btn btn-outline" onclick="syncInvHist()">Actualizar historial</button>
+      <input class="finp" id="inv-hist-buscar" placeholder="Buscar en historial…" oninput="renderInvHistorial()" style="width:260px">
+    </div>
+    <div class="tbl-wrap">
+      <table class="pst" id="inv-hist-table">
+        <thead><tr>
+          <th class="sortable">Fecha</th>
+          <th class="sortable">Activo</th>
+          <th class="sortable" style="text-align:center">Estado</th>
+          <th class="sortable">Asignado a</th>
+          <th>Registrado por</th>
+          <th>Comentario</th>
+        </tr></thead>
+        <tbody id="inv-hist-tbody"><tr><td colspan="6" style="text-align:center;padding:40px;color:var(--hi)">Sin movimientos aún.</td></tr></tbody>
+      </table>
+    </div>
   </div>
 </div>
 
@@ -836,11 +1027,63 @@ th.sortable.asc,th.sortable.desc{background:rgba(255,255,255,.1)!important}
       <div class="fg"><label>Cargo</label><input type="text" id="np-cargo" placeholder="Analista SR"></div>
       <div class="fg"><label>Área</label><input type="text" id="np-area" placeholder="Operaciones"></div>
       <div class="fg"><label>Fecha de ingreso</label><input type="date" id="np-ingreso"></div>
-      <div class="fg"><label>Tipo *</label><select id="np-tipo" class="fsel" style="width:100%;height:34px"><option value="Staff">Staff</option><option value="Campo">Campo</option></select></div>
+      <div class="fg"><label>Tipo *</label><select id="np-tipo" class="fsel" style="width:100%;height:34px" onchange="onTipoChange()"><option value="Staff">Staff</option><option value="Campo">Campo</option></select></div>
+      <div class="fg" id="np-subtipo-wrap" style="display:none"><label>Subtipo (campo)</label><select id="np-subtipo" class="fsel" style="width:100%;height:34px"><option value="">— Selecciona —</option><option value="Merch">Merch</option><option value="Promotor">Promotor</option><option value="Operaciones">Operaciones</option></select></div>
     </div>
     <div class="mfooter">
       <button class="btn btn-outline" onclick="closeModal('modal-nuevo-personal')">Cancelar</button>
       <button class="btn btn-primary" onclick="guardarPersonal()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Crear / Editar Activo (Inventario) -->
+<div class="overlay" id="modal-inv">
+  <div class="modal">
+    <span class="mclose" onclick="closeModal('modal-inv')">✕</span>
+    <h2 id="inv-modal-title">Crear activo</h2>
+    <p class="msub">Registra o edita un activo de la empresa.</p>
+    <input type="hidden" id="inv-id">
+    <div class="form-grid">
+      <div class="fg full"><label>Nombre del activo *</label><input type="text" id="inv-nombre" placeholder="Macbook Pro 14&quot;"></div>
+      <div class="fg"><label>Categoría</label><input type="text" id="inv-categoria" list="inv-cat-list" placeholder="Computadores">
+        <datalist id="inv-cat-list"><option value="Computadores"><option value="Celulares"><option value="Camionetas"><option value="Impresoras"><option value="Mobiliario"><option value="Otros"></datalist>
+      </div>
+      <div class="fg"><label>Estado *</label><select id="inv-estado" class="fsel" style="width:100%;height:34px"><option value="Disponible">Disponible</option><option value="Asignado">Asignado</option><option value="Mantenimiento">Mantenimiento</option><option value="Inactivo">Inactivo</option></select></div>
+      <div class="fg"><label>Asignado a</label><input type="text" id="inv-asignado" placeholder="Nombre del colaborador"></div>
+      <div class="fg"><label>Registrado por</label><input type="text" id="inv-admin" placeholder="Tu nombre"></div>
+      <div class="fg full"><label>Observación / comentario del movimiento</label><input type="text" id="inv-obs" placeholder="Ej. Reservado a ventas, problema en pantalla…"></div>
+    </div>
+    <div class="mfooter">
+      <button class="btn btn-outline" onclick="closeModal('modal-inv')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarInventario()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Ingresar montos de Costo de personal -->
+<div class="overlay" id="modal-costo">
+  <div class="modal wide">
+    <span class="mclose" onclick="closeModal('modal-costo')">✕</span>
+    <h2>Ingresar montos de costo</h2>
+    <p class="msub">Ingresa el monto por categoría para la quincena seleccionada. Deja en blanco lo que no aplique.</p>
+    <div class="ctrl" style="gap:8px;margin-bottom:14px">
+      <select class="fsel" id="costo-edit-mes" style="min-width:130px">
+        <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option>
+        <option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option>
+        <option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option>
+        <option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
+      </select>
+      <select class="fsel" id="costo-edit-q" style="min-width:110px">
+        <option value="Q1">Quincena 1</option>
+        <option value="Q2">Quincena 2</option>
+      </select>
+      <button class="btn btn-outline" onclick="loadCostoEditValues()">Cargar valores</button>
+    </div>
+    <div class="form-grid" id="costo-edit-grid"></div>
+    <div class="mfooter">
+      <button class="btn btn-outline" onclick="closeModal('modal-costo')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarCosto()">Guardar montos</button>
     </div>
   </div>
 </div>
@@ -981,18 +1224,28 @@ const STATE = {
   descuentos: JSON.parse(localStorage.getItem('tt_descuentos') || '{}'),
   activeMes: localStorage.getItem('tt_active_mes') || '',
   lastSync: localStorage.getItem('tt_last_sync') || '',
+  configCampo: JSON.parse(localStorage.getItem('tt_config_campo') || '[]'),
+  costo: JSON.parse(localStorage.getItem('tt_costo') || '[]'),
+  inventario: JSON.parse(localStorage.getItem('tt_inventario') || '[]'),
+  invHist: JSON.parse(localStorage.getItem('tt_inv_hist') || '[]'),
 };
+
+// Subtipos de personal de campo y categorías de costo
+const SUBTIPOS_CAMPO = ['Merch','Promotor','Operaciones'];
+const COSTO_CATS = ['TRAD','PRACTICANTES','TTA','RXH','LIQUIDACIONES'];
 
 function persist(key) {
   const map = {
     personal:'tt_personal', asistencia:'tt_asistencia',
     mesConfig:'tt_mes_config', resumen:'tt_resumen', descuentos:'tt_descuentos',
+    configCampo:'tt_config_campo', costo:'tt_costo',
+    inventario:'tt_inventario', invHist:'tt_inv_hist',
   };
   if (map[key]) localStorage.setItem(map[key], JSON.stringify(STATE[key]));
 }
 
 // ── NAVIGATION ─────────────────────────────────────────────
-const SISTEMA_PAGES = ['personal','config'];
+const SISTEMA_PAGES = ['personal','config','costo'];
 let _sistemaUnlocked = sessionStorage.getItem('tt_sis_ok')    === '1';
 let _campoUnlocked   = sessionStorage.getItem('tt_campo_ok')  === '1';
 let _pendingPage      = null;
@@ -1037,7 +1290,19 @@ function _navigateTo(id) {
   }
   if (id === 'personal') renderPersonalTable();
   if (id === 'dashboard') updateDashboard();
-  if (id === 'config') renderConfigPage();
+  if (id === 'config') { renderConfigPage(); renderConfigCampo(); if (STATE.sheetsUrl) syncConfigCampo().then(renderConfigCampo).catch(()=>{}); }
+  if (id === 'campo') {
+    renderCampoTable();
+    if (STATE.sheetsUrl) Promise.all([syncPersonalFromSheets(), syncConfigCampo()]).then(renderCampoTable).catch(()=>{});
+  }
+  if (id === 'costo') {
+    renderCosto();
+    if (STATE.sheetsUrl) syncCosto();
+  }
+  if (id === 'inventario') {
+    renderInventario(); renderInvHistorial();
+    if (STATE.sheetsUrl) { syncInventario(); syncInvHist(); }
+  }
   if (id === 'vacaciones') {
     renderVacResumen();
     if (STATE.sheetsUrl) {
@@ -1288,6 +1553,7 @@ async function syncPersonalFromSheets() {
     area: (r[4]||'').toString().trim(),
     fecha_ingreso: (r[5]||'').toString().trim(),
     tipo: (r[6]||'Staff').toString().trim() || 'Staff',
+    subtipo: (r[7]||'').toString().trim(),
   })).filter(p => p.dni && p.nombre);
   persist('personal');
 }
@@ -1903,13 +2169,21 @@ function renderPersonalTable(filter='') {
 
 function filterPersonal(q) { renderPersonalTable(q); }
 
+function onTipoChange() {
+  const tipo = document.getElementById('np-tipo')?.value || 'Staff';
+  const wrap = document.getElementById('np-subtipo-wrap');
+  if (wrap) wrap.style.display = tipo === 'Campo' ? '' : 'none';
+}
+
 function openNuevoPersonal() {
   ['np-dni','np-ficha','np-nombre','np-cargo','np-area'].forEach(id => {
     const el = document.getElementById(id); if(el) el.value='';
   });
   const tipoSel = document.getElementById('np-tipo'); if(tipoSel) tipoSel.value='Staff';
+  const subSel = document.getElementById('np-subtipo'); if(subSel) subSel.value='';
   const fi = document.getElementById('np-ingreso');
   if(fi) fi.value = '';
+  onTipoChange();
   openModal('modal-nuevo-personal');
 }
 
@@ -1921,14 +2195,15 @@ async function guardarPersonal() {
   const area   = document.getElementById('np-area')?.value.trim();
   const fi     = document.getElementById('np-ingreso')?.value.trim();
   const tipo   = document.getElementById('np-tipo')?.value || 'Staff';
+  const subtipo = tipo === 'Campo' ? (document.getElementById('np-subtipo')?.value || '') : '';
   if (!dni || !nombre) { toast('DNI y Nombre son obligatorios','warn'); return; }
 
   // Check duplicate
   const exists = STATE.personal.find(p => p.dni === dni);
   if (exists) {
-    Object.assign(exists, {nombre, ficha_buk:ficha, cargo, area, fecha_ingreso:fi, tipo});
+    Object.assign(exists, {nombre, ficha_buk:ficha, cargo, area, fecha_ingreso:fi, tipo, subtipo});
   } else {
-    STATE.personal.push({dni, nombre, ficha_buk:ficha, cargo, area, fecha_ingreso:fi, tipo});
+    STATE.personal.push({dni, nombre, ficha_buk:ficha, cargo, area, fecha_ingreso:fi, tipo, subtipo});
   }
   persist('personal');
   renderPersonalTable();
@@ -1938,7 +2213,7 @@ async function guardarPersonal() {
 
   // Sync to Sheets in background
   if (STATE.sheetsUrl) {
-    const ok = await postToSheets({accion:'savePersonal',dni,nombre,ficha_buk:ficha,cargo,area,fecha_ingreso:fi,tipo});
+    const ok = await postToSheets({accion:'savePersonal',dni,nombre,ficha_buk:ficha,cargo,area,fecha_ingreso:fi,tipo,subtipo});
     if (ok) { flashSync(); toast(`✓ ${nombre} sincronizado en Sheets`,'ok'); }
   }
 }
@@ -2096,42 +2371,506 @@ function minsToHora(t) {
 }
 
 // ════════════════════════════════════════════════════════════
+//  HELPERS COMPARTIDOS (nuevos módulos)
+// ════════════════════════════════════════════════════════════
+function fmtSoles(n) {
+  const v = Number(n) || 0;
+  return 'S/ ' + v.toLocaleString('es-PE', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+}
+function escHtml(s) {
+  return (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+// Suma horas a una hora "HH:MM" y devuelve "HH:MM" (para salida estimada)
+function addHoras(entrada, horas) {
+  if (!entrada || !horas) return '—';
+  const m = entrada.toString().match(/^(\d{1,2}):(\d{2})/);
+  if (!m) return '—';
+  let total = parseInt(m[1])*60 + parseInt(m[2]) + Math.round(parseFloat(horas)*60);
+  total = ((total % 1440) + 1440) % 1440;
+  const h = Math.floor(total/60), mm = total%60;
+  return String(h).padStart(2,'0') + ':' + String(mm).padStart(2,'0');
+}
+
+// ════════════════════════════════════════════════════════════
+//  CONFIG CAMPO — horarios y jornada por subtipo
+// ════════════════════════════════════════════════════════════
+async function syncConfigCampo() {
+  const data = await fetchFromSheets('getConfigCampo');
+  if (!data.rows) return;
+  STATE.configCampo = data.rows.map(r => ({
+    subtipo: (r.subtipo||'').toString().trim(),
+    entrada: (r.entrada||'').toString().trim(),
+    jornada: parseFloat(r.jornada) || 0,
+  }));
+  persist('configCampo');
+}
+
+function getCampoCfg(subtipo) {
+  return STATE.configCampo.find(c => (c.subtipo||'').toLowerCase() === (subtipo||'').toLowerCase())
+      || { subtipo, entrada:'', jornada:0 };
+}
+
+function renderConfigCampo() {
+  const tb = document.getElementById('cfg-campo-tbody');
+  if (!tb) return;
+  tb.innerHTML = SUBTIPOS_CAMPO.map(sub => {
+    const c = getCampoCfg(sub);
+    return `<tr>
+      <td style="font-weight:600">${sub}</td>
+      <td style="text-align:center"><input type="time" class="finp" id="cfg-ent-${sub}" value="${c.entrada||''}" style="width:120px"></td>
+      <td style="text-align:center"><input type="number" step="0.5" min="0" class="finp" id="cfg-jor-${sub}" value="${c.jornada||''}" placeholder="8" style="width:90px;text-align:center"></td>
+    </tr>`;
+  }).join('');
+}
+
+async function saveConfigCampo() {
+  const msg = document.getElementById('cfg-campo-msg');
+  const nuevos = [];
+  for (const sub of SUBTIPOS_CAMPO) {
+    const entrada = document.getElementById('cfg-ent-'+sub)?.value || '';
+    const jornada = parseFloat(document.getElementById('cfg-jor-'+sub)?.value) || 0;
+    nuevos.push({ subtipo: sub, entrada, jornada });
+  }
+  STATE.configCampo = nuevos;
+  persist('configCampo');
+  renderCampoTable();
+  if (STATE.sheetsUrl) {
+    let ok = true;
+    for (const c of nuevos) {
+      const r = await postToSheets({ accion:'saveConfigCampo', subtipo:c.subtipo, entrada:c.entrada, jornada:c.jornada });
+      ok = ok && r;
+    }
+    if (ok) { flashSync(); if (msg) { msg.textContent = '✓ Horarios guardados'; setTimeout(()=>msg.textContent='',3000); } }
+  } else {
+    toast('✓ Horarios guardados localmente','ok');
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+//  PERSONAL DE CAMPO — listado
+// ════════════════════════════════════════════════════════════
+async function syncCampo() {
+  if (!STATE.sheetsUrl) { toast('Conecta Google Sheets primero','warn'); return; }
+  showLoading('Sincronizando personal de campo…');
+  try {
+    await Promise.all([syncPersonalFromSheets(), syncConfigCampo()]);
+    renderCampoTable();
+    flashSync();
+    toast('✓ Personal de campo actualizado','ok');
+  } catch(e) {
+    toast('Error: '+e.message,'warn');
+  } finally { hideLoading(); }
+}
+
+function renderCampoTable() {
+  const tb = document.getElementById('campo-tbody');
+  if (!tb) return;
+  const fSub = document.getElementById('campo-filtro-sub')?.value || '';
+  const q = (document.getElementById('campo-buscar')?.value || '').toLowerCase().trim();
+
+  let data = STATE.personal.filter(p => (p.tipo||'') === 'Campo');
+  // KPIs
+  const cardsEl = document.getElementById('campo-cards');
+  if (cardsEl) {
+    const cnt = s => data.filter(p => (p.subtipo||'') === s).length;
+    const sinSub = data.filter(p => !p.subtipo).length;
+    cardsEl.innerHTML = `
+      <div class="card"><div class="card-label">Total campo</div><div class="card-value">${data.length}</div><div class="card-sub">colaboradores</div></div>
+      <div class="card"><div class="card-label">Merch</div><div class="card-value">${cnt('Merch')}</div><div class="card-sub">${horarioSub('Merch')}</div></div>
+      <div class="card"><div class="card-label">Promotor</div><div class="card-value">${cnt('Promotor')}</div><div class="card-sub">${horarioSub('Promotor')}</div></div>
+      <div class="card"><div class="card-label">Operaciones</div><div class="card-value">${cnt('Operaciones')}</div><div class="card-sub">${horarioSub('Operaciones')}</div></div>
+      ${sinSub?`<div class="card"><div class="card-label">Sin subtipo</div><div class="card-value warn">${sinSub}</div><div class="card-sub">asignar en Base personal</div></div>`:''}`;
+  }
+
+  if (fSub === '__none__') data = data.filter(p => !p.subtipo);
+  else if (fSub) data = data.filter(p => (p.subtipo||'') === fSub);
+  if (q) data = data.filter(p => p.nombre.toLowerCase().includes(q) || p.dni.includes(q));
+
+  if (!data.length) {
+    tb.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--hi)">Sin personal de campo con esos filtros.</td></tr>';
+    return;
+  }
+  tb.innerHTML = data.map(p => {
+    const c = p.subtipo ? getCampoCfg(p.subtipo) : {entrada:'',jornada:0};
+    const subBadge = p.subtipo
+      ? `<span style="background:#dcfce7;color:#15803d;border:1px solid #86efac;border-radius:10px;padding:2px 8px;font-size:11px;font-weight:600">${p.subtipo}</span>`
+      : `<span style="background:#fee2e2;color:#b91c1c;border:1px solid #fecaca;border-radius:10px;padding:2px 8px;font-size:11px;font-weight:600">Sin subtipo</span>`;
+    const salida = (c.entrada && c.jornada) ? addHoras(c.entrada, c.jornada) : '—';
+    return `<tr>
+      <td class="mono" style="color:var(--mu)">${p.dni}</td>
+      <td style="font-weight:600">${escHtml(p.nombre)}</td>
+      <td>${escHtml(p.cargo)||'—'}</td>
+      <td>${p.area?`<span class="tag-area">${escHtml(p.area)}</span>`:'—'}</td>
+      <td style="text-align:center">${subBadge}</td>
+      <td style="text-align:center">${c.entrada||'—'}</td>
+      <td style="text-align:center">${c.jornada?c.jornada+' h':'—'}</td>
+      <td style="text-align:center">${salida}</td>
+    </tr>`;
+  }).join('');
+  applySortable && applySortable('campo-table');
+}
+
+function horarioSub(sub) {
+  const c = getCampoCfg(sub);
+  if (!c.entrada && !c.jornada) return 'sin horario';
+  return (c.entrada||'—') + ' · ' + (c.jornada?c.jornada+'h':'—');
+}
+
+// ════════════════════════════════════════════════════════════
+//  COSTO DE PERSONAL — por categoría y quincena
+// ════════════════════════════════════════════════════════════
+const COSTO_MESES = ['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+async function syncCosto() {
+  if (!STATE.sheetsUrl) { renderCosto(); return; }
+  const año = document.getElementById('costo-año')?.value || '2026';
+  try {
+    const data = await fetchFromSheets('getCostoPersonal', { anio: año });
+    STATE.costo = (data.rows||[]).map(r => ({
+      anio: parseInt(r.anio)||0, mes: parseInt(r.mes)||0,
+      quincena: (r.quincena||'').toString().trim(),
+      categoria: (r.categoria||'').toString().trim(),
+      monto: parseFloat(r.monto)||0,
+    }));
+    persist('costo');
+    renderCosto();
+    flashSync();
+  } catch(e) { console.warn(e); renderCosto(); }
+}
+
+function costoLookup(año, mes, q, cat) {
+  const row = STATE.costo.find(r => r.anio==año && r.mes==mes && r.quincena===q && r.categoria===cat);
+  return row ? row.monto : 0;
+}
+
+function renderCosto() {
+  const wrap = document.getElementById('costo-wrap');
+  if (!wrap) return;
+  const año = parseInt(document.getElementById('costo-año')?.value || '2026');
+  // Meses/quincenas con al menos un dato registrado ese año
+  const colsConDatos = [];
+  for (let m=1; m<=12; m++) {
+    for (const q of ['Q1','Q2']) {
+      const hay = STATE.costo.some(r => r.anio===año && r.mes===m && r.quincena===q);
+      if (hay) colsConDatos.push({m,q});
+    }
+  }
+  // Si no hay datos aún, muestra hasta el mes actual
+  let cols = colsConDatos;
+  if (!cols.length) {
+    const hoyMes = (año === new Date().getFullYear()) ? (new Date().getMonth()+1) : 12;
+    for (let m=1; m<=hoyMes; m++) for (const q of ['Q1','Q2']) cols.push({m,q});
+  }
+
+  // KPIs
+  const totalAnual = STATE.costo.filter(r=>r.anio===año).reduce((a,r)=>a+r.monto,0);
+  const cardsEl = document.getElementById('costo-cards');
+  if (cardsEl) {
+    const porCat = COSTO_CATS.map(cat => {
+      const t = STATE.costo.filter(r=>r.anio===año && r.categoria===cat).reduce((a,r)=>a+r.monto,0);
+      return {cat, t};
+    });
+    cardsEl.innerHTML =
+      `<div class="card"><div class="card-label">Costo total ${año}</div><div class="card-value" style="font-size:18px">${fmtSoles(totalAnual)}</div><div class="card-sub">acumulado del año</div></div>` +
+      porCat.map(x=>`<div class="card"><div class="card-label">${x.cat}</div><div class="card-value" style="font-size:15px">${fmtSoles(x.t)}</div><div class="card-sub">acumulado ${año}</div></div>`).join('');
+  }
+
+  if (!cols.length) { wrap.innerHTML = '<div class="empty" style="padding:40px;text-align:center;color:var(--hi)">Sin datos. Usa "Ingresar montos".</div>'; return; }
+
+  let html = '<table class="pst" style="min-width:'+(180+cols.length*120)+'px"><thead><tr>';
+  html += '<th style="position:sticky;left:0;background:var(--sf2);z-index:2">PLANILLA</th>';
+  cols.forEach(c => { html += `<th style="text-align:right">${COSTO_MESES[c.m]} ${c.q}</th>`; });
+  html += '</tr></thead><tbody>';
+  COSTO_CATS.forEach(cat => {
+    html += `<tr><td style="font-weight:600;position:sticky;left:0;background:#fff;z-index:1">${cat}</td>`;
+    cols.forEach(c => {
+      const v = costoLookup(año, c.m, c.q, cat);
+      html += `<td style="text-align:right;${v?'':'color:var(--hi)'}">${v?fmtSoles(v):'—'}</td>`;
+    });
+    html += '</tr>';
+  });
+  // Fila TOTAL
+  html += `<tr style="border-top:2px solid var(--bd);font-weight:700;background:var(--sf3)"><td style="position:sticky;left:0;background:var(--sf3);z-index:1">TOTAL</td>`;
+  cols.forEach(c => {
+    const t = COSTO_CATS.reduce((a,cat)=>a+costoLookup(año,c.m,c.q,cat),0);
+    html += `<td style="text-align:right">${t?fmtSoles(t):'—'}</td>`;
+  });
+  html += '</tr></tbody></table>';
+  wrap.innerHTML = html;
+}
+
+function openCostoEdit() {
+  const año = document.getElementById('costo-año')?.value || '2026';
+  const now = new Date();
+  const mesEl = document.getElementById('costo-edit-mes');
+  if (mesEl) mesEl.value = (parseInt(año)===now.getFullYear()) ? (now.getMonth()+1) : 1;
+  loadCostoEditValues();
+  openModal('modal-costo');
+}
+
+function loadCostoEditValues() {
+  const año = parseInt(document.getElementById('costo-año')?.value || '2026');
+  const mes = parseInt(document.getElementById('costo-edit-mes')?.value || '1');
+  const q   = document.getElementById('costo-edit-q')?.value || 'Q1';
+  const grid = document.getElementById('costo-edit-grid');
+  if (!grid) return;
+  grid.innerHTML = COSTO_CATS.map(cat => {
+    const v = costoLookup(año, mes, q, cat);
+    return `<div class="fg"><label>${cat} (S/)</label><input type="number" step="0.01" min="0" class="finp" id="costo-in-${cat}" value="${v||''}" placeholder="0.00"></div>`;
+  }).join('');
+}
+
+async function guardarCosto() {
+  const año = parseInt(document.getElementById('costo-año')?.value || '2026');
+  const mes = parseInt(document.getElementById('costo-edit-mes')?.value || '1');
+  const q   = document.getElementById('costo-edit-q')?.value || 'Q1';
+  for (const cat of COSTO_CATS) {
+    const monto = parseFloat(document.getElementById('costo-in-'+cat)?.value) || 0;
+    // upsert local
+    let row = STATE.costo.find(r => r.anio===año && r.mes===mes && r.quincena===q && r.categoria===cat);
+    if (row) row.monto = monto;
+    else STATE.costo.push({anio:año, mes, quincena:q, categoria:cat, monto});
+    if (STATE.sheetsUrl) {
+      await postToSheets({accion:'saveCostoPersonal', anio:año, mes, quincena:q, categoria:cat, monto});
+    }
+  }
+  persist('costo');
+  renderCosto();
+  closeModal('modal-costo');
+  flashSync();
+  toast(`✓ Montos guardados (${COSTO_MESES[mes]} ${q})`,'ok');
+}
+
+// ════════════════════════════════════════════════════════════
+//  INVENTARIO — activos + historial
+// ════════════════════════════════════════════════════════════
+const INV_ESTADO_BADGE = {
+  'Disponible':   'background:#dcfce7;color:#15803d;border:1px solid #86efac',
+  'Asignado':     'background:#dbeafe;color:#1d4ed8;border:1px solid #93c5fd',
+  'Mantenimiento':'background:#fef3c7;color:#b45309;border:1px solid #fcd34d',
+  'Inactivo':     'background:#fee2e2;color:#b91c1c;border:1px solid #fecaca',
+};
+function invBadge(estado) {
+  const st = INV_ESTADO_BADGE[estado] || INV_ESTADO_BADGE['Disponible'];
+  return `<span style="${st};border-radius:10px;padding:2px 10px;font-size:11px;font-weight:600">${escHtml(estado||'Disponible')}</span>`;
+}
+
+async function syncInventario() {
+  if (!STATE.sheetsUrl) { renderInventario(); return; }
+  try {
+    const data = await fetchFromSheets('getInventario');
+    STATE.inventario = (data.rows||[]).map(r => ({
+      id:(r.id||'').toString().trim(), nombre:(r.nombre||'').toString().trim(),
+      categoria:(r.categoria||'').toString().trim(), estado:(r.estado||'Disponible').toString().trim(),
+      asignado:(r.asignado||'').toString().trim(), creacion:(r.creacion||'').toString().trim(),
+      obs:(r.obs||'').toString().trim(),
+    }));
+    persist('inventario');
+    renderInventario();
+    flashSync();
+  } catch(e) { console.warn(e); renderInventario(); }
+}
+
+async function syncInvHist() {
+  if (!STATE.sheetsUrl) { renderInvHistorial(); return; }
+  try {
+    const data = await fetchFromSheets('getInvHistorial');
+    STATE.invHist = (data.rows||[]).map(r => ({
+      fecha:(r.fecha||'').toString().trim(), id_activo:(r.id_activo||'').toString().trim(),
+      nombre:(r.nombre||'').toString().trim(), estado:(r.estado||'').toString().trim(),
+      asignado:(r.asignado||'').toString().trim(), admin:(r.admin||'').toString().trim(),
+      comentario:(r.comentario||'').toString().trim(),
+    }));
+    persist('invHist');
+    renderInvHistorial();
+  } catch(e) { console.warn(e); renderInvHistorial(); }
+}
+
+function switchInvTab(el, id) {
+  document.querySelectorAll('#page-inventario .tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('#page-inventario .tp').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(id)?.classList.add('active');
+  if (id === 'inv-hist' && STATE.sheetsUrl) syncInvHist();
+}
+
+function renderInventario() {
+  const tb = document.getElementById('inv-tbody');
+  if (!tb) return;
+  const fEst = document.getElementById('inv-filtro-estado')?.value || '';
+  const q = (document.getElementById('inv-buscar')?.value || '').toLowerCase().trim();
+
+  // KPIs
+  const cardsEl = document.getElementById('inv-cards');
+  if (cardsEl) {
+    const cnt = e => STATE.inventario.filter(a => a.estado === e).length;
+    cardsEl.innerHTML = `
+      <div class="card"><div class="card-label">Total activos</div><div class="card-value">${STATE.inventario.length}</div><div class="card-sub">en inventario</div></div>
+      <div class="card"><div class="card-label">Disponibles</div><div class="card-value" style="color:#15803d">${cnt('Disponible')}</div><div class="card-sub">libres</div></div>
+      <div class="card"><div class="card-label">Asignados</div><div class="card-value" style="color:#1d4ed8">${cnt('Asignado')}</div><div class="card-sub">en uso</div></div>
+      <div class="card"><div class="card-label">Mantenimiento</div><div class="card-value warn">${cnt('Mantenimiento')}</div><div class="card-sub">en reparación</div></div>
+      <div class="card"><div class="card-label">Inactivos</div><div class="card-value" style="color:#b91c1c">${cnt('Inactivo')}</div><div class="card-sub">de baja</div></div>`;
+  }
+
+  let data = STATE.inventario.slice();
+  if (fEst) data = data.filter(a => a.estado === fEst);
+  if (q) data = data.filter(a => (a.nombre+' '+a.categoria+' '+a.asignado).toLowerCase().includes(q));
+
+  if (!data.length) {
+    tb.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--hi)">Sin activos con esos filtros.</td></tr>';
+    return;
+  }
+  tb.innerHTML = data.map(a => `<tr>
+    <td class="mono" style="color:var(--mu)">${escHtml(a.id)}</td>
+    <td style="font-weight:600">${escHtml(a.nombre)}</td>
+    <td>${escHtml(a.categoria)||'—'}</td>
+    <td style="text-align:center">${invBadge(a.estado)}</td>
+    <td>${escHtml(a.asignado)||'—'}</td>
+    <td style="color:var(--mu);font-size:12px">${escHtml(a.obs)||'—'}</td>
+    <td style="text-align:center;white-space:nowrap">
+      <button class="btn btn-outline" style="padding:3px 8px;font-size:11px" onclick="openInvModal('${escHtml(a.id)}')">Editar</button>
+      <button class="btn btn-outline" style="padding:3px 8px;font-size:11px" onclick="deleteInventario('${escHtml(a.id)}')">Eliminar</button>
+    </td>
+  </tr>`).join('');
+  applySortable && applySortable('inv-table');
+}
+
+function openInvModal(id) {
+  const isEdit = !!id;
+  document.getElementById('inv-modal-title').textContent = isEdit ? 'Editar activo' : 'Crear activo';
+  const a = isEdit ? STATE.inventario.find(x=>x.id===id) : null;
+  document.getElementById('inv-id').value       = a ? a.id : '';
+  document.getElementById('inv-nombre').value   = a ? a.nombre : '';
+  document.getElementById('inv-categoria').value= a ? a.categoria : '';
+  document.getElementById('inv-estado').value   = a ? a.estado : 'Disponible';
+  document.getElementById('inv-asignado').value = a ? a.asignado : '';
+  document.getElementById('inv-obs').value      = '';
+  openModal('modal-inv');
+}
+
+async function guardarInventario() {
+  const id       = document.getElementById('inv-id').value.trim();
+  const nombre   = document.getElementById('inv-nombre').value.trim();
+  const categoria= document.getElementById('inv-categoria').value.trim();
+  const estado   = document.getElementById('inv-estado').value;
+  const asignado = document.getElementById('inv-asignado').value.trim();
+  const admin    = document.getElementById('inv-admin').value.trim();
+  const obs      = document.getElementById('inv-obs').value.trim();
+  if (!nombre) { toast('El nombre del activo es obligatorio','warn'); return; }
+
+  if (STATE.sheetsUrl) {
+    showLoading('Guardando activo…');
+    try {
+      const res = await fetch(STATE.sheetsUrl, {
+        method:'POST',
+        body: JSON.stringify({accion:'saveInventario', id, nombre, categoria, estado, asignado, obs, admin, comentario:obs}),
+      });
+      const json = await res.json().catch(()=>({}));
+      await syncInventario();
+      await syncInvHist();
+      flashSync();
+      toast('✓ Activo guardado','ok');
+    } catch(e) {
+      toast('Error: '+e.message,'warn');
+    } finally { hideLoading(); }
+  } else {
+    // offline local
+    if (id) {
+      const a = STATE.inventario.find(x=>x.id===id);
+      if (a) Object.assign(a, {nombre, categoria, estado, asignado, obs});
+    } else {
+      const newId = String(STATE.inventario.reduce((m,a)=>Math.max(m, parseInt((a.id||'').replace(/\D/g,''))||0),0)+1).padStart(3,'0');
+      STATE.inventario.push({id:newId, nombre, categoria, estado, asignado, obs, creacion:''});
+    }
+    persist('inventario');
+    renderInventario();
+    toast('✓ Activo guardado localmente','ok');
+  }
+  closeModal('modal-inv');
+}
+
+async function deleteInventario(id) {
+  const a = STATE.inventario.find(x=>x.id===id);
+  if (!a) return;
+  if (!confirm(`¿Eliminar el activo "${a.nombre}" (${id})? Esta acción no se puede deshacer.`)) return;
+  STATE.inventario = STATE.inventario.filter(x=>x.id!==id);
+  persist('inventario');
+  renderInventario();
+  if (STATE.sheetsUrl) {
+    await postToSheets({accion:'deleteInventario', id});
+    flashSync();
+  }
+  toast('Activo eliminado','ok');
+}
+
+function renderInvHistorial() {
+  const tb = document.getElementById('inv-hist-tbody');
+  if (!tb) return;
+  const q = (document.getElementById('inv-hist-buscar')?.value || '').toLowerCase().trim();
+  let data = STATE.invHist.slice().reverse(); // más reciente primero
+  if (q) data = data.filter(h => (h.nombre+' '+h.estado+' '+h.asignado+' '+h.admin+' '+h.comentario).toLowerCase().includes(q));
+  if (!data.length) {
+    tb.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--hi)">Sin movimientos registrados.</td></tr>';
+    return;
+  }
+  tb.innerHTML = data.map(h => `<tr>
+    <td style="color:var(--mu);font-size:12px;white-space:nowrap">${escHtml(h.fecha)}</td>
+    <td style="font-weight:600">${escHtml(h.nombre)} <span class="mono" style="color:var(--hi);font-weight:400">${escHtml(h.id_activo)}</span></td>
+    <td style="text-align:center">${invBadge(h.estado)}</td>
+    <td>${escHtml(h.asignado)||'—'}</td>
+    <td>${escHtml(h.admin)||'—'}</td>
+    <td style="color:var(--mu);font-size:12px">${escHtml(h.comentario)||'—'}</td>
+  </tr>`).join('');
+  applySortable && applySortable('inv-hist-table');
+}
+
+// ════════════════════════════════════════════════════════════
 //  APPS SCRIPT CODE (for display in Config)
 // ════════════════════════════════════════════════════════════
-const APPS_SCRIPT = `// ══════════════════════════════════════════════════════════
+const APPS_SCRIPT = `// ══════════════════════════════════════════════════════════════════
 // TT Audit RRHH — Apps Script v4
-// 1. Ve a Extensiones → Apps Script
-// 2. Reemplaza TODO el código con este
-// 3. Implementar → Nueva implementación
-//    Tipo: Aplicación web | Ejecutar como: Yo | Acceso: Cualquiera
-// 4. Copia la URL y pégala en Configuración de la plataforma
-// ══════════════════════════════════════════════════════════
+// ──────────────────────────────────────────────────────────────────
+// Pasos para desplegar:
+//   1. Ve a Extensiones → Apps Script en Google Sheets
+//   2. Reemplaza TODO el código con este archivo
+//   3. Implementar → Nueva implementación (o "Gestionar implementaciones" para actualizar)
+//      · Tipo:      Aplicación web
+//      · Ejecutar:  Yo (tu cuenta)
+//      · Acceso:    Cualquiera (Anyone)
+//   4. Copia la URL y pégala en Configuración → URL Apps Script
+//   5. Si es la primera vez, ejecuta initSheets() manualmente desde el editor
+// ══════════════════════════════════════════════════════════════════
 
-const SHEET_PERSONAL   = 'Datos generales personal';
-const SHEET_ASISTENCIA = 'Detalle de asistencia';
-const SHEET_VACACIONES = 'Vacaciones';
-const SHEET_RESUMEN    = 'Resumen Mensual';
-const SHEET_TARDANZAS  = 'Tardanzas Descuentos';
-const SS_ID            = '1s7r7KjxTYO_PK2obc_yQ9pXI8l-mEl3vbmrrfIqCrio';
+// ── Configuración ─────────────────────────────────────────────────
+const SS_ID              = '1s7r7KjxTYO_PK2obc_yQ9pXI8l-mEl3vbmrrfIqCrio';
+const SHEET_PERSONAL     = 'Datos generales personal';
+const SHEET_ASISTENCIA   = 'Detalle de asistencia';
+const SHEET_VACACIONES   = 'Vacaciones';
+const SHEET_RESUMEN      = 'Resumen Mensual';
+const SHEET_TARDANZAS    = 'Tardanzas Descuentos';
+const SHEET_CONFIG_VAC   = 'Config Vacaciones';
+const SHEET_CONFIG_CAMPO = 'Config Campo';        // horario entrada + jornada por subtipo
+const SHEET_COSTO        = 'Costo Personal';       // costo por categoria/quincena
+const SHEET_INVENTARIO   = 'Inventario';           // activos de la empresa
+const SHEET_INV_HIST     = 'Inventario Historial'; // historial de movimientos de activos
 
-// ── Obtener el Spreadsheet (activo o por ID) ─────────────────
+// ── Obtener el Spreadsheet (activo o por ID) ───────────────────────
 function getSS() {
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     if (ss) return ss;
-  } catch(e) {}
+  } catch (e) {
+    Logger.log('getActiveSpreadsheet falló, usando openById: ' + e.message);
+  }
   return SpreadsheetApp.openById(SS_ID);
 }
 
-// ── Crear o abrir pestaña con headers si está vacía ──────────
+// ── Crear o abrir pestaña; agrega headers si está vacía ────────────
 function getOrCreate(ss, name, headers) {
   if (!ss) ss = getSS();
   let sh = ss.getSheetByName(name);
-  if (!sh) {
-    sh = ss.insertSheet(name);
-  }
-  // Add headers if sheet is completely empty
-  if (sh.getLastRow() === 0 && headers && headers.length > 0) {
+  if (!sh) sh = ss.insertSheet(name);
+  if (sh.getLastRow() === 0 && headers && headers.length) {
     sh.appendRow(headers);
     sh.getRange(1, 1, 1, headers.length)
       .setFontWeight('bold')
@@ -2142,45 +2881,77 @@ function getOrCreate(ss, name, headers) {
   return sh;
 }
 
-// ── Inicializar TODAS las pestañas de una vez ────────────────
-// Llama a esta función manualmente desde el editor si quieres
-// crear todas las hojas antes de usar la plataforma
+// ── Inicializar todas las pestañas (ejecutar una sola vez) ─────────
 function initSheets() {
   const ss = getSS();
-  getOrCreate(ss, SHEET_PERSONAL,   ['DNI','Nombre','Ficha_Buk','Cargo','Area','Fecha_Ingreso']);
+  getOrCreate(ss, SHEET_PERSONAL,   ['DNI','Nombre','Ficha_Buk','Cargo','Area','Fecha_Ingreso','Tipo','Subtipo']);
   getOrCreate(ss, SHEET_ASISTENCIA, ['Documento','Fecha','Ingreso','Salida','Proyecto','DIA']);
   getOrCreate(ss, SHEET_VACACIONES, ['Colaborador','Año','Mes','Nombre_Mes','Dias','Dias_Detalle']);
   getOrCreate(ss, SHEET_RESUMEN,    ['Mes','DNI','Nombre','Horas_DM','Horas_Vacaciones','Objetivo_Horas']);
   getOrCreate(ss, SHEET_TARDANZAS,  ['Mes','DNI','Nombre','Ficha_Buk','Monto_Descuento']);
+  getOrCreate(ss, SHEET_CONFIG_VAC, ['Tipo','Clave','Valor']);
+
+  // Config Campo — horario de entrada y jornada por subtipo de personal de campo
+  const shCC = getOrCreate(ss, SHEET_CONFIG_CAMPO, ['Subtipo','Hora_Entrada','Horas_Jornada']);
+  if (shCC.getLastRow() <= 1) {
+    shCC.appendRow(['Merch',       '', '']);
+    shCC.appendRow(['Promotor',    '', '']);
+    shCC.appendRow(['Operaciones', '', '']);
+  }
+
+  getOrCreate(ss, SHEET_COSTO,      ['Anio','Mes','Quincena','Categoria','Monto']);
+  getOrCreate(ss, SHEET_INVENTARIO, ['ID','Nombre','Categoria','Estado','Asignado','Fecha_Creacion','Obs']);
+  getOrCreate(ss, SHEET_INV_HIST,   ['Fecha','ID_Activo','Nombre','Estado','Asignado','Admin','Comentario']);
+
+  Logger.log('initSheets OK');
   return 'OK — pestañas creadas';
 }
 
-// ════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════
 //  GET — Lectura de datos
-// ════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════
 function doGet(e) {
-  const ss     = getSS();
-  const accion = (e && e.parameter && e.parameter.accion) ? e.parameter.accion : '';
+  try {
+    return handleGet(e);
+  } catch (err) {
+    Logger.log('doGet error: ' + err.message + '\\n' + err.stack);
+    return jsonResp({ error: err.message });
+  }
+}
 
-  // ── Ping / health check ───────────────────────────────────
+function handleGet(e) {
+  const ss     = getSS();
+  const p      = (e && e.parameter) ? e.parameter : {};
+  const accion = p.accion || '';
+
+  // Health check
   if (!accion) {
-    return jsonResp({ status: 'TT Audit API activa', sheet: ss.getName() });
+    return jsonResp({ status: 'TT Audit API v4 activa', sheet: ss.getName() });
   }
 
-  // ── GET PERSONAL ──────────────────────────────────────────
+  // ── GET PERSONAL ────────────────────────────────────────────────
   if (accion === 'getPersonal') {
     const sh = ss.getSheetByName(SHEET_PERSONAL);
     if (!sh) return jsonResp({ error: 'Pestaña no encontrada: ' + SHEET_PERSONAL });
     const data = sh.getDataRange().getValues();
-    const rows = data.slice(1).filter(r => r[0] && r[1]).map(r => [
-      r[0], r[1], r[2]||'', r[3]||'', r[4]||'', r[5]||'', r[6]||'Staff'
-    ]);
+    const rows = data.slice(1)
+      .filter(r => r[0] && r[1])
+      .map(r => [
+        r[0].toString().trim(),              // DNI
+        r[1].toString().trim(),              // Nombre
+        r[2] ? r[2].toString().trim() : '',  // Ficha_Buk
+        r[3] ? r[3].toString().trim() : '',  // Cargo
+        r[4] ? r[4].toString().trim() : '',  // Area
+        r[5] ? r[5].toString().trim() : '',  // Fecha_Ingreso
+        r[6] ? r[6].toString().trim() : 'Staff', // Tipo
+        r[7] ? r[7].toString().trim() : '',  // Subtipo (Merch/Promotor/Operaciones)
+      ]);
     return jsonResp({ rows, count: rows.length });
   }
 
-  // ── GET ASISTENCIA ────────────────────────────────────────
+  // ── GET ASISTENCIA ──────────────────────────────────────────────
   if (accion === 'getAsistencia') {
-    const mes = (e && e.parameter && e.parameter.mes) ? e.parameter.mes : '';
+    const mes = p.mes || '';
     const sh  = ss.getSheetByName(SHEET_ASISTENCIA);
     if (!sh) return jsonResp({ error: 'Pestaña no encontrada: ' + SHEET_ASISTENCIA });
     const data = sh.getDataRange().getValues();
@@ -2189,13 +2960,15 @@ function doGet(e) {
       const r   = data[i];
       const dni = (r[0] || '').toString().trim();
       if (!dni) continue;
+
       let fechaStr = '';
       if (r[1] instanceof Date) {
-        fechaStr = pad(r[1].getDate())+'/'+pad(r[1].getMonth()+1)+'/'+r[1].getFullYear();
+        fechaStr = pad(r[1].getDate()) + '/' + pad(r[1].getMonth() + 1) + '/' + r[1].getFullYear();
       } else {
         fechaStr = r[1] ? r[1].toString().trim() : '';
       }
       if (!fechaStr) continue;
+
       if (mes) {
         const parts = fechaStr.split('/');
         if (parts.length === 3) {
@@ -2203,137 +2976,478 @@ function doGet(e) {
           if (rowMes !== mes) continue;
         }
       }
-      rows.push([dni, fechaStr, formatTime(r[2]), formatTime(r[3]), r[4]||'', r[5]||'']);
+      rows.push([
+        dni,
+        fechaStr,
+        formatTime(r[2]),
+        formatTime(r[3]),
+        r[4] ? r[4].toString().trim() : '',
+        r[5] ? r[5].toString().trim() : '',
+      ]);
     }
     return jsonResp({ rows, count: rows.length });
   }
 
-  // ── GET VACACIONES ────────────────────────────────────────
+  // ── GET VACACIONES ──────────────────────────────────────────────
   if (accion === 'getVacaciones') {
     const sh = ss.getSheetByName(SHEET_VACACIONES);
     if (!sh) return jsonResp({ error: 'Pestaña no encontrada: ' + SHEET_VACACIONES });
     const data = sh.getDataRange().getValues();
     if (data.length < 2) return jsonResp({ rows: [], count: 0 });
+    // Columnas: Colaborador(0), Año(1), Mes(2), Nombre_Mes(3), Dias(4), Dias_Detalle(5)
     const rows = data.slice(1)
       .filter(r => r[0] && r[1] !== '' && r[2] !== '')
       .map(r => ({
-        colaborador: (r[0]||'').toString().trim(),
+        colaborador: r[0].toString().trim(),
         año:         parseInt(r[1]) || 0,
         mes:         parseInt(r[2]) || 0,
-        dias:        parseInt(r[4]) || 0,
-        detalle:     (r[5]||'').toString().trim(),
+        nombre_mes:  r[3] ? r[3].toString().trim() : '',
+        dias:        parseInt(r[4]) || 0,   // BUG FIX: era r[3], correcto es r[4]
+        detalle:     r[5] ? r[5].toString().trim() : '',
       }))
       .filter(r => r.colaborador && r.año);
     return jsonResp({ rows, count: rows.length });
   }
 
-  return jsonResp({ status: 'TT Audit API activa', sheet: ss.getName() });
+  // ── GET RESUMEN MENSUAL ─────────────────────────────────────────
+  if (accion === 'getResumen') {
+    const mes = p.mes || '';
+    const sh  = ss.getSheetByName(SHEET_RESUMEN);
+    if (!sh) return jsonResp({ error: 'Pestaña no encontrada: ' + SHEET_RESUMEN });
+    const data = sh.getDataRange().getValues();
+    if (data.length < 2) return jsonResp({ rows: [], count: 0 });
+    // Columnas: Mes(0), DNI(1), Nombre(2), Horas_DM(3), Horas_Vacaciones(4), Objetivo_Horas(5)
+    let rows = data.slice(1).filter(r => r[0] && r[1]);
+    if (mes) rows = rows.filter(r => r[0].toString().trim() === mes);
+    const result = rows.map(r => ({
+      mesKey:    r[0].toString().trim(),
+      dni:       r[1].toString().trim(),
+      nombre:    r[2] ? r[2].toString().trim() : '',
+      dm:        parseFloat(r[3]) || 0,
+      vac:       parseFloat(r[4]) || 0,
+      objetivo:  parseFloat(r[5]) || 0,
+    }));
+    return jsonResp({ rows: result, count: result.length });
+  }
+
+  // ── GET TARDANZAS ───────────────────────────────────────────────
+  if (accion === 'getTardanzas') {
+    const mes = p.mes || '';
+    const sh  = ss.getSheetByName(SHEET_TARDANZAS);
+    if (!sh) return jsonResp({ error: 'Pestaña no encontrada: ' + SHEET_TARDANZAS });
+    const data = sh.getDataRange().getValues();
+    if (data.length < 2) return jsonResp({ rows: [], count: 0 });
+    // Columnas: Mes(0), DNI(1), Nombre(2), Ficha_Buk(3), Monto_Descuento(4)
+    let rows = data.slice(1).filter(r => r[0] && r[1]);
+    if (mes) rows = rows.filter(r => r[0].toString().trim() === mes);
+    const result = rows.map(r => ({
+      mesKey:    r[0].toString().trim(),
+      dni:       r[1].toString().trim(),
+      nombre:    r[2] ? r[2].toString().trim() : '',
+      ficha_buk: r[3] ? r[3].toString().trim() : '',
+      monto:     parseFloat(r[4]) || 0,
+    }));
+    return jsonResp({ rows: result, count: result.length });
+  }
+
+  // ── GET CONFIG VACACIONES ───────────────────────────────────────
+  if (accion === 'getConfigVac') {
+    const sh = ss.getSheetByName(SHEET_CONFIG_VAC);
+    if (!sh) return jsonResp({ rows: [], count: 0 });
+    const data = sh.getDataRange().getValues();
+    if (data.length < 2) return jsonResp({ rows: [], count: 0 });
+    // Columnas: Tipo(0), Clave(1), Valor(2)
+    const rows = data.slice(1)
+      .filter(r => r[0] && r[1])
+      .map(r => ({
+        tipo:  r[0].toString().trim(),
+        clave: r[1].toString().trim(),
+        valor: r[2] !== undefined ? r[2].toString().trim() : '',
+      }));
+    return jsonResp({ rows, count: rows.length });
+  }
+
+  // ── GET CONFIG CAMPO (horarios/jornada por subtipo) ─────────────
+  if (accion === 'getConfigCampo') {
+    const sh = ss.getSheetByName(SHEET_CONFIG_CAMPO);
+    if (!sh) return jsonResp({ rows: [], count: 0 });
+    const data = sh.getDataRange().getValues();
+    if (data.length < 2) return jsonResp({ rows: [], count: 0 });
+    // Columnas: Subtipo(0), Hora_Entrada(1), Horas_Jornada(2)
+    const rows = data.slice(1)
+      .filter(r => r[0])
+      .map(r => ({
+        subtipo:  r[0].toString().trim(),
+        entrada:  formatTime(r[1]) || (r[1] !== undefined && r[1] !== '' ? r[1].toString().trim() : ''),
+        jornada:  r[2] !== undefined && r[2] !== '' ? parseFloat(r[2]) || 0 : 0,
+      }));
+    return jsonResp({ rows, count: rows.length });
+  }
+
+  // ── GET COSTO PERSONAL ──────────────────────────────────────────
+  if (accion === 'getCostoPersonal') {
+    const anio = p.anio || '';
+    const sh   = ss.getSheetByName(SHEET_COSTO);
+    if (!sh) return jsonResp({ rows: [], count: 0 });
+    const data = sh.getDataRange().getValues();
+    if (data.length < 2) return jsonResp({ rows: [], count: 0 });
+    // Columnas: Anio(0), Mes(1), Quincena(2), Categoria(3), Monto(4)
+    let rows = data.slice(1).filter(r => r[0] !== '' && r[3]);
+    if (anio) rows = rows.filter(r => r[0].toString().trim() === anio.toString().trim());
+    const result = rows.map(r => ({
+      anio:      parseInt(r[0]) || 0,
+      mes:       parseInt(r[1]) || 0,
+      quincena:  r[2] ? r[2].toString().trim() : '',
+      categoria: r[3].toString().trim(),
+      monto:     parseFloat(r[4]) || 0,
+    }));
+    return jsonResp({ rows: result, count: result.length });
+  }
+
+  // ── GET INVENTARIO ──────────────────────────────────────────────
+  if (accion === 'getInventario') {
+    const sh = ss.getSheetByName(SHEET_INVENTARIO);
+    if (!sh) return jsonResp({ rows: [], count: 0 });
+    const data = sh.getDataRange().getValues();
+    if (data.length < 2) return jsonResp({ rows: [], count: 0 });
+    // Columnas: ID(0), Nombre(1), Categoria(2), Estado(3), Asignado(4), Fecha_Creacion(5), Obs(6)
+    const rows = data.slice(1)
+      .filter(r => r[0])
+      .map(r => ({
+        id:        r[0].toString().trim(),
+        nombre:    r[1] ? r[1].toString().trim() : '',
+        categoria: r[2] ? r[2].toString().trim() : '',
+        estado:    r[3] ? r[3].toString().trim() : 'Disponible',
+        asignado:  r[4] ? r[4].toString().trim() : '',
+        creacion:  r1ToString(r[5]),
+        obs:       r[6] ? r[6].toString().trim() : '',
+      }));
+    return jsonResp({ rows, count: rows.length });
+  }
+
+  // ── GET INVENTARIO HISTORIAL ────────────────────────────────────
+  if (accion === 'getInvHistorial') {
+    const idFiltro = p.id || '';
+    const sh = ss.getSheetByName(SHEET_INV_HIST);
+    if (!sh) return jsonResp({ rows: [], count: 0 });
+    const data = sh.getDataRange().getValues();
+    if (data.length < 2) return jsonResp({ rows: [], count: 0 });
+    // Columnas: Fecha(0), ID_Activo(1), Nombre(2), Estado(3), Asignado(4), Admin(5), Comentario(6)
+    let rows = data.slice(1).filter(r => r[1]);
+    if (idFiltro) rows = rows.filter(r => r[1].toString().trim() === idFiltro.toString().trim());
+    const result = rows.map(r => ({
+      fecha:      r1ToStringFull(r[0]),
+      id_activo:  r[1].toString().trim(),
+      nombre:     r[2] ? r[2].toString().trim() : '',
+      estado:     r[3] ? r[3].toString().trim() : '',
+      asignado:   r[4] ? r[4].toString().trim() : '',
+      admin:      r[5] ? r[5].toString().trim() : '',
+      comentario: r[6] ? r[6].toString().trim() : '',
+    }));
+    return jsonResp({ rows: result, count: result.length });
+  }
+
+  return jsonResp({ status: 'TT Audit API v4 activa', sheet: ss.getName() });
 }
 
-// ════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════
 //  POST — Escritura de datos
-// ════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════
 function doPost(e) {
+  try {
+    return handlePost(e);
+  } catch (err) {
+    Logger.log('doPost error: ' + err.message + '\\n' + err.stack);
+    return jsonResp({ error: err.message });
+  }
+}
+
+function handlePost(e) {
   const ss = getSS();
   let body;
   try {
     body = JSON.parse(e && e.postData ? e.postData.contents : '{}');
-  } catch(err) {
+  } catch (err) {
     return jsonResp({ error: 'JSON inválido: ' + err.message });
   }
   const accion = body.accion || '';
 
-  // ── SAVE PERSONAL ─────────────────────────────────────────
+  // ── SAVE PERSONAL ───────────────────────────────────────────────
   if (accion === 'savePersonal') {
-    const sh = getOrCreate(ss, SHEET_PERSONAL, ['DNI','Nombre','Ficha_Buk','Cargo','Area','Fecha_Ingreso','Tipo']);
-    const { dni, nombre, ficha_buk, cargo, area, fecha_ingreso, tipo } = body;
-    if (!dni || !nombre) return jsonResp({ error: 'DNI y Nombre requeridos' });
-    const data = sh.getDataRange().getValues();
-    let found = false;
+    const sh = getOrCreate(ss, SHEET_PERSONAL, ['DNI','Nombre','Ficha_Buk','Cargo','Area','Fecha_Ingreso','Tipo','Subtipo']);
+    const { dni, nombre, ficha_buk, cargo, area, fecha_ingreso, tipo, subtipo } = body;
+    if (!dni || !nombre) return jsonResp({ error: 'DNI y Nombre son requeridos' });
+    const dniStr = dni.toString().trim();
+    const data   = sh.getDataRange().getValues();
+    let found    = -1;
     for (let i = 1; i < data.length; i++) {
-      if (data[i][0].toString().trim() === dni.toString().trim()) {
-        sh.getRange(i+1, 1, 1, 7).setValues([[dni, nombre, ficha_buk||'', cargo||'', area||'', fecha_ingreso||'', tipo||'Staff']]);
-        found = true; break;
-      }
+      if (data[i][0].toString().trim() === dniStr) { found = i; break; }
     }
-    if (!found) sh.appendRow([dni, nombre, ficha_buk||'', cargo||'', area||'', fecha_ingreso||'', tipo||'Staff']);
-    return jsonResp({ ok: true, action: found ? 'updated' : 'created' });
+    const row = [dniStr, nombre.toString().trim(), ficha_buk||'', cargo||'', area||'', fecha_ingreso||'', tipo||'Staff', subtipo||''];
+    if (found > 0) {
+      sh.getRange(found + 1, 1, 1, 8).setValues([row]);
+    } else {
+      sh.appendRow(row);
+    }
+    return jsonResp({ ok: true, action: found > 0 ? 'updated' : 'created' });
   }
 
-  // ── SAVE RESUMEN MENSUAL ──────────────────────────────────
+  // ── DELETE PERSONAL ─────────────────────────────────────────────
+  if (accion === 'deletePersonal') {
+    const sh = ss.getSheetByName(SHEET_PERSONAL);
+    if (!sh) return jsonResp({ error: 'Pestaña no encontrada' });
+    const { dni } = body;
+    if (!dni) return jsonResp({ error: 'DNI requerido' });
+    const dniStr = dni.toString().trim();
+    const data   = sh.getDataRange().getValues();
+    for (let i = 1; i < data.length; i++) {
+      if (data[i][0].toString().trim() === dniStr) {
+        sh.deleteRow(i + 1);
+        return jsonResp({ ok: true, action: 'deleted' });
+      }
+    }
+    return jsonResp({ ok: false, error: 'DNI no encontrado' });
+  }
+
+  // ── SAVE ASISTENCIA ─────────────────────────────────────────────
+  if (accion === 'saveAsistencia') {
+    const sh = getOrCreate(ss, SHEET_ASISTENCIA, ['Documento','Fecha','Ingreso','Salida','Proyecto','DIA']);
+    const { documento, fecha, ingreso, salida, proyecto, dia } = body;
+    if (!documento || !fecha) return jsonResp({ error: 'Documento y Fecha son requeridos' });
+    const data  = sh.getDataRange().getValues();
+    let found   = -1;
+    for (let i = 1; i < data.length; i++) {
+      const rowFecha = r1ToString(data[i][1]);
+      if (data[i][0].toString().trim() === documento.toString().trim() && rowFecha === fecha.toString().trim()) {
+        found = i; break;
+      }
+    }
+    const row = [documento, fecha, ingreso||'', salida||'', proyecto||'', dia||''];
+    if (found > 0) {
+      sh.getRange(found + 1, 1, 1, 6).setValues([row]);
+    } else {
+      sh.appendRow(row);
+    }
+    return jsonResp({ ok: true, action: found > 0 ? 'updated' : 'created' });
+  }
+
+  // ── SAVE RESUMEN MENSUAL ────────────────────────────────────────
   if (accion === 'saveResumen') {
     const sh = getOrCreate(ss, SHEET_RESUMEN, ['Mes','DNI','Nombre','Horas_DM','Horas_Vacaciones','Objetivo_Horas']);
     const { mesKey, dni, nombre, dm, vac, objetivo } = body;
-    if (!mesKey || !dni) return jsonResp({ error: 'mesKey y DNI requeridos' });
-    const data = sh.getDataRange().getValues();
-    let found = false;
+    if (!mesKey || !dni) return jsonResp({ error: 'mesKey y DNI son requeridos' });
+    const dniStr = dni.toString().trim();
+    const data   = sh.getDataRange().getValues();
+    let found    = -1;
     for (let i = 1; i < data.length; i++) {
-      if (data[i][0] === mesKey && data[i][1].toString().trim() === dni.toString().trim()) {
-        sh.getRange(i+1, 4, 1, 3).setValues([[dm||0, vac||0, objetivo||0]]);
-        found = true; break;
-      }
+      if (data[i][0] === mesKey && data[i][1].toString().trim() === dniStr) { found = i; break; }
     }
-    if (!found) sh.appendRow([mesKey, dni, nombre||'', dm||0, vac||0, objetivo||0]);
-    return jsonResp({ ok: true, action: found ? 'updated' : 'created' });
+    if (found > 0) {
+      sh.getRange(found + 1, 4, 1, 3).setValues([[dm||0, vac||0, objetivo||0]]);
+    } else {
+      sh.appendRow([mesKey, dniStr, nombre||'', dm||0, vac||0, objetivo||0]);
+    }
+    return jsonResp({ ok: true, action: found > 0 ? 'updated' : 'created' });
   }
 
-  // ── SAVE DESCUENTO TARDANZA ───────────────────────────────
+  // ── SAVE DESCUENTO TARDANZA ─────────────────────────────────────
   if (accion === 'saveDescuento') {
     const sh = getOrCreate(ss, SHEET_TARDANZAS, ['Mes','DNI','Nombre','Ficha_Buk','Monto_Descuento']);
     const { mesKey, dni, nombre, ficha_buk, monto } = body;
-    if (!mesKey || !dni) return jsonResp({ error: 'mesKey y DNI requeridos' });
-    const data = sh.getDataRange().getValues();
-    let found = false;
+    if (!mesKey || !dni) return jsonResp({ error: 'mesKey y DNI son requeridos' });
+    const dniStr = dni.toString().trim();
+    const data   = sh.getDataRange().getValues();
+    let found    = -1;
     for (let i = 1; i < data.length; i++) {
-      if (data[i][0] === mesKey && data[i][1].toString().trim() === dni.toString().trim()) {
-        sh.getRange(i+1, 5).setValue(monto||0);
-        found = true; break;
-      }
+      if (data[i][0] === mesKey && data[i][1].toString().trim() === dniStr) { found = i; break; }
     }
-    if (!found) sh.appendRow([mesKey, dni, nombre||'', ficha_buk||'', monto||0]);
-    return jsonResp({ ok: true, action: found ? 'updated' : 'created' });
+    if (found > 0) {
+      sh.getRange(found + 1, 5).setValue(monto || 0);
+    } else {
+      sh.appendRow([mesKey, dniStr, nombre||'', ficha_buk||'', monto||0]);
+    }
+    return jsonResp({ ok: true, action: found > 0 ? 'updated' : 'created' });
   }
 
-  // ── SAVE VACACION ─────────────────────────────────────────
+  // ── SAVE VACACION ───────────────────────────────────────────────
   if (accion === 'saveVacacion') {
     const sh = getOrCreate(ss, SHEET_VACACIONES, ['Colaborador','Año','Mes','Nombre_Mes','Dias','Dias_Detalle']);
     const { colaborador, año, mes, dias, detalle } = body;
-    if (!colaborador || !año || !mes) return jsonResp({ error: 'Faltan campos requeridos' });
+    if (!colaborador || !año || !mes) return jsonResp({ error: 'Faltan campos requeridos: colaborador, año, mes' });
     const mesNombres = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio',
                         'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-    const data = sh.getDataRange().getValues();
-    let found = false;
+    const data  = sh.getDataRange().getValues();
+    let found   = -1;
     for (let i = 1; i < data.length; i++) {
       if (data[i][0].toString().trim() === colaborador.toString().trim() &&
           parseInt(data[i][1]) === parseInt(año) &&
           parseInt(data[i][2]) === parseInt(mes)) {
-        sh.getRange(i+1, 5).setValue(dias||0);
-        sh.getRange(i+1, 6).setValue(detalle||'');
-        found = true; break;
+        found = i; break;
       }
     }
-    if (!found) {
-      sh.appendRow([colaborador, año, mes, mesNombres[parseInt(mes)]||'', dias||0, detalle||'']);
+    if (found > 0) {
+      sh.getRange(found + 1, 5).setValue(dias || 0);
+      sh.getRange(found + 1, 6).setValue(detalle || '');
+    } else {
+      sh.appendRow([colaborador, parseInt(año), parseInt(mes),
+                    mesNombres[parseInt(mes)] || '', dias || 0, detalle || '']);
     }
-    return jsonResp({ ok: true, action: found ? 'updated' : 'created' });
+    return jsonResp({ ok: true, action: found > 0 ? 'updated' : 'created' });
+  }
+
+  // ── SAVE CONFIG VACACIONES ──────────────────────────────────────
+  if (accion === 'saveConfigVac') {
+    const sh = getOrCreate(ss, SHEET_CONFIG_VAC, ['Tipo','Clave','Valor']);
+    const { tipo, clave, valor } = body;
+    if (!tipo || !clave) return jsonResp({ error: 'tipo y clave son requeridos' });
+    const data  = sh.getDataRange().getValues();
+    let found   = -1;
+    for (let i = 1; i < data.length; i++) {
+      if (data[i][0].toString().trim() === tipo && data[i][1].toString().trim() === clave) {
+        found = i; break;
+      }
+    }
+    if (found > 0) {
+      sh.getRange(found + 1, 3).setValue(valor !== undefined ? valor : '');
+    } else {
+      sh.appendRow([tipo, clave, valor !== undefined ? valor : '']);
+    }
+    return jsonResp({ ok: true, action: found > 0 ? 'updated' : 'created' });
+  }
+
+  // ── SAVE CONFIG CAMPO (horario/jornada por subtipo) ─────────────
+  if (accion === 'saveConfigCampo') {
+    const sh = getOrCreate(ss, SHEET_CONFIG_CAMPO, ['Subtipo','Hora_Entrada','Horas_Jornada']);
+    const { subtipo, entrada, jornada } = body;
+    if (!subtipo) return jsonResp({ error: 'subtipo requerido' });
+    const data  = sh.getDataRange().getValues();
+    let found   = -1;
+    for (let i = 1; i < data.length; i++) {
+      if (data[i][0].toString().trim().toLowerCase() === subtipo.toString().trim().toLowerCase()) { found = i; break; }
+    }
+    if (found > 0) {
+      sh.getRange(found + 1, 2, 1, 2).setValues([[entrada || '', jornada !== undefined && jornada !== '' ? jornada : '']]);
+    } else {
+      sh.appendRow([subtipo, entrada || '', jornada !== undefined && jornada !== '' ? jornada : '']);
+    }
+    return jsonResp({ ok: true, action: found > 0 ? 'updated' : 'created' });
+  }
+
+  // ── SAVE COSTO PERSONAL ─────────────────────────────────────────
+  if (accion === 'saveCostoPersonal') {
+    const sh = getOrCreate(ss, SHEET_COSTO, ['Anio','Mes','Quincena','Categoria','Monto']);
+    const { anio, mes, quincena, categoria, monto } = body;
+    if (!anio || !mes || !quincena || !categoria) return jsonResp({ error: 'anio, mes, quincena y categoria son requeridos' });
+    const data  = sh.getDataRange().getValues();
+    let found   = -1;
+    for (let i = 1; i < data.length; i++) {
+      if (parseInt(data[i][0]) === parseInt(anio) &&
+          parseInt(data[i][1]) === parseInt(mes) &&
+          data[i][2].toString().trim() === quincena.toString().trim() &&
+          data[i][3].toString().trim() === categoria.toString().trim()) {
+        found = i; break;
+      }
+    }
+    if (found > 0) {
+      sh.getRange(found + 1, 5).setValue(parseFloat(monto) || 0);
+    } else {
+      sh.appendRow([parseInt(anio), parseInt(mes), quincena, categoria, parseFloat(monto) || 0]);
+    }
+    return jsonResp({ ok: true, action: found > 0 ? 'updated' : 'created' });
+  }
+
+  // ── SAVE INVENTARIO (activo) — registra historial si cambia estado/asignado ──
+  if (accion === 'saveInventario') {
+    const sh  = getOrCreate(ss, SHEET_INVENTARIO, ['ID','Nombre','Categoria','Estado','Asignado','Fecha_Creacion','Obs']);
+    const shH = getOrCreate(ss, SHEET_INV_HIST,   ['Fecha','ID_Activo','Nombre','Estado','Asignado','Admin','Comentario']);
+    let { id, nombre, categoria, estado, asignado, obs, admin, comentario } = body;
+    if (!nombre) return jsonResp({ error: 'nombre requerido' });
+    estado = estado || 'Disponible';
+    const data = sh.getDataRange().getValues();
+    let found  = -1;
+    let prevEstado = '', prevAsignado = '';
+    if (id) {
+      const idStr = id.toString().trim();
+      for (let i = 1; i < data.length; i++) {
+        if (data[i][0].toString().trim() === idStr) { found = i; prevEstado = (data[i][3]||'').toString().trim(); prevAsignado = (data[i][4]||'').toString().trim(); break; }
+      }
+    }
+    if (found > 0) {
+      // conservar fecha de creación existente
+      const creacion = data[found][5] || '';
+      sh.getRange(found + 1, 1, 1, 7).setValues([[id, nombre, categoria || '', estado, asignado || '', creacion, obs || '']]);
+    } else {
+      if (!id) id = nextInvId(data);
+      sh.appendRow([id, nombre, categoria || '', estado, asignado || '', r1ToStringFull(new Date()), obs || '']);
+    }
+    // Historial: registra en alta o cuando cambia estado/asignado
+    const cambio = (found <= 0) || (prevEstado !== estado) || (prevAsignado !== (asignado || ''));
+    if (cambio) {
+      shH.appendRow([r1ToStringFull(new Date()), id, nombre, estado, asignado || '', admin || '', comentario || (found <= 0 ? 'Alta de activo' : '')]);
+    }
+    return jsonResp({ ok: true, action: found > 0 ? 'updated' : 'created', id: id });
+  }
+
+  // ── DELETE INVENTARIO ───────────────────────────────────────────
+  if (accion === 'deleteInventario') {
+    const sh = ss.getSheetByName(SHEET_INVENTARIO);
+    if (!sh) return jsonResp({ error: 'Pestaña no encontrada' });
+    const { id } = body;
+    if (!id) return jsonResp({ error: 'id requerido' });
+    const idStr = id.toString().trim();
+    const data  = sh.getDataRange().getValues();
+    for (let i = 1; i < data.length; i++) {
+      if (data[i][0].toString().trim() === idStr) {
+        sh.deleteRow(i + 1);
+        return jsonResp({ ok: true, action: 'deleted' });
+      }
+    }
+    return jsonResp({ ok: false, error: 'ID no encontrado' });
   }
 
   return jsonResp({ error: 'Acción no reconocida: ' + accion });
 }
 
-// ════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════
 //  HELPERS
-// ════════════════════════════════════════════════════════════
-function formatTime(val) {
-  if (!val || val === '-') return '0:00:00';
+// ════════════════════════════════════════════════════════════════════
+// Genera un ID numérico incremental de 3 dígitos para inventario
+function nextInvId(data) {
+  let max = 0;
+  for (let i = 1; i < data.length; i++) {
+    const n = parseInt((data[i][0] || '').toString().replace(/\\D/g, ''), 10);
+    if (!isNaN(n) && n > max) max = n;
+  }
+  return String(max + 1).padStart(3, '0');
+}
+
+// Fecha + hora legible (DD/MM/YYYY HH:MM)
+function r1ToStringFull(val) {
+  if (!val) return '';
   if (val instanceof Date) {
-    return pad(val.getHours())+':'+pad(val.getMinutes())+':'+pad(val.getSeconds());
+    return pad(val.getDate()) + '/' + pad(val.getMonth() + 1) + '/' + val.getFullYear() +
+           ' ' + pad(val.getHours()) + ':' + pad(val.getMinutes());
+  }
+  return val.toString().trim();
+}
+function formatTime(val) {
+  if (!val || val === '-') return '';
+  if (val instanceof Date) {
+    return pad(val.getHours()) + ':' + pad(val.getMinutes()) + ':' + pad(val.getSeconds());
   }
   const s = val.toString().trim();
-  if (!s || s === '-') return '0:00:00';
-  const m = s.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?/);
-  if (m) return pad(parseInt(m[1]))+':'+m[2]+':'+(m[3]||'00');
-  return '0:00:00';
+  if (!s || s === '-') return '';
+  const m = s.match(/^(\\d{1,2}):(\\d{2})(?::(\\d{2}))?/);
+  if (m) return pad(parseInt(m[1])) + ':' + m[2] + ':' + (m[3] || '00');
+  return '';
+}
+
+function r1ToString(val) {
+  if (!val) return '';
+  if (val instanceof Date) {
+    return pad(val.getDate()) + '/' + pad(val.getMonth() + 1) + '/' + val.getFullYear();
+  }
+  return val.toString().trim();
 }
 
 function pad(n) { return String(n).padStart(2, '0'); }
@@ -2342,7 +3456,8 @@ function jsonResp(obj) {
   return ContentService
     .createTextOutput(JSON.stringify(obj))
     .setMimeType(ContentService.MimeType.JSON);
-}`
+}
+`
 
 
 
