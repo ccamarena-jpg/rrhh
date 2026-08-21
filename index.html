@@ -741,12 +741,13 @@ th.sortable.asc,th.sortable.desc{background:rgba(255,255,255,.1)!important}
     <!-- Horarios Personal Campo -->
     <div class="card" style="max-width:560px;padding:22px 24px;box-shadow:var(--sh2);margin-top:14px">
       <div class="card-label" style="margin-bottom:4px">Horarios · Personal de campo</div>
-      <p style="font-size:12.5px;color:var(--mu);margin:0 0 14px">Define la hora de entrada y la duración de jornada (horas) para cada tipo de personal de campo. Se usa en la vista Personal de campo.</p>
+      <p style="font-size:12.5px;color:var(--mu);margin:0 0 14px">Define la hora de entrada, la duración de jornada (horas/día) y las horas objetivo al mes para cada tipo de personal de campo. Se usa en la vista Personal de campo.</p>
       <table class="pst" style="width:100%">
         <thead><tr>
           <th>Subtipo</th>
           <th style="text-align:center">Hora de entrada</th>
-          <th style="text-align:center">Jornada (horas)</th>
+          <th style="text-align:center">Jornada (h/día)</th>
+          <th style="text-align:center">Horas / mes</th>
         </tr></thead>
         <tbody id="cfg-campo-tbody">
           <tr><td colspan="3" style="text-align:center;padding:20px;color:var(--hi)">Cargando…</td></tr>
@@ -781,6 +782,7 @@ th.sortable.asc,th.sortable.desc{background:rgba(255,255,255,.1)!important}
         <option value="Merch">Merch</option>
         <option value="Promotor">Promotor</option>
         <option value="Operaciones">Operaciones</option>
+        <option value="Practicantes">Practicantes</option>
         <option value="__none__">Sin subtipo</option>
       </select>
       <input class="finp" id="campo-buscar" placeholder="Buscar por nombre o DNI…" oninput="renderCampoTable()" style="width:220px">
@@ -796,8 +798,9 @@ th.sortable.asc,th.sortable.desc{background:rgba(255,255,255,.1)!important}
           <th style="text-align:center">Hora entrada</th>
           <th style="text-align:center">Jornada</th>
           <th style="text-align:center">Salida estimada</th>
+          <th style="text-align:center">Horas / mes</th>
         </tr></thead>
-        <tbody id="campo-tbody"><tr><td colspan="8" style="text-align:center;padding:40px;color:var(--hi)">Sin personal de campo. Sincroniza desde Sheets.</td></tr></tbody>
+        <tbody id="campo-tbody"><tr><td colspan="9" style="text-align:center;padding:40px;color:var(--hi)">Sin personal de campo. Sincroniza desde Sheets.</td></tr></tbody>
       </table>
     </div>
   </div>
@@ -1028,7 +1031,7 @@ th.sortable.asc,th.sortable.desc{background:rgba(255,255,255,.1)!important}
       <div class="fg"><label>Área</label><input type="text" id="np-area" placeholder="Operaciones"></div>
       <div class="fg"><label>Fecha de ingreso</label><input type="date" id="np-ingreso"></div>
       <div class="fg"><label>Tipo *</label><select id="np-tipo" class="fsel" style="width:100%;height:34px" onchange="onTipoChange()"><option value="Staff">Staff</option><option value="Campo">Campo</option></select></div>
-      <div class="fg" id="np-subtipo-wrap" style="display:none"><label>Subtipo (campo)</label><select id="np-subtipo" class="fsel" style="width:100%;height:34px"><option value="">— Selecciona —</option><option value="Merch">Merch</option><option value="Promotor">Promotor</option><option value="Operaciones">Operaciones</option></select></div>
+      <div class="fg" id="np-subtipo-wrap" style="display:none"><label>Subtipo (campo)</label><select id="np-subtipo" class="fsel" style="width:100%;height:34px"><option value="">— Selecciona —</option><option value="Merch">Merch</option><option value="Promotor">Promotor</option><option value="Operaciones">Operaciones</option><option value="Practicantes">Practicantes</option></select></div>
     </div>
     <div class="mfooter">
       <button class="btn btn-outline" onclick="closeModal('modal-nuevo-personal')">Cancelar</button>
@@ -1231,7 +1234,7 @@ const STATE = {
 };
 
 // Subtipos de personal de campo y categorías de costo
-const SUBTIPOS_CAMPO = ['Merch','Promotor','Operaciones'];
+const SUBTIPOS_CAMPO = ['Merch','Promotor','Operaciones','Practicantes'];
 const COSTO_CATS = ['TRAD','PRACTICANTES','TTA','RXH','LIQUIDACIONES'];
 
 function persist(key) {
@@ -2401,13 +2404,14 @@ async function syncConfigCampo() {
     subtipo: (r.subtipo||'').toString().trim(),
     entrada: (r.entrada||'').toString().trim(),
     jornada: parseFloat(r.jornada) || 0,
+    horasMes: parseFloat(r.horasMes) || 0,
   }));
   persist('configCampo');
 }
 
 function getCampoCfg(subtipo) {
   return STATE.configCampo.find(c => (c.subtipo||'').toLowerCase() === (subtipo||'').toLowerCase())
-      || { subtipo, entrada:'', jornada:0 };
+      || { subtipo, entrada:'', jornada:0, horasMes:0 };
 }
 
 function renderConfigCampo() {
@@ -2419,6 +2423,7 @@ function renderConfigCampo() {
       <td style="font-weight:600">${sub}</td>
       <td style="text-align:center"><input type="time" class="finp" id="cfg-ent-${sub}" value="${c.entrada||''}" style="width:120px"></td>
       <td style="text-align:center"><input type="number" step="0.5" min="0" class="finp" id="cfg-jor-${sub}" value="${c.jornada||''}" placeholder="8" style="width:90px;text-align:center"></td>
+      <td style="text-align:center"><input type="number" step="1" min="0" class="finp" id="cfg-hm-${sub}" value="${c.horasMes||''}" placeholder="208" style="width:90px;text-align:center"></td>
     </tr>`;
   }).join('');
 }
@@ -2429,7 +2434,8 @@ async function saveConfigCampo() {
   for (const sub of SUBTIPOS_CAMPO) {
     const entrada = document.getElementById('cfg-ent-'+sub)?.value || '';
     const jornada = parseFloat(document.getElementById('cfg-jor-'+sub)?.value) || 0;
-    nuevos.push({ subtipo: sub, entrada, jornada });
+    const horasMes = parseFloat(document.getElementById('cfg-hm-'+sub)?.value) || 0;
+    nuevos.push({ subtipo: sub, entrada, jornada, horasMes });
   }
   STATE.configCampo = nuevos;
   persist('configCampo');
@@ -2437,7 +2443,7 @@ async function saveConfigCampo() {
   if (STATE.sheetsUrl) {
     let ok = true;
     for (const c of nuevos) {
-      const r = await postToSheets({ accion:'saveConfigCampo', subtipo:c.subtipo, entrada:c.entrada, jornada:c.jornada });
+      const r = await postToSheets({ accion:'saveConfigCampo', subtipo:c.subtipo, entrada:c.entrada, jornada:c.jornada, horasMes:c.horasMes });
       ok = ok && r;
     }
     if (ok) { flashSync(); if (msg) { msg.textContent = '✓ Horarios guardados'; setTimeout(()=>msg.textContent='',3000); } }
@@ -2474,12 +2480,10 @@ function renderCampoTable() {
   if (cardsEl) {
     const cnt = s => data.filter(p => (p.subtipo||'') === s).length;
     const sinSub = data.filter(p => !p.subtipo).length;
-    cardsEl.innerHTML = `
-      <div class="card"><div class="card-label">Total campo</div><div class="card-value">${data.length}</div><div class="card-sub">colaboradores</div></div>
-      <div class="card"><div class="card-label">Merch</div><div class="card-value">${cnt('Merch')}</div><div class="card-sub">${horarioSub('Merch')}</div></div>
-      <div class="card"><div class="card-label">Promotor</div><div class="card-value">${cnt('Promotor')}</div><div class="card-sub">${horarioSub('Promotor')}</div></div>
-      <div class="card"><div class="card-label">Operaciones</div><div class="card-value">${cnt('Operaciones')}</div><div class="card-sub">${horarioSub('Operaciones')}</div></div>
-      ${sinSub?`<div class="card"><div class="card-label">Sin subtipo</div><div class="card-value warn">${sinSub}</div><div class="card-sub">asignar en Base personal</div></div>`:''}`;
+    cardsEl.innerHTML =
+      `<div class="card"><div class="card-label">Total campo</div><div class="card-value">${data.length}</div><div class="card-sub">colaboradores</div></div>` +
+      SUBTIPOS_CAMPO.map(s => `<div class="card"><div class="card-label">${s}</div><div class="card-value">${cnt(s)}</div><div class="card-sub">${horarioSub(s)}</div></div>`).join('') +
+      (sinSub?`<div class="card"><div class="card-label">Sin subtipo</div><div class="card-value warn">${sinSub}</div><div class="card-sub">asignar en Base personal</div></div>`:'');
   }
 
   if (fSub === '__none__') data = data.filter(p => !p.subtipo);
@@ -2487,7 +2491,7 @@ function renderCampoTable() {
   if (q) data = data.filter(p => p.nombre.toLowerCase().includes(q) || p.dni.includes(q));
 
   if (!data.length) {
-    tb.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--hi)">Sin personal de campo con esos filtros.</td></tr>';
+    tb.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:40px;color:var(--hi)">Sin personal de campo con esos filtros.</td></tr>';
     return;
   }
   tb.innerHTML = data.map(p => {
@@ -2505,6 +2509,7 @@ function renderCampoTable() {
       <td style="text-align:center">${c.entrada||'—'}</td>
       <td style="text-align:center">${c.jornada?c.jornada+' h':'—'}</td>
       <td style="text-align:center">${salida}</td>
+      <td style="text-align:center">${c.horasMes?c.horasMes+' h':'—'}</td>
     </tr>`;
   }).join('');
   applySortable && applySortable('campo-table');
@@ -2512,8 +2517,10 @@ function renderCampoTable() {
 
 function horarioSub(sub) {
   const c = getCampoCfg(sub);
-  if (!c.entrada && !c.jornada) return 'sin horario';
-  return (c.entrada||'—') + ' · ' + (c.jornada?c.jornada+'h':'—');
+  if (!c.entrada && !c.jornada && !c.horasMes) return 'sin horario';
+  let s = (c.entrada||'—') + ' · ' + (c.jornada?c.jornada+'h/día':'—');
+  if (c.horasMes) s += ' · ' + c.horasMes + 'h/mes';
+  return s;
 }
 
 // ════════════════════════════════════════════════════════════
@@ -2910,12 +2917,18 @@ function initSheets() {
   getOrCreate(ss, SHEET_TARDANZAS,  ['Mes','DNI','Nombre','Ficha_Buk','Monto_Descuento']);
   getOrCreate(ss, SHEET_CONFIG_VAC, ['Tipo','Clave','Valor']);
 
-  // Config Campo — horario de entrada y jornada por subtipo de personal de campo
-  const shCC = getOrCreate(ss, SHEET_CONFIG_CAMPO, ['Subtipo','Hora_Entrada','Horas_Jornada']);
+  // Config Campo — horario de entrada, jornada y horas/mes por subtipo de personal de campo
+  const shCC = getOrCreate(ss, SHEET_CONFIG_CAMPO, ['Subtipo','Hora_Entrada','Horas_Jornada','Horas_Mes']);
+  ensureHeaders(shCC, { 4: 'Horas_Mes' }); // migración si ya existía con 3 columnas
   if (shCC.getLastRow() <= 1) {
-    shCC.appendRow(['Merch',       '', '']);
-    shCC.appendRow(['Promotor',    '', '']);
-    shCC.appendRow(['Operaciones', '', '']);
+    shCC.appendRow(['Merch',        '', '', '']);
+    shCC.appendRow(['Promotor',     '', '', '']);
+    shCC.appendRow(['Operaciones',  '', '', '']);
+    shCC.appendRow(['Practicantes', '', '', '']);
+  } else {
+    // Asegura que exista la fila Practicantes aunque la pestaña ya tuviera datos
+    const vals = shCC.getRange(1, 1, shCC.getLastRow(), 1).getValues().map(r => (r[0]||'').toString().trim().toLowerCase());
+    if (vals.indexOf('practicantes') === -1) shCC.appendRow(['Practicantes', '', '', '']);
   }
 
   getOrCreate(ss, SHEET_COSTO,      ['Anio','Mes','Quincena','Categoria','Monto']);
@@ -3092,13 +3105,14 @@ function handleGet(e) {
     if (!sh) return jsonResp({ rows: [], count: 0 });
     const data = sh.getDataRange().getValues();
     if (data.length < 2) return jsonResp({ rows: [], count: 0 });
-    // Columnas: Subtipo(0), Hora_Entrada(1), Horas_Jornada(2)
+    // Columnas: Subtipo(0), Hora_Entrada(1), Horas_Jornada(2), Horas_Mes(3)
     const rows = data.slice(1)
       .filter(r => r[0])
       .map(r => ({
         subtipo:  r[0].toString().trim(),
         entrada:  formatTime(r[1]) || (r[1] !== undefined && r[1] !== '' ? r[1].toString().trim() : ''),
         jornada:  r[2] !== undefined && r[2] !== '' ? parseFloat(r[2]) || 0 : 0,
+        horasMes: r[3] !== undefined && r[3] !== '' ? parseFloat(r[3]) || 0 : 0,
       }));
     return jsonResp({ rows, count: rows.length });
   }
@@ -3336,18 +3350,20 @@ function handlePost(e) {
 
   // ── SAVE CONFIG CAMPO (horario/jornada por subtipo) ─────────────
   if (accion === 'saveConfigCampo') {
-    const sh = getOrCreate(ss, SHEET_CONFIG_CAMPO, ['Subtipo','Hora_Entrada','Horas_Jornada']);
-    const { subtipo, entrada, jornada } = body;
+    const sh = getOrCreate(ss, SHEET_CONFIG_CAMPO, ['Subtipo','Hora_Entrada','Horas_Jornada','Horas_Mes']);
+    const { subtipo, entrada, jornada, horasMes } = body;
     if (!subtipo) return jsonResp({ error: 'subtipo requerido' });
+    const jVal = (jornada !== undefined && jornada !== '') ? jornada : '';
+    const hmVal = (horasMes !== undefined && horasMes !== '') ? horasMes : '';
     const data  = sh.getDataRange().getValues();
     let found   = -1;
     for (let i = 1; i < data.length; i++) {
       if (data[i][0].toString().trim().toLowerCase() === subtipo.toString().trim().toLowerCase()) { found = i; break; }
     }
     if (found > 0) {
-      sh.getRange(found + 1, 2, 1, 2).setValues([[entrada || '', jornada !== undefined && jornada !== '' ? jornada : '']]);
+      sh.getRange(found + 1, 2, 1, 3).setValues([[entrada || '', jVal, hmVal]]);
     } else {
-      sh.appendRow([subtipo, entrada || '', jornada !== undefined && jornada !== '' ? jornada : '']);
+      sh.appendRow([subtipo, entrada || '', jVal, hmVal]);
     }
     return jsonResp({ ok: true, action: found > 0 ? 'updated' : 'created' });
   }
@@ -3614,6 +3630,17 @@ function getAlocAnual(year) {
 }
 
 // ── RESUMEN VF TABLE ─────────────────────────────────────────
+// Filtra nombres de VAC_DATA por el tipo activo (Staff/Campo).
+// Solo cae a "mostrar todos" cuando la base de personal aún no está cargada;
+// si hay base cargada, filtra estricto (Campo nunca muestra Staff y viceversa).
+function filterVacNamesByTipo(allNames) {
+  if (!STATE.personal.length) return allNames;
+  const nombresTipo = new Set(
+    STATE.personal.filter(p => (p.tipo||'Staff') === TIPO_FILTRO_VAC).map(p => normNombre(p.nombre))
+  );
+  return allNames.filter(n => nombresTipo.has(normNombre(n)));
+}
+
 function renderVacResumen() {
   const wrap = document.getElementById('vac-resumen-wrap');
   if (!wrap) return;
@@ -3622,12 +3649,7 @@ function renderVacResumen() {
   if (titleEl) titleEl.textContent = TIPO_FILTRO_VAC === 'Campo' ? 'Vacaciones Campo' : 'Vacaciones Staff';
 
   // Filtrar colaboradores por tipo (normalizado para tolerar comas y espacios)
-  const tipoNombresNorm = new Set(
-    STATE.personal.filter(p => (p.tipo||'Staff') === TIPO_FILTRO_VAC).map(p => normNombre(p.nombre))
-  );
-  const allVacNames = Object.keys(VAC_DATA);
-  const hasAnyMatchResumen = tipoNombresNorm.size > 0 && allVacNames.some(n => tipoNombresNorm.has(normNombre(n)));
-  const names = hasAnyMatchResumen ? allVacNames.filter(n => tipoNombresNorm.has(normNombre(n))) : allVacNames;
+  const names = filterVacNamesByTipo(Object.keys(VAC_DATA));
 
   let html = `<table id="tbl-vac-resumen" style="border-collapse:collapse;width:100%;font-size:12.5px">
     <thead>
@@ -3753,12 +3775,7 @@ function renderVacDetalle() {
   const año = parseInt(document.getElementById('vac-det-año')?.value || 2026);
   if (!wrap) return;
 
-  const tipoNombresDetNorm = new Set(
-    STATE.personal.filter(p => (p.tipo||'Staff') === TIPO_FILTRO_VAC).map(p => normNombre(p.nombre))
-  );
-  const allDetNames = Object.keys(VAC_DATA);
-  const hasMatchDetalle = tipoNombresDetNorm.size > 0 && allDetNames.some(n => tipoNombresDetNorm.has(normNombre(n)));
-  const names = hasMatchDetalle ? allDetNames.filter(n => tipoNombresDetNorm.has(normNombre(n))) : allDetNames;
+  const names = filterVacNamesByTipo(Object.keys(VAC_DATA));
   const allMonths = [];
   names.forEach(n => {
     const byYear = VAC_DATA[n].byYear[año];
@@ -3819,12 +3836,7 @@ function renderVacMensual() {
   const mes  = parseInt(document.getElementById('vac-mes-num')?.value || 1);
   const año  = parseInt(document.getElementById('vac-mes-año')?.value || 2026);
 
-  const tipoNombresMensNorm = new Set(
-    STATE.personal.filter(p => (p.tipo||'Staff') === TIPO_FILTRO_VAC).map(p => normNombre(p.nombre))
-  );
-  const allMensNames = Object.keys(VAC_DATA);
-  const hasMatchMens = tipoNombresMensNorm.size > 0 && allMensNames.some(n => tipoNombresMensNorm.has(normNombre(n)));
-  const names = hasMatchMens ? allMensNames.filter(n => tipoNombresMensNorm.has(normNombre(n))) : allMensNames;
+  const names = filterVacNamesByTipo(Object.keys(VAC_DATA));
   const conVac = [];
 
   names.forEach(nombre => {
@@ -3946,13 +3958,8 @@ function renderVacCalendario() {
 
   // Poblar select de personas (una sola vez)
   const sel = document.getElementById('vac-cal-persona');
-  const tipoNombresCalNorm = new Set(
-    STATE.personal.filter(p => (p.tipo||'Staff') === TIPO_FILTRO_VAC).map(p => normNombre(p.nombre))
-  );
-  const allCalNames = Object.keys(VAC_DATA);
-  const hasAnyMatchCal = tipoNombresCalNorm.size > 0 && allCalNames.some(n => tipoNombresCalNorm.has(normNombre(n)));
   const vistosCal = new Set();
-  const names = (hasAnyMatchCal ? allCalNames.filter(n => tipoNombresCalNorm.has(normNombre(n))) : allCalNames)
+  const names = filterVacNamesByTipo(Object.keys(VAC_DATA))
     .filter(n => { const k = normNombre(n); if (vistosCal.has(k)) return false; vistosCal.add(k); return true; })
     .sort((a,b)=>a.localeCompare(b,'es'));
   const prev = sel.value;

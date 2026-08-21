@@ -81,12 +81,18 @@ function initSheets() {
   getOrCreate(ss, SHEET_TARDANZAS,  ['Mes','DNI','Nombre','Ficha_Buk','Monto_Descuento']);
   getOrCreate(ss, SHEET_CONFIG_VAC, ['Tipo','Clave','Valor']);
 
-  // Config Campo — horario de entrada y jornada por subtipo de personal de campo
-  const shCC = getOrCreate(ss, SHEET_CONFIG_CAMPO, ['Subtipo','Hora_Entrada','Horas_Jornada']);
+  // Config Campo — horario de entrada, jornada y horas/mes por subtipo de personal de campo
+  const shCC = getOrCreate(ss, SHEET_CONFIG_CAMPO, ['Subtipo','Hora_Entrada','Horas_Jornada','Horas_Mes']);
+  ensureHeaders(shCC, { 4: 'Horas_Mes' }); // migración si ya existía con 3 columnas
   if (shCC.getLastRow() <= 1) {
-    shCC.appendRow(['Merch',       '', '']);
-    shCC.appendRow(['Promotor',    '', '']);
-    shCC.appendRow(['Operaciones', '', '']);
+    shCC.appendRow(['Merch',        '', '', '']);
+    shCC.appendRow(['Promotor',     '', '', '']);
+    shCC.appendRow(['Operaciones',  '', '', '']);
+    shCC.appendRow(['Practicantes', '', '', '']);
+  } else {
+    // Asegura que exista la fila Practicantes aunque la pestaña ya tuviera datos
+    const vals = shCC.getRange(1, 1, shCC.getLastRow(), 1).getValues().map(r => (r[0]||'').toString().trim().toLowerCase());
+    if (vals.indexOf('practicantes') === -1) shCC.appendRow(['Practicantes', '', '', '']);
   }
 
   getOrCreate(ss, SHEET_COSTO,      ['Anio','Mes','Quincena','Categoria','Monto']);
@@ -263,13 +269,14 @@ function handleGet(e) {
     if (!sh) return jsonResp({ rows: [], count: 0 });
     const data = sh.getDataRange().getValues();
     if (data.length < 2) return jsonResp({ rows: [], count: 0 });
-    // Columnas: Subtipo(0), Hora_Entrada(1), Horas_Jornada(2)
+    // Columnas: Subtipo(0), Hora_Entrada(1), Horas_Jornada(2), Horas_Mes(3)
     const rows = data.slice(1)
       .filter(r => r[0])
       .map(r => ({
         subtipo:  r[0].toString().trim(),
         entrada:  formatTime(r[1]) || (r[1] !== undefined && r[1] !== '' ? r[1].toString().trim() : ''),
         jornada:  r[2] !== undefined && r[2] !== '' ? parseFloat(r[2]) || 0 : 0,
+        horasMes: r[3] !== undefined && r[3] !== '' ? parseFloat(r[3]) || 0 : 0,
       }));
     return jsonResp({ rows, count: rows.length });
   }
@@ -507,18 +514,20 @@ function handlePost(e) {
 
   // ── SAVE CONFIG CAMPO (horario/jornada por subtipo) ─────────────
   if (accion === 'saveConfigCampo') {
-    const sh = getOrCreate(ss, SHEET_CONFIG_CAMPO, ['Subtipo','Hora_Entrada','Horas_Jornada']);
-    const { subtipo, entrada, jornada } = body;
+    const sh = getOrCreate(ss, SHEET_CONFIG_CAMPO, ['Subtipo','Hora_Entrada','Horas_Jornada','Horas_Mes']);
+    const { subtipo, entrada, jornada, horasMes } = body;
     if (!subtipo) return jsonResp({ error: 'subtipo requerido' });
+    const jVal = (jornada !== undefined && jornada !== '') ? jornada : '';
+    const hmVal = (horasMes !== undefined && horasMes !== '') ? horasMes : '';
     const data  = sh.getDataRange().getValues();
     let found   = -1;
     for (let i = 1; i < data.length; i++) {
       if (data[i][0].toString().trim().toLowerCase() === subtipo.toString().trim().toLowerCase()) { found = i; break; }
     }
     if (found > 0) {
-      sh.getRange(found + 1, 2, 1, 2).setValues([[entrada || '', jornada !== undefined && jornada !== '' ? jornada : '']]);
+      sh.getRange(found + 1, 2, 1, 3).setValues([[entrada || '', jVal, hmVal]]);
     } else {
-      sh.appendRow([subtipo, entrada || '', jornada !== undefined && jornada !== '' ? jornada : '']);
+      sh.appendRow([subtipo, entrada || '', jVal, hmVal]);
     }
     return jsonResp({ ok: true, action: found > 0 ? 'updated' : 'created' });
   }
