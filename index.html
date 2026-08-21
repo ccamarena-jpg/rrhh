@@ -2881,10 +2881,29 @@ function getOrCreate(ss, name, headers) {
   return sh;
 }
 
+// ── Asegurar encabezados en columnas concretas (migración no destructiva) ──
+// cols: objeto { numeroColumna(1-based): 'Texto encabezado' }
+function ensureHeaders(sh, cols) {
+  if (!sh) return;
+  Object.keys(cols).forEach(function (c) {
+    const col = parseInt(c, 10);
+    const cell = sh.getRange(1, col);
+    const actual = (cell.getValue() || '').toString().trim();
+    if (!actual) {
+      cell.setValue(cols[c])
+          .setFontWeight('bold')
+          .setBackground('#2c3280')
+          .setFontColor('#ffffff');
+    }
+  });
+}
+
 // ── Inicializar todas las pestañas (ejecutar una sola vez) ─────────
 function initSheets() {
   const ss = getSS();
   getOrCreate(ss, SHEET_PERSONAL,   ['DNI','Nombre','Ficha_Buk','Cargo','Area','Fecha_Ingreso','Tipo','Subtipo']);
+  // Migración: si la pestaña de personal ya existía con datos, asegura los encabezados Tipo/Subtipo
+  ensureHeaders(ss.getSheetByName(SHEET_PERSONAL), { 7: 'Tipo', 8: 'Subtipo' });
   getOrCreate(ss, SHEET_ASISTENCIA, ['Documento','Fecha','Ingreso','Salida','Proyecto','DIA']);
   getOrCreate(ss, SHEET_VACACIONES, ['Colaborador','Año','Mes','Nombre_Mes','Dias','Dias_Detalle']);
   getOrCreate(ss, SHEET_RESUMEN,    ['Mes','DNI','Nombre','Horas_DM','Horas_Vacaciones','Objetivo_Horas']);
