@@ -1098,32 +1098,28 @@ th.sortable.asc,th.sortable.desc{background:rgba(255,255,255,.1)!important}
     <div class="cards" id="seg-cards" style="margin:14px 0 4px"></div>
     <div class="ctrl" style="gap:8px;flex-wrap:wrap">
       <select class="fsel" id="seg-f-mes" data-all="Todos los meses" onchange="renderSegBase()" style="min-width:140px"><option value="">Todos los meses</option></select>
+      <select class="fsel" id="seg-f-anio" data-all="Todos los años" onchange="renderSegBase()" style="min-width:120px"><option value="">Todos los años</option></select>
       <select class="fsel" id="seg-f-empresa" data-all="Todas las empresas" onchange="renderSegBase()" style="min-width:140px"><option value="">Todas las empresas</option></select>
       <select class="fsel" id="seg-f-tipo" data-all="Todos los tipos" onchange="renderSegBase()" style="min-width:150px"><option value="">Todos los tipos</option></select>
       <select class="fsel" id="seg-f-status" data-all="Todos los status" onchange="renderSegBase()" style="min-width:140px"><option value="">Todos los status</option></select>
       <input class="finp" id="seg-buscar" placeholder="Buscar…" oninput="renderSegBase()" style="width:200px">
     </div>
-    <div class="grid-2" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;margin-bottom:14px">
-      <div class="tbl-wrap">
-        <div style="font-size:12px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.4px;margin:6px 2px">Monto por mes</div>
-        <table class="pst" id="seg-res-mes"><thead><tr><th>Mes</th><th style="text-align:right">Monto</th></tr></thead><tbody id="seg-res-mes-tbody"></tbody></table>
-      </div>
-      <div class="tbl-wrap">
-        <div style="font-size:12px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.4px;margin:6px 2px">Monto por tipo de seguro</div>
-        <table class="pst" id="seg-res-tipo"><thead><tr><th>Tipo</th><th style="text-align:right">Monto</th></tr></thead><tbody id="seg-res-tipo-tbody"></tbody></table>
-      </div>
+    <div class="tbl-wrap" style="margin-bottom:14px">
+      <div style="font-size:12px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.4px;margin:6px 2px">Monto por tipo de seguro</div>
+      <table class="pst" id="seg-res-tipo"><thead><tr><th>Tipo de seguro</th><th style="text-align:center"># Registros</th><th style="text-align:right">Monto</th></tr></thead><tbody id="seg-res-tipo-tbody"></tbody></table>
     </div>
     <div class="tbl-wrap">
       <table class="pst" id="seg-table">
         <thead><tr>
           <th class="sortable">Mes</th>
+          <th class="sortable">Año</th>
           <th class="sortable">Empresa</th>
           <th class="sortable">Aseguradora</th>
           <th class="sortable">Tipo de seguro</th>
           <th class="sortable" style="text-align:right">Monto</th>
           <th class="sortable" style="text-align:center">Status</th>
         </tr></thead>
-        <tbody id="seg-tbody"><tr><td colspan="6" style="text-align:center;padding:40px;color:var(--hi)">Sin registros. Carga la base mensual.</td></tr></tbody>
+        <tbody id="seg-tbody"><tr><td colspan="7" style="text-align:center;padding:40px;color:var(--hi)">Sin registros. Carga la base mensual.</td></tr></tbody>
       </table>
     </div>
   </div>
@@ -1413,7 +1409,7 @@ th.sortable.asc,th.sortable.desc{background:rgba(255,255,255,.1)!important}
     <div class="upzone" onclick="document.getElementById('file-seg-base').click()" style="cursor:pointer">
       <span class="upzone-ico">📆</span>
       <h3>Haz clic para seleccionar tu CSV</h3>
-      <p>Columnas: Mes · Empresa · Aseguradora · Tipo de seguro · Monto · Status</p>
+      <p>Columnas: Mes · Año · Empresa · Aseguradora · Tipo de seguro · Monto · Status</p>
     </div>
     <input type="file" id="file-seg-base" accept=".csv" style="display:none" onchange="handleSegBaseCSV(this)">
     <label style="display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;color:var(--tx)"><input type="checkbox" id="seg-base-replace" checked> Reemplazar toda la base existente</label>
@@ -3876,7 +3872,8 @@ async function syncSeguros() {
   try {
     const [b, ep] = await Promise.all([fetchFromSheets('getSegurosBase'), fetchFromSheets('getSegurosEps')]);
     STATE.segBase = (b.rows||[]).map(r => ({
-      rid:(r.rid||'').toString(), mes:(r.mes||'').toString().trim(), empresa:(r.empresa||'').toString().trim(),
+      rid:(r.rid||'').toString(), mes:(r.mes||'').toString().trim(), anio:(r.anio||'').toString().trim(),
+      empresa:(r.empresa||'').toString().trim(),
       aseguradora:(r.aseguradora||'').toString().trim(), tipo:(r.tipo||'').toString().trim(),
       monto:parseFloat(r.monto)||0, status:(r.status||'').toString().trim(),
     }));
@@ -3900,10 +3897,12 @@ function renderSegBase() {
   if (!tb) return;
   const meses = [...new Set(STATE.segBase.map(s=>s.mes).filter(Boolean))].sort((a,b)=>mesIdx(a)-mesIdx(b));
   fillSelect('seg-f-mes', meses);
+  fillSelect('seg-f-anio', [...new Set(STATE.segBase.map(s=>s.anio).filter(Boolean))].sort());
   fillSelect('seg-f-empresa', [...new Set(STATE.segBase.map(s=>s.empresa).filter(Boolean))].sort());
   fillSelect('seg-f-tipo', [...new Set(STATE.segBase.map(s=>s.tipo).filter(Boolean))].sort());
   fillSelect('seg-f-status', [...new Set(STATE.segBase.map(s=>s.status).filter(Boolean))].sort());
   const fMes = document.getElementById('seg-f-mes')?.value || '';
+  const fAnio= document.getElementById('seg-f-anio')?.value || '';
   const fEmp = document.getElementById('seg-f-empresa')?.value || '';
   const fTipo= document.getElementById('seg-f-tipo')?.value || '';
   const fSt  = document.getElementById('seg-f-status')?.value || '';
@@ -3911,10 +3910,11 @@ function renderSegBase() {
 
   let data = STATE.segBase.slice();
   if (fMes) data = data.filter(s=>s.mes===fMes);
+  if (fAnio)data = data.filter(s=>(s.anio||'')===fAnio);
   if (fEmp) data = data.filter(s=>s.empresa===fEmp);
   if (fTipo)data = data.filter(s=>s.tipo===fTipo);
   if (fSt)  data = data.filter(s=>s.status===fSt);
-  if (q) data = data.filter(s=>(s.mes+' '+s.empresa+' '+s.aseguradora+' '+s.tipo+' '+s.status).toLowerCase().includes(q));
+  if (q) data = data.filter(s=>(s.mes+' '+(s.anio||'')+' '+s.empresa+' '+s.aseguradora+' '+s.tipo+' '+s.status).toLowerCase().includes(q));
 
   // KPIs
   const cardsEl = document.getElementById('seg-cards');
@@ -3928,30 +3928,25 @@ function renderSegBase() {
       <div class="card"><div class="card-label">Pendiente</div><div class="card-value warn" style="font-size:20px">${fmtSoles(pend)}</div><div class="card-sub">por pagar</div></div>
       <div class="card"><div class="card-label">Meses</div><div class="card-value">${new Set(data.map(s=>s.mes)).size}</div><div class="card-sub">con registros</div></div>`;
   }
-  // resumen por mes
-  const porMes = {}; data.forEach(s=>{ porMes[s.mes]=(porMes[s.mes]||0)+s.monto; });
-  const tbMes = document.getElementById('seg-res-mes-tbody');
-  if (tbMes) {
-    const ks = Object.keys(porMes).sort((a,b)=>mesIdx(a)-mesIdx(b));
-    tbMes.innerHTML = ks.map(k=>`<tr><td>${escHtml(k)}</td><td style="text-align:right">${fmtSoles(porMes[k])}</td></tr>`).join('')
-      || '<tr><td colspan="2" style="text-align:center;color:var(--hi);padding:16px">—</td></tr>';
-  }
-  // resumen por tipo
-  const porTipo = {}; data.forEach(s=>{ porTipo[s.tipo]=(porTipo[s.tipo]||0)+s.monto; });
+  // resumen por tipo de seguro (a todo el ancho)
+  const porTipo = {}; data.forEach(s=>{ const k=s.tipo||'(Sin tipo)'; if(!porTipo[k])porTipo[k]={n:0,monto:0}; porTipo[k].n++; porTipo[k].monto+=s.monto; });
   const tbTipo = document.getElementById('seg-res-tipo-tbody');
   if (tbTipo) {
-    const ks = Object.keys(porTipo).sort((a,b)=>porTipo[b]-porTipo[a]);
-    tbTipo.innerHTML = ks.map(k=>`<tr><td>${escHtml(k)||'—'}</td><td style="text-align:right">${fmtSoles(porTipo[k])}</td></tr>`).join('')
-      || '<tr><td colspan="2" style="text-align:center;color:var(--hi);padding:16px">—</td></tr>';
+    const ks = Object.keys(porTipo).sort((a,b)=>porTipo[b].monto-porTipo[a].monto);
+    const totN = data.length, totM = data.reduce((a,s)=>a+s.monto,0);
+    tbTipo.innerHTML = (ks.map(k=>`<tr><td style="font-weight:600">${escHtml(k)}</td><td style="text-align:center">${porTipo[k].n}</td><td style="text-align:right">${fmtSoles(porTipo[k].monto)}</td></tr>`).join('')
+      + (ks.length?`<tr style="border-top:2px solid var(--bd2);font-weight:700"><td>TOTAL</td><td style="text-align:center">${totN}</td><td style="text-align:right">${fmtSoles(totM)}</td></tr>`:''))
+      || '<tr><td colspan="3" style="text-align:center;color:var(--hi);padding:16px">—</td></tr>';
   }
 
   if (!data.length) {
-    tb.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--hi)">Sin registros con esos filtros.</td></tr>';
+    tb.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--hi)">Sin registros con esos filtros.</td></tr>';
     return;
   }
   data.sort((a,b)=> mesIdx(a.mes)-mesIdx(b.mes) || a.empresa.localeCompare(b.empresa));
   tb.innerHTML = data.map(s => `<tr>
     <td>${escHtml(s.mes)}</td>
+    <td style="text-align:center">${escHtml(s.anio)||'—'}</td>
     <td style="font-weight:600">${escHtml(s.empresa)||'—'}</td>
     <td>${escHtml(s.aseguradora)||'—'}</td>
     <td>${escHtml(s.tipo)||'—'}</td>
@@ -4016,7 +4011,7 @@ function renderSegEps() {
 }
 
 // Seguros — carga masiva CSV
-const SEG_BASE_BULK_HEADERS = ['Mes','Empresa','Aseguradora','Tipo_Seguro','Monto','Status'];
+const SEG_BASE_BULK_HEADERS = ['Mes','Anio','Empresa','Aseguradora','Tipo_Seguro','Monto','Status'];
 const SEG_EPS_BULK_HEADERS  = ['Mes','Seguro','Empresa','Contrato','Afiliado','Dependientes','Costo_Prima','Costo_Titular'];
 let _segBaseBulkRows = [], _segEpsBulkRows = [];
 function openSegBaseBulk() {
@@ -4034,8 +4029,8 @@ function handleSegBaseCSV(input) {
       const rows = parseCSV(e.target.result);
       if (rows.length < 2) { toast('El archivo no tiene datos','warn'); return; }
       _segBaseBulkRows = rows.slice(1).map(r => ({
-        mes:(r[0]||'').trim(), empresa:(r[1]||'').trim(), aseguradora:(r[2]||'').trim(),
-        tipo:(r[3]||'').trim(), monto:numPE(r[4]), status:(r[5]||'').trim(),
+        mes:(r[0]||'').trim(), anio:(r[1]||'').trim(), empresa:(r[2]||'').trim(), aseguradora:(r[3]||'').trim(),
+        tipo:(r[4]||'').trim(), monto:numPE(r[5]), status:(r[6]||'').trim(),
       })).filter(x => x.mes);
       const tot = _segBaseBulkRows.reduce((a,r)=>a+r.monto,0);
       document.getElementById('seg-base-info').innerHTML = `Se detectaron <b>${_segBaseBulkRows.length}</b> filas válidas · total ${fmtSoles(tot)}.`;
@@ -4065,7 +4060,7 @@ async function confirmarSegBaseBulk() {
   closeModal('modal-seg-base-bulk');
 }
 function descargarPlantillaSegBase() {
-  const ej = ['ENERO','TRAD','PACIFICO','EPS','2614.93','PAGADO'];
+  const ej = ['ENERO','2025','TRAD','PACIFICO','EPS','2614.93','PAGADO'];
   const csv = SEG_BASE_BULK_HEADERS.join(';') + '\n' + ej.join(';') + '\n';
   const blob = new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8'});
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'plantilla_seguros_base.csv'; a.click();
@@ -4164,7 +4159,7 @@ const SHEET_SEG_EPS      = 'Seguros EPS Staff';    // relación EPS staff con co
 const INV_HEADERS = ['ID','Nombre','Categoria','Estado','Asignado','Fecha_Creacion','Obs',
                      'Cuenta','Marca','Procesador','RAM','ID_Dispositivo','Fecha_Compra','Mantenimiento','Mouse'];
 const LINEAS_HEADERS  = ['Telefono','Modelo','SIM','IMEI','Plan','Estado','Inicio_Adenda','Fin_Adenda','Penalidad','Nombre','Posicion','Proyecto','Cuota'];
-const SEG_BASE_HEADERS = ['Mes','Empresa','Aseguradora','Tipo_Seguro','Monto','Status'];
+const SEG_BASE_HEADERS = ['Mes','Anio','Empresa','Aseguradora','Tipo_Seguro','Monto','Status'];
 const SEG_EPS_HEADERS  = ['Mes','Seguro','Empresa','Contrato','Afiliado','Dependientes','Costo_Prima','Costo_Titular'];
 
 // ── Obtener el Spreadsheet (activo o por ID) ───────────────────────
@@ -4571,17 +4566,18 @@ function handleGet(e) {
     if (!sh) return jsonResp({ rows: [], count: 0 });
     const data = sh.getDataRange().getValues();
     if (data.length < 2) return jsonResp({ rows: [], count: 0 });
-    // Mes(0),Empresa(1),Aseguradora(2),Tipo_Seguro(3),Monto(4),Status(5)
+    // Mes(0),Anio(1),Empresa(2),Aseguradora(3),Tipo_Seguro(4),Monto(5),Status(6)
     const rows = data.slice(1)
       .filter(r => r[0])
       .map((r, i) => ({
         rid:         String(i + 2),
         mes:         r[0] ? r[0].toString().trim() : '',
-        empresa:     r[1] ? r[1].toString().trim() : '',
-        aseguradora: r[2] ? r[2].toString().trim() : '',
-        tipo:        r[3] ? r[3].toString().trim() : '',
-        monto:       parseFloat(r[4]) || 0,
-        status:      r[5] ? r[5].toString().trim() : '',
+        anio:        r[1] != null && r[1] !== '' ? r[1].toString().trim() : '',
+        empresa:     r[2] ? r[2].toString().trim() : '',
+        aseguradora: r[3] ? r[3].toString().trim() : '',
+        tipo:        r[4] ? r[4].toString().trim() : '',
+        monto:       parseFloat(r[5]) || 0,
+        status:      r[6] ? r[6].toString().trim() : '',
       }));
     return jsonResp({ rows, count: rows.length });
   }
@@ -5015,7 +5011,7 @@ function handlePost(e) {
     const items = body.rows || [];
     if (!items.length) return jsonResp({ error: 'Sin filas para cargar' });
     if (body.replace) clearBody(sh);
-    const nuevas = items.map(b => [ b.mes||'', b.empresa||'', b.aseguradora||'', b.tipo||'', parseFloat(b.monto)||0, b.status||'' ]);
+    const nuevas = items.map(b => [ b.mes||'', b.anio||'', b.empresa||'', b.aseguradora||'', b.tipo||'', parseFloat(b.monto)||0, b.status||'' ]);
     if (nuevas.length) sh.getRange(sh.getLastRow() + 1, 1, nuevas.length, SEG_BASE_HEADERS.length).setValues(nuevas);
     return jsonResp({ ok: true, count: nuevas.length });
   }

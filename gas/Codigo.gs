@@ -34,7 +34,7 @@ const SHEET_SEG_EPS      = 'Seguros EPS Staff';    // relación EPS staff con co
 const INV_HEADERS = ['ID','Nombre','Categoria','Estado','Asignado','Fecha_Creacion','Obs',
                      'Cuenta','Marca','Procesador','RAM','ID_Dispositivo','Fecha_Compra','Mantenimiento','Mouse'];
 const LINEAS_HEADERS  = ['Telefono','Modelo','SIM','IMEI','Plan','Estado','Inicio_Adenda','Fin_Adenda','Penalidad','Nombre','Posicion','Proyecto','Cuota'];
-const SEG_BASE_HEADERS = ['Mes','Empresa','Aseguradora','Tipo_Seguro','Monto','Status'];
+const SEG_BASE_HEADERS = ['Mes','Anio','Empresa','Aseguradora','Tipo_Seguro','Monto','Status'];
 const SEG_EPS_HEADERS  = ['Mes','Seguro','Empresa','Contrato','Afiliado','Dependientes','Costo_Prima','Costo_Titular'];
 
 // ── Obtener el Spreadsheet (activo o por ID) ───────────────────────
@@ -441,17 +441,18 @@ function handleGet(e) {
     if (!sh) return jsonResp({ rows: [], count: 0 });
     const data = sh.getDataRange().getValues();
     if (data.length < 2) return jsonResp({ rows: [], count: 0 });
-    // Mes(0),Empresa(1),Aseguradora(2),Tipo_Seguro(3),Monto(4),Status(5)
+    // Mes(0),Anio(1),Empresa(2),Aseguradora(3),Tipo_Seguro(4),Monto(5),Status(6)
     const rows = data.slice(1)
       .filter(r => r[0])
       .map((r, i) => ({
         rid:         String(i + 2),
         mes:         r[0] ? r[0].toString().trim() : '',
-        empresa:     r[1] ? r[1].toString().trim() : '',
-        aseguradora: r[2] ? r[2].toString().trim() : '',
-        tipo:        r[3] ? r[3].toString().trim() : '',
-        monto:       parseFloat(r[4]) || 0,
-        status:      r[5] ? r[5].toString().trim() : '',
+        anio:        r[1] != null && r[1] !== '' ? r[1].toString().trim() : '',
+        empresa:     r[2] ? r[2].toString().trim() : '',
+        aseguradora: r[3] ? r[3].toString().trim() : '',
+        tipo:        r[4] ? r[4].toString().trim() : '',
+        monto:       parseFloat(r[5]) || 0,
+        status:      r[6] ? r[6].toString().trim() : '',
       }));
     return jsonResp({ rows, count: rows.length });
   }
@@ -885,7 +886,7 @@ function handlePost(e) {
     const items = body.rows || [];
     if (!items.length) return jsonResp({ error: 'Sin filas para cargar' });
     if (body.replace) clearBody(sh);
-    const nuevas = items.map(b => [ b.mes||'', b.empresa||'', b.aseguradora||'', b.tipo||'', parseFloat(b.monto)||0, b.status||'' ]);
+    const nuevas = items.map(b => [ b.mes||'', b.anio||'', b.empresa||'', b.aseguradora||'', b.tipo||'', parseFloat(b.monto)||0, b.status||'' ]);
     if (nuevas.length) sh.getRange(sh.getLastRow() + 1, 1, nuevas.length, SEG_BASE_HEADERS.length).setValues(nuevas);
     return jsonResp({ ok: true, count: nuevas.length });
   }
