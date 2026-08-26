@@ -26,6 +26,16 @@ const SHEET_COSTO        = 'Costo Personal';       // (legado) costo por categor
 const SHEET_PLANILLA     = 'Planilla';             // base detallada de planilla por persona/quincena
 const SHEET_INVENTARIO   = 'Inventario';           // activos de la empresa
 const SHEET_INV_HIST     = 'Inventario Historial'; // historial de movimientos de activos
+const SHEET_LINEAS       = 'Lineas Celulares';     // líneas móviles / equipos (Entel)
+const SHEET_SEG_BASE     = 'Seguros Base';         // base mensual de seguros (todos los meses)
+const SHEET_SEG_EPS      = 'Seguros EPS Staff';    // relación EPS staff con costo de prima
+
+// Encabezados de Inventario (extendido con columnas de laptop)
+const INV_HEADERS = ['ID','Nombre','Categoria','Estado','Asignado','Fecha_Creacion','Obs',
+                     'Cuenta','Marca','Procesador','RAM','ID_Dispositivo','Fecha_Compra','Mantenimiento','Mouse'];
+const LINEAS_HEADERS  = ['Telefono','Modelo','SIM','IMEI','Plan','Estado','Inicio_Adenda','Fin_Adenda','Penalidad','Nombre','Posicion','Proyecto','Cuota'];
+const SEG_BASE_HEADERS = ['Mes','Empresa','Aseguradora','Tipo_Seguro','Monto','Status'];
+const SEG_EPS_HEADERS  = ['Mes','Seguro','Empresa','Contrato','Afiliado','Dependientes','Costo_Prima','Costo_Titular'];
 
 // ── Obtener el Spreadsheet (activo o por ID) ───────────────────────
 function getSS() {
@@ -101,8 +111,16 @@ function initSheets() {
 
   getOrCreate(ss, SHEET_COSTO,      ['Anio','Mes','Quincena','Categoria','Monto']);
   getOrCreate(ss, SHEET_PLANILLA,   ['ID','Razon_Social','Tipo_Personal','Anio','Mes','Quincena','Cuenta','Proyecto','Gerente','Supervisor','Nombres','DNI','Ubigeo','Ciudad','Banco','Num_Cuenta','Num_CCI','Total_Pagar']);
-  getOrCreate(ss, SHEET_INVENTARIO, ['ID','Nombre','Categoria','Estado','Asignado','Fecha_Creacion','Obs']);
+  getOrCreate(ss, SHEET_INVENTARIO, INV_HEADERS);
+  // Migración: agrega los encabezados de columnas de laptop si la pestaña ya tenía datos
+  ensureHeaders(ss.getSheetByName(SHEET_INVENTARIO),
+    { 8:'Cuenta', 9:'Marca', 10:'Procesador', 11:'RAM', 12:'ID_Dispositivo', 13:'Fecha_Compra', 14:'Mantenimiento', 15:'Mouse' });
   getOrCreate(ss, SHEET_INV_HIST,   ['Fecha','ID_Activo','Nombre','Estado','Asignado','Admin','Comentario']);
+
+  // Gestión — Líneas celulares y Seguros
+  getOrCreate(ss, SHEET_LINEAS,   LINEAS_HEADERS);
+  getOrCreate(ss, SHEET_SEG_BASE, SEG_BASE_HEADERS);
+  getOrCreate(ss, SHEET_SEG_EPS,  SEG_EPS_HEADERS);
 
   Logger.log('initSheets OK');
   return 'OK — pestañas creadas';
@@ -365,7 +383,8 @@ function handleGet(e) {
     if (!sh) return jsonResp({ rows: [], count: 0 });
     const data = sh.getDataRange().getValues();
     if (data.length < 2) return jsonResp({ rows: [], count: 0 });
-    // Columnas: ID(0), Nombre(1), Categoria(2), Estado(3), Asignado(4), Fecha_Creacion(5), Obs(6)
+    // Columnas: ID(0),Nombre(1),Categoria(2),Estado(3),Asignado(4),Fecha_Creacion(5),Obs(6),
+    //           Cuenta(7),Marca(8),Procesador(9),RAM(10),ID_Dispositivo(11),Fecha_Compra(12),Mantenimiento(13),Mouse(14)
     const rows = data.slice(1)
       .filter(r => r[0])
       .map(r => ({
@@ -376,6 +395,86 @@ function handleGet(e) {
         asignado:  r[4] ? r[4].toString().trim() : '',
         creacion:  r1ToString(r[5]),
         obs:       r[6] ? r[6].toString().trim() : '',
+        cuenta:    r[7]  ? r[7].toString().trim()  : '',
+        marca:     r[8]  ? r[8].toString().trim()  : '',
+        procesador:r[9]  ? r[9].toString().trim()  : '',
+        ram:       r[10] ? r[10].toString().trim() : '',
+        dispositivo:r[11]? r[11].toString().trim() : '',
+        fecha_compra:r1ToString(r[12]),
+        mantenimiento:r1ToString(r[13]),
+        mouse:     r[14] ? r[14].toString().trim() : '',
+      }));
+    return jsonResp({ rows, count: rows.length });
+  }
+
+  // ── GET LINEAS CELULARES ────────────────────────────────────────
+  if (accion === 'getLineas') {
+    const sh = ss.getSheetByName(SHEET_LINEAS);
+    if (!sh) return jsonResp({ rows: [], count: 0 });
+    const data = sh.getDataRange().getValues();
+    if (data.length < 2) return jsonResp({ rows: [], count: 0 });
+    // Telefono(0),Modelo(1),SIM(2),IMEI(3),Plan(4),Estado(5),Inicio(6),Fin(7),Penalidad(8),Nombre(9),Posicion(10),Proyecto(11),Cuota(12)
+    const rows = data.slice(1)
+      .filter(r => r.some(c => c !== '' && c != null))
+      .map((r, i) => ({
+        rid:       String(i + 2),
+        telefono:  r[0] != null ? r[0].toString().trim() : '',
+        modelo:    r[1] ? r[1].toString().trim() : '',
+        sim:       r[2] != null ? r[2].toString().trim() : '',
+        imei:      r[3] != null ? r[3].toString().trim() : '',
+        plan:      r[4] ? r[4].toString().trim() : '',
+        estado:    r[5] ? r[5].toString().trim() : '',
+        inicio:    r1ToString(r[6]),
+        fin:       r1ToString(r[7]),
+        penalidad: r[8] != null ? r[8].toString().trim() : '',
+        nombre:    r[9] ? r[9].toString().trim() : '',
+        posicion:  r[10] ? r[10].toString().trim() : '',
+        proyecto:  r[11] ? r[11].toString().trim() : '',
+        cuota:     r[12] ? r[12].toString().trim() : '',
+      }));
+    return jsonResp({ rows, count: rows.length });
+  }
+
+  // ── GET SEGUROS BASE (todos los meses) ──────────────────────────
+  if (accion === 'getSegurosBase') {
+    const sh = ss.getSheetByName(SHEET_SEG_BASE);
+    if (!sh) return jsonResp({ rows: [], count: 0 });
+    const data = sh.getDataRange().getValues();
+    if (data.length < 2) return jsonResp({ rows: [], count: 0 });
+    // Mes(0),Empresa(1),Aseguradora(2),Tipo_Seguro(3),Monto(4),Status(5)
+    const rows = data.slice(1)
+      .filter(r => r[0])
+      .map((r, i) => ({
+        rid:         String(i + 2),
+        mes:         r[0] ? r[0].toString().trim() : '',
+        empresa:     r[1] ? r[1].toString().trim() : '',
+        aseguradora: r[2] ? r[2].toString().trim() : '',
+        tipo:        r[3] ? r[3].toString().trim() : '',
+        monto:       parseFloat(r[4]) || 0,
+        status:      r[5] ? r[5].toString().trim() : '',
+      }));
+    return jsonResp({ rows, count: rows.length });
+  }
+
+  // ── GET SEGUROS EPS STAFF ───────────────────────────────────────
+  if (accion === 'getSegurosEps') {
+    const sh = ss.getSheetByName(SHEET_SEG_EPS);
+    if (!sh) return jsonResp({ rows: [], count: 0 });
+    const data = sh.getDataRange().getValues();
+    if (data.length < 2) return jsonResp({ rows: [], count: 0 });
+    // Mes(0),Seguro(1),Empresa(2),Contrato(3),Afiliado(4),Dependientes(5),Costo_Prima(6),Costo_Titular(7)
+    const rows = data.slice(1)
+      .filter(r => r[4])
+      .map((r, i) => ({
+        rid:         String(i + 2),
+        mes:         r[0] ? r[0].toString().trim() : '',
+        seguro:      r[1] ? r[1].toString().trim() : '',
+        empresa:     r[2] ? r[2].toString().trim() : '',
+        contrato:    r[3] != null ? r[3].toString().trim() : '',
+        afiliado:    r[4] ? r[4].toString().trim() : '',
+        dependientes:r[5] != null && r[5] !== '' ? (parseInt(r[5]) || 0) : '',
+        costo:       parseFloat(r[6]) || 0,
+        costo_titular: r[7] != null && r[7] !== '' ? (parseFloat(r[7]) || 0) : '',
       }));
     return jsonResp({ rows, count: rows.length });
   }
@@ -676,9 +775,11 @@ function handlePost(e) {
 
   // ── SAVE INVENTARIO (activo) — registra historial si cambia estado/asignado ──
   if (accion === 'saveInventario') {
-    const sh  = getOrCreate(ss, SHEET_INVENTARIO, ['ID','Nombre','Categoria','Estado','Asignado','Fecha_Creacion','Obs']);
+    const sh  = getOrCreate(ss, SHEET_INVENTARIO, INV_HEADERS);
+    ensureHeaders(sh, { 8:'Cuenta', 9:'Marca', 10:'Procesador', 11:'RAM', 12:'ID_Dispositivo', 13:'Fecha_Compra', 14:'Mantenimiento', 15:'Mouse' });
     const shH = getOrCreate(ss, SHEET_INV_HIST,   ['Fecha','ID_Activo','Nombre','Estado','Asignado','Admin','Comentario']);
-    let { id, nombre, categoria, estado, asignado, obs, admin, comentario } = body;
+    let { id, nombre, categoria, estado, asignado, obs, admin, comentario,
+          cuenta, marca, procesador, ram, dispositivo, fecha_compra, mantenimiento, mouse } = body;
     if (!nombre) return jsonResp({ error: 'nombre requerido' });
     estado = estado || 'Disponible';
     const data = sh.getDataRange().getValues();
@@ -693,10 +794,12 @@ function handlePost(e) {
     if (found > 0) {
       // conservar fecha de creación existente
       const creacion = data[found][5] || '';
-      sh.getRange(found + 1, 1, 1, 7).setValues([[id, nombre, categoria || '', estado, asignado || '', creacion, obs || '']]);
+      sh.getRange(found + 1, 1, 1, 15).setValues([[id, nombre, categoria || '', estado, asignado || '', creacion, obs || '',
+        cuenta || '', marca || '', procesador || '', ram || '', dispositivo || '', fecha_compra || '', mantenimiento || '', mouse || '']]);
     } else {
       if (!id) id = nextInvId(data);
-      sh.appendRow([id, nombre, categoria || '', estado, asignado || '', r1ToStringFull(new Date()), obs || '']);
+      sh.appendRow([id, nombre, categoria || '', estado, asignado || '', r1ToStringFull(new Date()), obs || '',
+        cuenta || '', marca || '', procesador || '', ram || '', dispositivo || '', fecha_compra || '', mantenimiento || '', mouse || '']);
     }
     // Historial: registra en alta o cuando cambia estado/asignado
     const cambio = (found <= 0) || (prevEstado !== estado) || (prevAsignado !== (asignado || ''));
@@ -723,6 +826,84 @@ function handlePost(e) {
     return jsonResp({ ok: false, error: 'ID no encontrado' });
   }
 
+  // ── SAVE INVENTARIO BULK (carga masiva de activos) ──────────────
+  if (accion === 'saveInventarioBulk') {
+    const sh = getOrCreate(ss, SHEET_INVENTARIO, INV_HEADERS);
+    ensureHeaders(sh, { 8:'Cuenta', 9:'Marca', 10:'Procesador', 11:'RAM', 12:'ID_Dispositivo', 13:'Fecha_Compra', 14:'Mantenimiento', 15:'Mouse' });
+    const items = body.rows || [];
+    if (!items.length) return jsonResp({ error: 'Sin filas para cargar' });
+    if (body.replace) clearBody(sh);
+    const data = sh.getDataRange().getValues();
+    let maxId = 0;
+    for (let i = 1; i < data.length; i++) { const n = parseInt((data[i][0]||'').toString().replace(/\D/g,''),10); if (!isNaN(n) && n>maxId) maxId=n; }
+    const now = r1ToStringFull(new Date());
+    const nuevas = items.map(b => [
+      String(++maxId).padStart(3,'0'), b.nombre||'', b.categoria||'', b.estado||'Disponible', b.asignado||'', now, b.obs||'',
+      b.cuenta||'', b.marca||'', b.procesador||'', b.ram||'', b.dispositivo||'', b.fecha_compra||'', b.mantenimiento||'', b.mouse||''
+    ]);
+    if (nuevas.length) sh.getRange(sh.getLastRow() + 1, 1, nuevas.length, 15).setValues(nuevas);
+    return jsonResp({ ok: true, count: nuevas.length });
+  }
+
+  // ── SAVE LINEA (una fila; upsert por fila rid) ──────────────────
+  if (accion === 'saveLinea') {
+    const sh = getOrCreate(ss, SHEET_LINEAS, LINEAS_HEADERS);
+    const b  = body;
+    const row = lineaRow(b);
+    const rid = b.rid ? parseInt(b.rid, 10) : 0;
+    if (rid && rid >= 2 && rid <= sh.getLastRow()) {
+      sh.getRange(rid, 1, 1, LINEAS_HEADERS.length).setValues([row]);
+      return jsonResp({ ok: true, action: 'updated', rid: String(rid) });
+    }
+    sh.appendRow(row);
+    return jsonResp({ ok: true, action: 'created', rid: String(sh.getLastRow()) });
+  }
+
+  // ── SAVE LINEAS BULK ────────────────────────────────────────────
+  if (accion === 'saveLineasBulk') {
+    const sh = getOrCreate(ss, SHEET_LINEAS, LINEAS_HEADERS);
+    const items = body.rows || [];
+    if (!items.length) return jsonResp({ error: 'Sin filas para cargar' });
+    if (body.replace) clearBody(sh);
+    const nuevas = items.map(lineaRow);
+    if (nuevas.length) sh.getRange(sh.getLastRow() + 1, 1, nuevas.length, LINEAS_HEADERS.length).setValues(nuevas);
+    return jsonResp({ ok: true, count: nuevas.length });
+  }
+
+  // ── DELETE LINEA ────────────────────────────────────────────────
+  if (accion === 'deleteLinea') {
+    const sh = ss.getSheetByName(SHEET_LINEAS);
+    if (!sh) return jsonResp({ error: 'Pestaña no encontrada' });
+    const rid = parseInt(body.rid, 10);
+    if (rid && rid >= 2 && rid <= sh.getLastRow()) { sh.deleteRow(rid); return jsonResp({ ok: true, action: 'deleted' }); }
+    return jsonResp({ ok: false, error: 'Fila no encontrada' });
+  }
+
+  // ── SAVE SEGUROS BASE BULK ──────────────────────────────────────
+  if (accion === 'saveSegBaseBulk') {
+    const sh = getOrCreate(ss, SHEET_SEG_BASE, SEG_BASE_HEADERS);
+    const items = body.rows || [];
+    if (!items.length) return jsonResp({ error: 'Sin filas para cargar' });
+    if (body.replace) clearBody(sh);
+    const nuevas = items.map(b => [ b.mes||'', b.empresa||'', b.aseguradora||'', b.tipo||'', parseFloat(b.monto)||0, b.status||'' ]);
+    if (nuevas.length) sh.getRange(sh.getLastRow() + 1, 1, nuevas.length, SEG_BASE_HEADERS.length).setValues(nuevas);
+    return jsonResp({ ok: true, count: nuevas.length });
+  }
+
+  // ── SAVE SEGUROS EPS BULK ───────────────────────────────────────
+  if (accion === 'saveSegEpsBulk') {
+    const sh = getOrCreate(ss, SHEET_SEG_EPS, SEG_EPS_HEADERS);
+    const items = body.rows || [];
+    if (!items.length) return jsonResp({ error: 'Sin filas para cargar' });
+    if (body.replace) clearBody(sh);
+    const nuevas = items.map(b => [ b.mes||'', b.seguro||'', b.empresa||'', b.contrato||'', b.afiliado||'',
+      (b.dependientes===''||b.dependientes==null)?'':(parseInt(b.dependientes)||0),
+      parseFloat(b.costo)||0,
+      (b.costo_titular===''||b.costo_titular==null)?'':(parseFloat(b.costo_titular)||0) ]);
+    if (nuevas.length) sh.getRange(sh.getLastRow() + 1, 1, nuevas.length, SEG_EPS_HEADERS.length).setValues(nuevas);
+    return jsonResp({ ok: true, count: nuevas.length });
+  }
+
   return jsonResp({ error: 'Acción no reconocida: ' + accion });
 }
 
@@ -747,6 +928,20 @@ function nextPlanillaId(data) {
     if (!isNaN(n) && n > max) max = n;
   }
   return String(max + 1).padStart(5, '0');
+}
+
+// Construye la fila de Líneas Celulares (13 columnas) desde el objeto del front
+function lineaRow(b) {
+  return [
+    b.telefono || '', b.modelo || '', b.sim || '', b.imei || '', b.plan || '', b.estado || '',
+    b.inicio || '', b.fin || '', b.penalidad || '', b.nombre || '', b.posicion || '', b.proyecto || '', b.cuota || '',
+  ];
+}
+
+// Borra todas las filas de datos (deja el encabezado) de una pestaña
+function clearBody(sh) {
+  const last = sh.getLastRow();
+  if (last > 1) sh.getRange(2, 1, last - 1, sh.getLastColumn()).clearContent();
 }
 
 // Genera un ID numérico incremental de 3 dígitos para inventario

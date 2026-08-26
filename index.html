@@ -356,6 +356,16 @@ th.sortable.asc,th.sortable.desc{background:rgba(255,255,255,.1)!important}
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
     </div>
     <div class="sb-icon-sep"></div>
+    <!-- Líneas celulares -->
+    <div class="sb-icon" data-page="lineas" onclick="showPage('lineas')" title="Líneas celulares">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg>
+    </div>
+    <div class="sb-icon-sep"></div>
+    <!-- Seguros -->
+    <div class="sb-icon" data-page="seguros" onclick="showPage('seguros')" title="Seguros">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    </div>
+    <div class="sb-icon-sep"></div>
     <!-- Config -->
     <div class="sb-icon" data-page="config" onclick="showPage('config')" title="Configuración">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M12 2v2M12 20v2M2 12h2M20 12h2M17.66 17.66l-1.41-1.41M6.34 17.66l1.41-1.41"/></svg>
@@ -411,6 +421,14 @@ th.sortable.asc,th.sortable.desc{background:rgba(255,255,255,.1)!important}
       <div class="sb-item" data-page="inventario" onclick="showPage('inventario')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
         Inventario
+      </div>
+      <div class="sb-item" data-page="lineas" onclick="showPage('lineas')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+        Líneas celulares
+      </div>
+      <div class="sb-item" data-page="seguros" onclick="showPage('seguros')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Seguros
       </div>
     </div>
     <div class="sb-sep"></div>
@@ -911,6 +929,10 @@ th.sortable.asc,th.sortable.desc{background:rgba(255,255,255,.1)!important}
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
         Sincronizar
       </button>
+      <button class="btn btn-outline" onclick="openInvBulk()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Cargar consolidado
+      </button>
       <button class="btn btn-primary" onclick="openInvModal()">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Crear activo
@@ -939,12 +961,15 @@ th.sortable.asc,th.sortable.desc{background:rgba(255,255,255,.1)!important}
           <th class="sortable">ID</th>
           <th class="sortable">Nombre del activo</th>
           <th class="sortable">Categoría</th>
+          <th class="sortable">Cuenta</th>
+          <th class="sortable">Marca</th>
+          <th class="sortable">RAM</th>
           <th class="sortable" style="text-align:center">Estado</th>
           <th class="sortable">Asignado a</th>
-          <th>Observación</th>
+          <th class="sortable">Fecha compra</th>
           <th style="text-align:center">Acciones</th>
         </tr></thead>
-        <tbody id="inv-tbody"><tr><td colspan="7" style="text-align:center;padding:40px;color:var(--hi)">Sin activos registrados. Crea uno o sincroniza.</td></tr></tbody>
+        <tbody id="inv-tbody"><tr><td colspan="10" style="text-align:center;padding:40px;color:var(--hi)">Sin activos registrados. Crea uno o sincroniza.</td></tr></tbody>
       </table>
     </div>
   </div>
@@ -964,6 +989,165 @@ th.sortable.asc,th.sortable.desc{background:rgba(255,255,255,.1)!important}
           <th>Comentario</th>
         </tr></thead>
         <tbody id="inv-hist-tbody"><tr><td colspan="6" style="text-align:center;padding:40px;color:var(--hi)">Sin movimientos aún.</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     PAGE: LÍNEAS CELULARES
+════════════════════════════════════ -->
+<div class="page" id="page-lineas">
+  <div class="ph">
+    <h1>Líneas celulares</h1>
+    <div class="ph-row">
+      <p style="margin:0">Detalle de líneas móviles y equipos: plan, estado, asignación y costo por cuenta.</p>
+      <div class="fgap"></div>
+      <button class="btn btn-outline" onclick="syncLineas()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        Sincronizar
+      </button>
+      <button class="btn btn-outline" onclick="openLineasBulk()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Cargar consolidado
+      </button>
+      <button class="btn btn-primary" onclick="openLineaModal()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Agregar línea
+      </button>
+    </div>
+  </div>
+  <div class="tabs">
+    <div class="tab active" onclick="switchLineasTab(this,'lin-detalle')">📋 Detalle</div>
+    <div class="tab" onclick="switchLineasTab(this,'lin-resumen')">📊 Líneas por cuenta</div>
+  </div>
+  <div class="tp active" id="lin-detalle">
+    <div class="cards" id="lin-cards" style="margin:14px 0 4px"></div>
+    <div class="ctrl" style="gap:8px;flex-wrap:wrap">
+      <select class="fsel" id="lin-f-proy" data-all="Todas las cuentas" onchange="renderLineas()" style="min-width:170px"><option value="">Todas las cuentas</option></select>
+      <select class="fsel" id="lin-f-estado" onchange="renderLineas()" style="min-width:140px"><option value="">Todos los estados</option></select>
+      <input class="finp" id="lin-buscar" placeholder="Buscar por teléfono, nombre, modelo, plan…" oninput="renderLineas()" style="width:280px">
+    </div>
+    <div class="tbl-wrap">
+      <table class="pst" id="lin-table">
+        <thead><tr>
+          <th class="sortable">Teléfono</th>
+          <th class="sortable">Modelo</th>
+          <th class="sortable">Plan</th>
+          <th class="sortable" style="text-align:right">Costo/mes</th>
+          <th class="sortable" style="text-align:center">Estado</th>
+          <th class="sortable">Nombre</th>
+          <th class="sortable">Posición</th>
+          <th class="sortable">Cuenta</th>
+          <th style="text-align:center">Acciones</th>
+        </tr></thead>
+        <tbody id="lin-tbody"><tr><td colspan="9" style="text-align:center;padding:40px;color:var(--hi)">Sin líneas registradas. Crea una o carga el consolidado.</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="tp" id="lin-resumen">
+    <div class="cards" id="lin-res-cards" style="margin:14px 0 4px"></div>
+    <div class="grid-2" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start">
+      <div class="tbl-wrap">
+        <div style="font-size:12px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.4px;margin:6px 2px">Líneas y costo mensual por cuenta</div>
+        <table class="pst" id="lin-res-cuenta">
+          <thead><tr><th class="sortable">Cuenta</th><th class="sortable" style="text-align:center"># Líneas</th><th class="sortable" style="text-align:right">Costo mensual</th></tr></thead>
+          <tbody id="lin-res-cuenta-tbody"></tbody>
+        </table>
+      </div>
+      <div class="tbl-wrap">
+        <div style="font-size:12px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.4px;margin:6px 2px">Líneas y costo mensual por plan</div>
+        <table class="pst" id="lin-res-plan">
+          <thead><tr><th class="sortable">Plan</th><th class="sortable" style="text-align:center"># Líneas</th><th class="sortable" style="text-align:right">Costo unit.</th><th class="sortable" style="text-align:right">Costo mensual</th></tr></thead>
+          <tbody id="lin-res-plan-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     PAGE: SEGUROS
+════════════════════════════════════ -->
+<div class="page" id="page-seguros">
+  <div class="ph">
+    <h1>Seguros</h1>
+    <div class="ph-row">
+      <p style="margin:0">Base mensual de seguros (SCTR, Vida Ley, EPS, FOLA) y relación de EPS staff con su prima.</p>
+      <div class="fgap"></div>
+      <button class="btn btn-outline" onclick="syncSeguros()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        Sincronizar
+      </button>
+      <button class="btn btn-outline" onclick="openSegBaseBulk()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Cargar base mensual
+      </button>
+      <button class="btn btn-outline" onclick="openSegEpsBulk()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Cargar EPS staff
+      </button>
+    </div>
+  </div>
+  <div class="tabs">
+    <div class="tab active" onclick="switchSegTab(this,'seg-base')">📆 Base mensual</div>
+    <div class="tab" onclick="switchSegTab(this,'seg-eps')">👥 EPS Staff</div>
+  </div>
+  <!-- Base mensual -->
+  <div class="tp active" id="seg-base">
+    <div class="cards" id="seg-cards" style="margin:14px 0 4px"></div>
+    <div class="ctrl" style="gap:8px;flex-wrap:wrap">
+      <select class="fsel" id="seg-f-mes" data-all="Todos los meses" onchange="renderSegBase()" style="min-width:140px"><option value="">Todos los meses</option></select>
+      <select class="fsel" id="seg-f-empresa" data-all="Todas las empresas" onchange="renderSegBase()" style="min-width:140px"><option value="">Todas las empresas</option></select>
+      <select class="fsel" id="seg-f-tipo" data-all="Todos los tipos" onchange="renderSegBase()" style="min-width:150px"><option value="">Todos los tipos</option></select>
+      <select class="fsel" id="seg-f-status" data-all="Todos los status" onchange="renderSegBase()" style="min-width:140px"><option value="">Todos los status</option></select>
+      <input class="finp" id="seg-buscar" placeholder="Buscar…" oninput="renderSegBase()" style="width:200px">
+    </div>
+    <div class="grid-2" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;margin-bottom:14px">
+      <div class="tbl-wrap">
+        <div style="font-size:12px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.4px;margin:6px 2px">Monto por mes</div>
+        <table class="pst" id="seg-res-mes"><thead><tr><th>Mes</th><th style="text-align:right">Monto</th></tr></thead><tbody id="seg-res-mes-tbody"></tbody></table>
+      </div>
+      <div class="tbl-wrap">
+        <div style="font-size:12px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.4px;margin:6px 2px">Monto por tipo de seguro</div>
+        <table class="pst" id="seg-res-tipo"><thead><tr><th>Tipo</th><th style="text-align:right">Monto</th></tr></thead><tbody id="seg-res-tipo-tbody"></tbody></table>
+      </div>
+    </div>
+    <div class="tbl-wrap">
+      <table class="pst" id="seg-table">
+        <thead><tr>
+          <th class="sortable">Mes</th>
+          <th class="sortable">Empresa</th>
+          <th class="sortable">Aseguradora</th>
+          <th class="sortable">Tipo de seguro</th>
+          <th class="sortable" style="text-align:right">Monto</th>
+          <th class="sortable" style="text-align:center">Status</th>
+        </tr></thead>
+        <tbody id="seg-tbody"><tr><td colspan="6" style="text-align:center;padding:40px;color:var(--hi)">Sin registros. Carga la base mensual.</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+  <!-- EPS Staff -->
+  <div class="tp" id="seg-eps">
+    <div class="cards" id="seg-eps-cards" style="margin:14px 0 4px"></div>
+    <div class="config-banner" style="margin-bottom:10px">ℹ Se excluyen los contratos de la Clínica Ricardo Palma <b>81173</b> y <b>94062</b>.</div>
+    <div class="ctrl" style="gap:8px;flex-wrap:wrap">
+      <select class="fsel" id="seps-f-mes" data-all="Todos los meses" onchange="renderSegEps()" style="min-width:140px"><option value="">Todos los meses</option></select>
+      <select class="fsel" id="seps-f-seguro" data-all="Todos los seguros" onchange="renderSegEps()" style="min-width:150px"><option value="">Todos los seguros</option></select>
+      <input class="finp" id="seps-buscar" placeholder="Buscar por afiliado o contrato…" oninput="renderSegEps()" style="width:260px">
+    </div>
+    <div class="tbl-wrap">
+      <table class="pst" id="seps-table">
+        <thead><tr>
+          <th class="sortable">Mes</th>
+          <th class="sortable">Seguro</th>
+          <th class="sortable">Empresa</th>
+          <th class="sortable">Contrato</th>
+          <th class="sortable">Afiliado</th>
+          <th class="sortable" style="text-align:center">Dependientes</th>
+          <th class="sortable" style="text-align:right">Costo prima</th>
+        </tr></thead>
+        <tbody id="seps-tbody"><tr><td colspan="7" style="text-align:center;padding:40px;color:var(--hi)">Sin registros. Carga la relación de EPS staff.</td></tr></tbody>
       </table>
     </div>
   </div>
@@ -1104,7 +1288,7 @@ th.sortable.asc,th.sortable.desc{background:rgba(255,255,255,.1)!important}
 
 <!-- Crear / Editar Activo (Inventario) -->
 <div class="overlay" id="modal-inv">
-  <div class="modal">
+  <div class="modal wide">
     <span class="mclose" onclick="closeModal('modal-inv')">✕</span>
     <h2 id="inv-modal-title">Crear activo</h2>
     <p class="msub">Registra o edita un activo de la empresa.</p>
@@ -1116,12 +1300,151 @@ th.sortable.asc,th.sortable.desc{background:rgba(255,255,255,.1)!important}
       </div>
       <div class="fg"><label>Estado *</label><select id="inv-estado" class="fsel" style="width:100%;height:34px"><option value="Disponible">Disponible</option><option value="Asignado">Asignado</option><option value="Mantenimiento">Mantenimiento</option><option value="Inactivo">Inactivo</option></select></div>
       <div class="fg"><label>Asignado a</label><input type="text" id="inv-asignado" placeholder="Nombre del colaborador"></div>
+      <div class="fg"><label>Cuenta / Área</label><input type="text" id="inv-cuenta" list="inv-cuenta-list" placeholder="OPERACIONES, BAT, ALICORP…">
+        <datalist id="inv-cuenta-list"><option value="OPERACIONES"><option value="ADMINISTRATIVO"><option value="GERENCIA"><option value="BAT"><option value="ALICORP"><option value="EDGEWELL"><option value="LIBRE"></datalist>
+      </div>
+      <div class="fg"><label>Marca</label><input type="text" id="inv-marca" list="inv-marca-list" placeholder="HP, LENOVO, HONOR…">
+        <datalist id="inv-marca-list"><option value="HP"><option value="LENOVO"><option value="HONOR"><option value="Macbook Air"><option value="ASUS"><option value="DELL"></datalist>
+      </div>
+      <div class="fg"><label>RAM</label><input type="text" id="inv-ram" placeholder="8.00 GB"></div>
+      <div class="fg full"><label>Procesador</label><input type="text" id="inv-procesador" placeholder="Intel Core i5-8250U…"></div>
+      <div class="fg"><label>ID dispositivo</label><input type="text" id="inv-dispositivo" placeholder="Serie / ID del equipo"></div>
+      <div class="fg"><label>Fecha de compra</label><input type="text" id="inv-fecha-compra" placeholder="dd/mm/aaaa"></div>
+      <div class="fg"><label>Último mantenimiento</label><input type="text" id="inv-mantenimiento" placeholder="dd/mm/aaaa"></div>
+      <div class="fg"><label>Mouse</label><input type="text" id="inv-mouse" list="inv-mouse-list" placeholder="SI / NO / PROPIO">
+        <datalist id="inv-mouse-list"><option value="SI"><option value="NO"><option value="PROPIO"></datalist>
+      </div>
       <div class="fg"><label>Registrado por</label><input type="text" id="inv-admin" placeholder="Tu nombre"></div>
       <div class="fg full"><label>Observación / comentario del movimiento</label><input type="text" id="inv-obs" placeholder="Ej. Reservado a ventas, problema en pantalla…"></div>
     </div>
     <div class="mfooter">
       <button class="btn btn-outline" onclick="closeModal('modal-inv')">Cancelar</button>
       <button class="btn btn-primary" onclick="guardarInventario()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Carga masiva de Inventario (CSV) -->
+<div class="overlay" id="modal-inv-bulk">
+  <div class="modal wide">
+    <span class="mclose" onclick="closeModal('modal-inv-bulk')">✕</span>
+    <h2>Cargar consolidado de inventario</h2>
+    <p class="msub">Descarga la plantilla, llénala en Excel y <b>guárdala como CSV</b>, luego súbela aquí.</p>
+    <div style="margin-bottom:12px">
+      <button class="btn btn-outline" onclick="descargarPlantillaInv()">⬇ Descargar plantilla CSV</button>
+    </div>
+    <div class="upzone" onclick="document.getElementById('file-inv').click()" style="cursor:pointer">
+      <span class="upzone-ico">📦</span>
+      <h3>Haz clic para seleccionar tu CSV</h3>
+      <p>Columnas: Nombre · Categoría · Estado · Asignado · Cuenta · Marca · Procesador · RAM · ID Dispositivo · Fecha compra · Mantenimiento · Mouse · Obs</p>
+    </div>
+    <input type="file" id="file-inv" accept=".csv" style="display:none" onchange="handleInvCSV(this)">
+    <label style="display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;color:var(--tx)"><input type="checkbox" id="inv-bulk-replace"> Reemplazar todo el inventario existente</label>
+    <div id="inv-bulk-info" style="margin-top:12px;font-size:13px;color:var(--tx)"></div>
+    <div class="mfooter">
+      <button class="btn btn-outline" onclick="closeModal('modal-inv-bulk')">Cancelar</button>
+      <button class="btn btn-primary" id="inv-bulk-confirm" style="display:none" onclick="confirmarInvBulk()">Confirmar carga</button>
+    </div>
+  </div>
+</div>
+
+<!-- Crear / Editar Línea celular -->
+<div class="overlay" id="modal-linea">
+  <div class="modal wide">
+    <span class="mclose" onclick="closeModal('modal-linea')">✕</span>
+    <h2 id="linea-modal-title">Nueva línea</h2>
+    <p class="msub">Registra o edita una línea móvil / equipo.</p>
+    <input type="hidden" id="linea-rid">
+    <div class="form-grid">
+      <div class="fg"><label>Teléfono</label><input type="text" id="linea-telefono" placeholder="9XXXXXXXX"></div>
+      <div class="fg"><label>Modelo</label><input type="text" id="linea-modelo" placeholder="SGLXY A07 128GB…"></div>
+      <div class="fg"><label>Plan</label><input type="text" id="linea-plan" placeholder="Empresa Plus 35.90"></div>
+      <div class="fg"><label>Estado</label><input type="text" id="linea-estado" list="linea-estado-list" placeholder="Activo"><datalist id="linea-estado-list"><option value="Activo"><option value="Baja"><option value="Suspendido"></datalist></div>
+      <div class="fg"><label>SIM</label><input type="text" id="linea-sim"></div>
+      <div class="fg"><label>IMEI</label><input type="text" id="linea-imei"></div>
+      <div class="fg"><label>Inicio de adenda</label><input type="text" id="linea-inicio" placeholder="dd/mm/aaaa o Sin Contrato"></div>
+      <div class="fg"><label>Fin de adenda</label><input type="text" id="linea-fin" placeholder="dd/mm/aaaa o Sin Contrato"></div>
+      <div class="fg"><label>Penalidad</label><input type="text" id="linea-penalidad" placeholder="-"></div>
+      <div class="fg"><label>Cuota</label><input type="text" id="linea-cuota" placeholder="3era cuota"></div>
+      <div class="fg full"><label>Nombre</label><input type="text" id="linea-nombre" placeholder="Nombre del colaborador"></div>
+      <div class="fg"><label>Posición</label><input type="text" id="linea-posicion" placeholder="Merchandaiser, Coordinador…"></div>
+      <div class="fg"><label>Cuenta / Proyecto</label><input type="text" id="linea-proyecto" placeholder="BAT, ALICORP, OPERACIONES…"></div>
+    </div>
+    <div class="mfooter">
+      <button class="btn btn-outline" onclick="closeModal('modal-linea')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarLinea()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Carga masiva de Líneas (CSV) -->
+<div class="overlay" id="modal-lineas-bulk">
+  <div class="modal wide">
+    <span class="mclose" onclick="closeModal('modal-lineas-bulk')">✕</span>
+    <h2>Cargar consolidado de líneas</h2>
+    <p class="msub">Descarga la plantilla, llénala en Excel y <b>guárdala como CSV</b>, luego súbela aquí.</p>
+    <div style="margin-bottom:12px">
+      <button class="btn btn-outline" onclick="descargarPlantillaLineas()">⬇ Descargar plantilla CSV</button>
+    </div>
+    <div class="upzone" onclick="document.getElementById('file-lineas').click()" style="cursor:pointer">
+      <span class="upzone-ico">📱</span>
+      <h3>Haz clic para seleccionar tu CSV</h3>
+      <p>Columnas: Teléfono · Modelo · SIM · IMEI · Plan · Estado · Inicio adenda · Fin adenda · Penalidad · Nombre · Posición · Proyecto · Cuota</p>
+    </div>
+    <input type="file" id="file-lineas" accept=".csv" style="display:none" onchange="handleLineasCSV(this)">
+    <label style="display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;color:var(--tx)"><input type="checkbox" id="lineas-bulk-replace" checked> Reemplazar todas las líneas existentes</label>
+    <div id="lineas-bulk-info" style="margin-top:12px;font-size:13px;color:var(--tx)"></div>
+    <div class="mfooter">
+      <button class="btn btn-outline" onclick="closeModal('modal-lineas-bulk')">Cancelar</button>
+      <button class="btn btn-primary" id="lineas-bulk-confirm" style="display:none" onclick="confirmarLineasBulk()">Confirmar carga</button>
+    </div>
+  </div>
+</div>
+
+<!-- Carga masiva de Seguros Base (CSV) -->
+<div class="overlay" id="modal-seg-base-bulk">
+  <div class="modal wide">
+    <span class="mclose" onclick="closeModal('modal-seg-base-bulk')">✕</span>
+    <h2>Cargar base mensual de seguros</h2>
+    <p class="msub">Descarga la plantilla, llénala en Excel y <b>guárdala como CSV</b>, luego súbela aquí.</p>
+    <div style="margin-bottom:12px">
+      <button class="btn btn-outline" onclick="descargarPlantillaSegBase()">⬇ Descargar plantilla CSV</button>
+    </div>
+    <div class="upzone" onclick="document.getElementById('file-seg-base').click()" style="cursor:pointer">
+      <span class="upzone-ico">📆</span>
+      <h3>Haz clic para seleccionar tu CSV</h3>
+      <p>Columnas: Mes · Empresa · Aseguradora · Tipo de seguro · Monto · Status</p>
+    </div>
+    <input type="file" id="file-seg-base" accept=".csv" style="display:none" onchange="handleSegBaseCSV(this)">
+    <label style="display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;color:var(--tx)"><input type="checkbox" id="seg-base-replace" checked> Reemplazar toda la base existente</label>
+    <div id="seg-base-info" style="margin-top:12px;font-size:13px;color:var(--tx)"></div>
+    <div class="mfooter">
+      <button class="btn btn-outline" onclick="closeModal('modal-seg-base-bulk')">Cancelar</button>
+      <button class="btn btn-primary" id="seg-base-confirm" style="display:none" onclick="confirmarSegBaseBulk()">Confirmar carga</button>
+    </div>
+  </div>
+</div>
+
+<!-- Carga masiva de Seguros EPS Staff (CSV) -->
+<div class="overlay" id="modal-seg-eps-bulk">
+  <div class="modal wide">
+    <span class="mclose" onclick="closeModal('modal-seg-eps-bulk')">✕</span>
+    <h2>Cargar relación EPS staff</h2>
+    <p class="msub">Descarga la plantilla, llénala en Excel y <b>guárdala como CSV</b>, luego súbela aquí. Los contratos 81173 y 94062 (Ricardo Palma) se excluyen automáticamente.</p>
+    <div style="margin-bottom:12px">
+      <button class="btn btn-outline" onclick="descargarPlantillaSegEps()">⬇ Descargar plantilla CSV</button>
+    </div>
+    <div class="upzone" onclick="document.getElementById('file-seg-eps').click()" style="cursor:pointer">
+      <span class="upzone-ico">👥</span>
+      <h3>Haz clic para seleccionar tu CSV</h3>
+      <p>Columnas: Mes · Seguro · Empresa · Contrato · Afiliado · Dependientes · Costo prima · Costo titular</p>
+    </div>
+    <input type="file" id="file-seg-eps" accept=".csv" style="display:none" onchange="handleSegEpsCSV(this)">
+    <label style="display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;color:var(--tx)"><input type="checkbox" id="seg-eps-replace" checked> Reemplazar toda la relación existente</label>
+    <div id="seg-eps-info" style="margin-top:12px;font-size:13px;color:var(--tx)"></div>
+    <div class="mfooter">
+      <button class="btn btn-outline" onclick="closeModal('modal-seg-eps-bulk')">Cancelar</button>
+      <button class="btn btn-primary" id="seg-eps-confirm" style="display:none" onclick="confirmarSegEpsBulk()">Confirmar carga</button>
     </div>
   </div>
 </div>
@@ -1349,6 +1672,9 @@ const STATE = {
   planilla: JSON.parse(localStorage.getItem('tt_planilla') || '[]'),
   inventario: JSON.parse(localStorage.getItem('tt_inventario') || '[]'),
   invHist: JSON.parse(localStorage.getItem('tt_inv_hist') || '[]'),
+  lineas: JSON.parse(localStorage.getItem('tt_lineas') || '[]'),
+  segBase: JSON.parse(localStorage.getItem('tt_seg_base') || '[]'),
+  segEps: JSON.parse(localStorage.getItem('tt_seg_eps') || '[]'),
 };
 
 // Subtipos de personal de campo y tipos de personal (planilla)
@@ -1361,6 +1687,7 @@ function persist(key) {
     mesConfig:'tt_mes_config', resumen:'tt_resumen', descuentos:'tt_descuentos',
     configCampo:'tt_config_campo', horasCampo:'tt_horas_campo', planilla:'tt_planilla',
     inventario:'tt_inventario', invHist:'tt_inv_hist',
+    lineas:'tt_lineas', segBase:'tt_seg_base', segEps:'tt_seg_eps',
   };
   if (map[key]) localStorage.setItem(map[key], JSON.stringify(STATE[key]));
 }
@@ -1423,6 +1750,14 @@ function _navigateTo(id) {
   if (id === 'inventario') {
     renderInventario(); renderInvHistorial();
     if (STATE.sheetsUrl) { syncInventario(); syncInvHist(); }
+  }
+  if (id === 'lineas') {
+    renderLineas();
+    if (STATE.sheetsUrl) syncLineas();
+  }
+  if (id === 'seguros') {
+    renderSegBase(); renderSegEps();
+    if (STATE.sheetsUrl) syncSeguros();
   }
   if (id === 'vacaciones') {
     renderVacResumen();
@@ -3051,6 +3386,10 @@ async function syncInventario() {
       categoria:(r.categoria||'').toString().trim(), estado:(r.estado||'Disponible').toString().trim(),
       asignado:(r.asignado||'').toString().trim(), creacion:(r.creacion||'').toString().trim(),
       obs:(r.obs||'').toString().trim(),
+      cuenta:(r.cuenta||'').toString().trim(), marca:(r.marca||'').toString().trim(),
+      procesador:(r.procesador||'').toString().trim(), ram:(r.ram||'').toString().trim(),
+      dispositivo:(r.dispositivo||'').toString().trim(), fecha_compra:(r.fecha_compra||'').toString().trim(),
+      mantenimiento:(r.mantenimiento||'').toString().trim(), mouse:(r.mouse||'').toString().trim(),
     }));
     persist('inventario');
     renderInventario();
@@ -3101,19 +3440,22 @@ function renderInventario() {
 
   let data = STATE.inventario.slice();
   if (fEst) data = data.filter(a => a.estado === fEst);
-  if (q) data = data.filter(a => (a.nombre+' '+a.categoria+' '+a.asignado).toLowerCase().includes(q));
+  if (q) data = data.filter(a => (a.nombre+' '+a.categoria+' '+a.asignado+' '+(a.cuenta||'')+' '+(a.marca||'')+' '+(a.dispositivo||'')).toLowerCase().includes(q));
 
   if (!data.length) {
-    tb.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--hi)">Sin activos con esos filtros.</td></tr>';
+    tb.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:40px;color:var(--hi)">Sin activos con esos filtros.</td></tr>';
     return;
   }
   tb.innerHTML = data.map(a => `<tr>
     <td class="mono" style="color:var(--mu)">${escHtml(a.id)}</td>
     <td style="font-weight:600">${escHtml(a.nombre)}</td>
     <td>${escHtml(a.categoria)||'—'}</td>
+    <td>${escHtml(a.cuenta)||'—'}</td>
+    <td>${escHtml(a.marca)||'—'}</td>
+    <td>${escHtml(a.ram)||'—'}</td>
     <td style="text-align:center">${invBadge(a.estado)}</td>
     <td>${escHtml(a.asignado)||'—'}</td>
-    <td style="color:var(--mu);font-size:12px">${escHtml(a.obs)||'—'}</td>
+    <td style="color:var(--mu);font-size:12px;white-space:nowrap">${escHtml(a.fecha_compra)||'—'}</td>
     <td style="text-align:center;white-space:nowrap">
       <button class="btn btn-outline" style="padding:3px 8px;font-size:11px" onclick="openInvModal('${escHtml(a.id)}')">Editar</button>
       <button class="btn btn-outline" style="padding:3px 8px;font-size:11px" onclick="deleteInventario('${escHtml(a.id)}')">Eliminar</button>
@@ -3131,6 +3473,14 @@ function openInvModal(id) {
   document.getElementById('inv-categoria').value= a ? a.categoria : '';
   document.getElementById('inv-estado').value   = a ? a.estado : 'Disponible';
   document.getElementById('inv-asignado').value = a ? a.asignado : '';
+  document.getElementById('inv-cuenta').value       = a ? (a.cuenta||'') : '';
+  document.getElementById('inv-marca').value        = a ? (a.marca||'') : '';
+  document.getElementById('inv-procesador').value   = a ? (a.procesador||'') : '';
+  document.getElementById('inv-ram').value          = a ? (a.ram||'') : '';
+  document.getElementById('inv-dispositivo').value  = a ? (a.dispositivo||'') : '';
+  document.getElementById('inv-fecha-compra').value = a ? (a.fecha_compra||'') : '';
+  document.getElementById('inv-mantenimiento').value= a ? (a.mantenimiento||'') : '';
+  document.getElementById('inv-mouse').value        = a ? (a.mouse||'') : '';
   document.getElementById('inv-obs').value      = '';
   openModal('modal-inv');
 }
@@ -3143,6 +3493,14 @@ async function guardarInventario() {
   const asignado = document.getElementById('inv-asignado').value.trim();
   const admin    = document.getElementById('inv-admin').value.trim();
   const obs      = document.getElementById('inv-obs').value.trim();
+  const cuenta       = document.getElementById('inv-cuenta').value.trim();
+  const marca        = document.getElementById('inv-marca').value.trim();
+  const procesador   = document.getElementById('inv-procesador').value.trim();
+  const ram          = document.getElementById('inv-ram').value.trim();
+  const dispositivo  = document.getElementById('inv-dispositivo').value.trim();
+  const fecha_compra = document.getElementById('inv-fecha-compra').value.trim();
+  const mantenimiento= document.getElementById('inv-mantenimiento').value.trim();
+  const mouse        = document.getElementById('inv-mouse').value.trim();
   if (!nombre) { toast('El nombre del activo es obligatorio','warn'); return; }
 
   if (STATE.sheetsUrl) {
@@ -3150,7 +3508,8 @@ async function guardarInventario() {
     try {
       const res = await fetch(STATE.sheetsUrl, {
         method:'POST',
-        body: JSON.stringify({accion:'saveInventario', id, nombre, categoria, estado, asignado, obs, admin, comentario:obs}),
+        body: JSON.stringify({accion:'saveInventario', id, nombre, categoria, estado, asignado, obs, admin, comentario:obs,
+          cuenta, marca, procesador, ram, dispositivo, fecha_compra, mantenimiento, mouse}),
       });
       const json = await res.json().catch(()=>({}));
       await syncInventario();
@@ -3162,12 +3521,13 @@ async function guardarInventario() {
     } finally { hideLoading(); }
   } else {
     // offline local
+    const extra = {cuenta, marca, procesador, ram, dispositivo, fecha_compra, mantenimiento, mouse};
     if (id) {
       const a = STATE.inventario.find(x=>x.id===id);
-      if (a) Object.assign(a, {nombre, categoria, estado, asignado, obs});
+      if (a) Object.assign(a, {nombre, categoria, estado, asignado, obs, ...extra});
     } else {
       const newId = String(STATE.inventario.reduce((m,a)=>Math.max(m, parseInt((a.id||'').replace(/\D/g,''))||0),0)+1).padStart(3,'0');
-      STATE.inventario.push({id:newId, nombre, categoria, estado, asignado, obs, creacion:''});
+      STATE.inventario.push({id:newId, nombre, categoria, estado, asignado, obs, creacion:'', ...extra});
     }
     persist('inventario');
     renderInventario();
@@ -3211,6 +3571,560 @@ function renderInvHistorial() {
   applySortable && applySortable('inv-hist-table');
 }
 
+// ── Inventario: carga masiva CSV ────────────────────────────
+const INV_BULK_HEADERS = ['Nombre','Categoria','Estado','Asignado','Cuenta','Marca','Procesador','RAM','ID_Dispositivo','Fecha_Compra','Mantenimiento','Mouse','Obs'];
+let _invBulkRows = [];
+function openInvBulk() {
+  _invBulkRows = [];
+  document.getElementById('inv-bulk-info').textContent = '';
+  document.getElementById('inv-bulk-confirm').style.display = 'none';
+  const f = document.getElementById('file-inv'); if (f) f.value = '';
+  const rc = document.getElementById('inv-bulk-replace'); if (rc) rc.checked = false;
+  openModal('modal-inv-bulk');
+}
+function handleInvCSV(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const rows = parseCSV(e.target.result);
+      if (rows.length < 2) { toast('El archivo no tiene datos','warn'); return; }
+      _invBulkRows = rows.slice(1).map(r => ({
+        nombre:(r[0]||'').trim(), categoria:(r[1]||'').trim(), estado:(r[2]||'Disponible').trim(),
+        asignado:(r[3]||'').trim(), cuenta:(r[4]||'').trim(), marca:(r[5]||'').trim(),
+        procesador:(r[6]||'').trim(), ram:(r[7]||'').trim(), dispositivo:(r[8]||'').trim(),
+        fecha_compra:(r[9]||'').trim(), mantenimiento:(r[10]||'').trim(), mouse:(r[11]||'').trim(), obs:(r[12]||'').trim(),
+      })).filter(x => x.nombre);
+      document.getElementById('inv-bulk-info').innerHTML = `Se detectaron <b>${_invBulkRows.length}</b> activos válidos. Revisa y confirma la carga.`;
+      document.getElementById('inv-bulk-confirm').style.display = _invBulkRows.length ? '' : 'none';
+    } catch(err) { toast('Error leyendo CSV: '+err.message,'warn'); }
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+async function confirmarInvBulk() {
+  if (!_invBulkRows.length) { toast('Nada que cargar','warn'); return; }
+  const replace = document.getElementById('inv-bulk-replace')?.checked || false;
+  if (STATE.sheetsUrl) {
+    showLoading(`Cargando ${_invBulkRows.length} activos…`);
+    try {
+      await fetch(STATE.sheetsUrl, {method:'POST', body:JSON.stringify({accion:'saveInventarioBulk', rows:_invBulkRows, replace})});
+      await syncInventario();
+      flashSync(); toast(`✓ ${_invBulkRows.length} activos cargados`,'ok');
+    } catch(e) { toast('Error: '+e.message,'warn'); } finally { hideLoading(); }
+  } else {
+    if (replace) STATE.inventario = [];
+    _invBulkRows.forEach(r => {
+      const newId = String(STATE.inventario.reduce((m,a)=>Math.max(m, parseInt((a.id||'').replace(/\D/g,''))||0),0)+1).padStart(3,'0');
+      STATE.inventario.push({id:newId, creacion:'', ...r});
+    });
+    persist('inventario'); renderInventario(); toast(`✓ ${_invBulkRows.length} cargados localmente`,'ok');
+  }
+  closeModal('modal-inv-bulk');
+}
+function descargarPlantillaInv() {
+  const ej = ['Laptop HP','Laptop','Asignado','Edinson Pezo','OPERACIONES','HP','Intel Core i5-8250U','8.00 GB','CEC669D2-...','01/03/2023','01/12/2024','SI','—'];
+  const csv = INV_BULK_HEADERS.join(';') + '\n' + ej.join(';') + '\n';
+  const blob = new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'plantilla_inventario.csv'; a.click();
+}
+
+// ════════════════════════════════════════════════════════════
+//  LÍNEAS CELULARES
+// ════════════════════════════════════════════════════════════
+const MESES_ORD = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+function mesIdx(m){ const i = MESES_ORD.indexOf((m||'').toString().trim().toUpperCase()); return i<0?99:i; }
+// Costo mensual del plan: última cifra decimal del texto (ej. "Empresa Plus 2.0 33.9" → 33.9)
+function planCosto(plan){
+  const s = (plan||'').toString();
+  const dec = s.match(/\d+[.,]\d+/g);
+  if (dec && dec.length) return parseFloat(dec[dec.length-1].replace(',','.'))||0;
+  const w = s.match(/\d+/g);
+  return w ? (parseFloat(w[w.length-1])||0) : 0;
+}
+function fillSelect(id, values){
+  const el = document.getElementById(id); if (!el) return;
+  const cur = el.value;
+  const all = el.getAttribute('data-all') || el.options[0]?.text || 'Todos';
+  el.innerHTML = `<option value="">${escHtml(all)}</option>` + values.map(v=>`<option value="${escHtml(v)}">${escHtml(v)}</option>`).join('');
+  if (values.includes(cur)) el.value = cur;
+}
+
+async function syncLineas() {
+  if (!STATE.sheetsUrl) { renderLineas(); return; }
+  try {
+    const data = await fetchFromSheets('getLineas');
+    STATE.lineas = (data.rows||[]).map(r => ({
+      rid:(r.rid||'').toString(), telefono:(r.telefono||'').toString().trim(), modelo:(r.modelo||'').toString().trim(),
+      sim:(r.sim||'').toString().trim(), imei:(r.imei||'').toString().trim(), plan:(r.plan||'').toString().trim(),
+      estado:(r.estado||'').toString().trim(), inicio:(r.inicio||'').toString().trim(), fin:(r.fin||'').toString().trim(),
+      penalidad:(r.penalidad||'').toString().trim(), nombre:(r.nombre||'').toString().trim(),
+      posicion:(r.posicion||'').toString().trim(), proyecto:(r.proyecto||'').toString().trim(), cuota:(r.cuota||'').toString().trim(),
+    }));
+    persist('lineas'); renderLineas(); flashSync();
+  } catch(e) { console.warn(e); renderLineas(); }
+}
+function switchLineasTab(el, id) {
+  document.querySelectorAll('#page-lineas .tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('#page-lineas .tp').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(id)?.classList.add('active');
+  if (id === 'lin-resumen') renderLineasResumen();
+}
+function renderLineas() {
+  const tb = document.getElementById('lin-tbody');
+  if (!tb) return;
+  // filtros
+  const proyectos = [...new Set(STATE.lineas.map(l=>l.proyecto).filter(Boolean))].sort();
+  const estados = [...new Set(STATE.lineas.map(l=>l.estado).filter(Boolean))].sort();
+  fillSelect('lin-f-proy', proyectos);
+  fillSelect('lin-f-estado', estados);
+  const fProy = document.getElementById('lin-f-proy')?.value || '';
+  const fEst  = document.getElementById('lin-f-estado')?.value || '';
+  const q = (document.getElementById('lin-buscar')?.value || '').toLowerCase().trim();
+
+  // KPIs
+  const cardsEl = document.getElementById('lin-cards');
+  if (cardsEl) {
+    const total = STATE.lineas.length;
+    const activas = STATE.lineas.filter(l=>/activ/i.test(l.estado)).length;
+    const costoMes = STATE.lineas.reduce((a,l)=>a+planCosto(l.plan),0);
+    const cuentas = new Set(STATE.lineas.map(l=>l.proyecto).filter(Boolean)).size;
+    cardsEl.innerHTML = `
+      <div class="card"><div class="card-label">Total líneas</div><div class="card-value">${total}</div><div class="card-sub">registradas</div></div>
+      <div class="card"><div class="card-label">Activas</div><div class="card-value" style="color:#15803d">${activas}</div><div class="card-sub">en servicio</div></div>
+      <div class="card"><div class="card-label">Costo mensual</div><div class="card-value" style="font-size:20px">${fmtSoles(costoMes)}</div><div class="card-sub">según plan</div></div>
+      <div class="card"><div class="card-label">Cuentas</div><div class="card-value">${cuentas}</div><div class="card-sub">con líneas</div></div>`;
+  }
+
+  let data = STATE.lineas.slice();
+  if (fProy) data = data.filter(l=>l.proyecto===fProy);
+  if (fEst)  data = data.filter(l=>l.estado===fEst);
+  if (q) data = data.filter(l=>(l.telefono+' '+l.nombre+' '+l.modelo+' '+l.plan+' '+l.posicion+' '+l.proyecto).toLowerCase().includes(q));
+
+  if (!data.length) {
+    tb.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:40px;color:var(--hi)">Sin líneas con esos filtros.</td></tr>';
+    return;
+  }
+  tb.innerHTML = data.map(l => `<tr>
+    <td class="mono" style="font-weight:600">${escHtml(l.telefono)||'—'}</td>
+    <td>${escHtml(l.modelo)||'—'}</td>
+    <td style="font-size:12px">${escHtml(l.plan)||'—'}</td>
+    <td style="text-align:right">${fmtSoles(planCosto(l.plan))}</td>
+    <td style="text-align:center">${escHtml(l.estado)||'—'}</td>
+    <td>${escHtml(l.nombre)||'—'}</td>
+    <td style="font-size:12px;color:var(--mu)">${escHtml(l.posicion)||'—'}</td>
+    <td>${escHtml(l.proyecto)||'—'}</td>
+    <td style="text-align:center;white-space:nowrap">
+      <button class="btn btn-outline" style="padding:3px 8px;font-size:11px" onclick="openLineaModal('${escHtml(l.rid)}')">Editar</button>
+      <button class="btn btn-outline" style="padding:3px 8px;font-size:11px" onclick="deleteLinea('${escHtml(l.rid)}')">Eliminar</button>
+    </td>
+  </tr>`).join('');
+  applySortable && applySortable('lin-table');
+}
+function renderLineasResumen() {
+  // por cuenta
+  const porCuenta = {};
+  STATE.lineas.forEach(l => {
+    const k = l.proyecto || '(Sin cuenta)';
+    if (!porCuenta[k]) porCuenta[k] = {n:0, costo:0};
+    porCuenta[k].n++; porCuenta[k].costo += planCosto(l.plan);
+  });
+  const cuentaRows = Object.keys(porCuenta).sort((a,b)=>porCuenta[b].costo-porCuenta[a].costo);
+  const tbC = document.getElementById('lin-res-cuenta-tbody');
+  if (tbC) {
+    const totN = STATE.lineas.length, totC = STATE.lineas.reduce((a,l)=>a+planCosto(l.plan),0);
+    tbC.innerHTML = cuentaRows.map(k=>`<tr><td style="font-weight:600">${escHtml(k)}</td><td style="text-align:center">${porCuenta[k].n}</td><td style="text-align:right">${fmtSoles(porCuenta[k].costo)}</td></tr>`).join('')
+      + `<tr style="border-top:2px solid var(--bd2);font-weight:700"><td>TOTAL</td><td style="text-align:center">${totN}</td><td style="text-align:right">${fmtSoles(totC)}</td></tr>`;
+  }
+  // por plan
+  const porPlan = {};
+  STATE.lineas.forEach(l => {
+    const k = l.plan || '(Sin plan)';
+    if (!porPlan[k]) porPlan[k] = {n:0, unit:planCosto(l.plan)};
+    porPlan[k].n++;
+  });
+  const planRows = Object.keys(porPlan).sort((a,b)=>(porPlan[b].unit*porPlan[b].n)-(porPlan[a].unit*porPlan[a].n));
+  const tbP = document.getElementById('lin-res-plan-tbody');
+  if (tbP) {
+    tbP.innerHTML = planRows.map(k=>`<tr><td style="font-size:12px">${escHtml(k)}</td><td style="text-align:center">${porPlan[k].n}</td><td style="text-align:right">${fmtSoles(porPlan[k].unit)}</td><td style="text-align:right">${fmtSoles(porPlan[k].unit*porPlan[k].n)}</td></tr>`).join('');
+  }
+  // cards resumen
+  const cardsEl = document.getElementById('lin-res-cards');
+  if (cardsEl) {
+    const totC = STATE.lineas.reduce((a,l)=>a+planCosto(l.plan),0);
+    cardsEl.innerHTML = `
+      <div class="card"><div class="card-label">Total líneas</div><div class="card-value">${STATE.lineas.length}</div><div class="card-sub">registradas</div></div>
+      <div class="card"><div class="card-label">Costo mensual total</div><div class="card-value" style="font-size:20px">${fmtSoles(totC)}</div><div class="card-sub">según plan</div></div>
+      <div class="card"><div class="card-label">Costo anual estimado</div><div class="card-value" style="font-size:20px">${fmtSoles(totC*12)}</div><div class="card-sub">× 12 meses</div></div>
+      <div class="card"><div class="card-label">Cuentas</div><div class="card-value">${cuentaRows.length}</div><div class="card-sub">con líneas</div></div>`;
+  }
+}
+function openLineaModal(rid) {
+  const isEdit = !!rid;
+  document.getElementById('linea-modal-title').textContent = isEdit ? 'Editar línea' : 'Nueva línea';
+  const l = isEdit ? STATE.lineas.find(x=>x.rid===rid) : null;
+  document.getElementById('linea-rid').value      = l ? l.rid : '';
+  document.getElementById('linea-telefono').value = l ? l.telefono : '';
+  document.getElementById('linea-modelo').value   = l ? l.modelo : '';
+  document.getElementById('linea-plan').value     = l ? l.plan : '';
+  document.getElementById('linea-estado').value   = l ? l.estado : 'Activo';
+  document.getElementById('linea-sim').value      = l ? l.sim : '';
+  document.getElementById('linea-imei').value     = l ? l.imei : '';
+  document.getElementById('linea-inicio').value   = l ? l.inicio : '';
+  document.getElementById('linea-fin').value      = l ? l.fin : '';
+  document.getElementById('linea-penalidad').value= l ? l.penalidad : '';
+  document.getElementById('linea-cuota').value    = l ? l.cuota : '';
+  document.getElementById('linea-nombre').value   = l ? l.nombre : '';
+  document.getElementById('linea-posicion').value = l ? l.posicion : '';
+  document.getElementById('linea-proyecto').value = l ? l.proyecto : '';
+  openModal('modal-linea');
+}
+async function guardarLinea() {
+  const g = id => document.getElementById(id).value.trim();
+  const b = {
+    rid:g('linea-rid'), telefono:g('linea-telefono'), modelo:g('linea-modelo'), plan:g('linea-plan'),
+    estado:g('linea-estado'), sim:g('linea-sim'), imei:g('linea-imei'), inicio:g('linea-inicio'),
+    fin:g('linea-fin'), penalidad:g('linea-penalidad'), cuota:g('linea-cuota'), nombre:g('linea-nombre'),
+    posicion:g('linea-posicion'), proyecto:g('linea-proyecto'),
+  };
+  if (!b.telefono && !b.nombre && !b.modelo) { toast('Ingresa al menos teléfono, nombre o modelo','warn'); return; }
+  if (STATE.sheetsUrl) {
+    showLoading('Guardando línea…');
+    try {
+      await fetch(STATE.sheetsUrl, {method:'POST', body:JSON.stringify({accion:'saveLinea', ...b})});
+      await syncLineas(); flashSync(); toast('✓ Línea guardada','ok');
+    } catch(e) { toast('Error: '+e.message,'warn'); } finally { hideLoading(); }
+  } else {
+    if (b.rid) { const l = STATE.lineas.find(x=>x.rid===b.rid); if (l) Object.assign(l, b); }
+    else { b.rid = 'L'+(STATE.lineas.length+1); STATE.lineas.push(b); }
+    persist('lineas'); renderLineas(); toast('✓ Línea guardada localmente','ok');
+  }
+  closeModal('modal-linea');
+}
+async function deleteLinea(rid) {
+  const l = STATE.lineas.find(x=>x.rid===rid);
+  if (!l) return;
+  if (!confirm(`¿Eliminar la línea "${l.telefono||l.nombre||l.modelo}"? Esta acción no se puede deshacer.`)) return;
+  if (STATE.sheetsUrl) {
+    await postToSheets({accion:'deleteLinea', rid});
+    await syncLineas(); flashSync();
+  } else {
+    STATE.lineas = STATE.lineas.filter(x=>x.rid!==rid);
+    persist('lineas'); renderLineas();
+  }
+  toast('Línea eliminada','ok');
+}
+const LINEAS_BULK_HEADERS = ['Telefono','Modelo','SIM','IMEI','Plan','Estado','Inicio_Adenda','Fin_Adenda','Penalidad','Nombre','Posicion','Proyecto','Cuota'];
+let _lineasBulkRows = [];
+function openLineasBulk() {
+  _lineasBulkRows = [];
+  document.getElementById('lineas-bulk-info').textContent = '';
+  document.getElementById('lineas-bulk-confirm').style.display = 'none';
+  const f = document.getElementById('file-lineas'); if (f) f.value = '';
+  openModal('modal-lineas-bulk');
+}
+function handleLineasCSV(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const rows = parseCSV(e.target.result);
+      if (rows.length < 2) { toast('El archivo no tiene datos','warn'); return; }
+      _lineasBulkRows = rows.slice(1).map(r => ({
+        telefono:(r[0]||'').trim(), modelo:(r[1]||'').trim(), sim:(r[2]||'').trim(), imei:(r[3]||'').trim(),
+        plan:(r[4]||'').trim(), estado:(r[5]||'').trim(), inicio:(r[6]||'').trim(), fin:(r[7]||'').trim(),
+        penalidad:(r[8]||'').trim(), nombre:(r[9]||'').trim(), posicion:(r[10]||'').trim(),
+        proyecto:(r[11]||'').trim(), cuota:(r[12]||'').trim(),
+      })).filter(x => x.telefono || x.nombre || x.modelo);
+      const costo = _lineasBulkRows.reduce((a,r)=>a+planCosto(r.plan),0);
+      document.getElementById('lineas-bulk-info').innerHTML = `Se detectaron <b>${_lineasBulkRows.length}</b> líneas válidas · costo mensual ${fmtSoles(costo)}.`;
+      document.getElementById('lineas-bulk-confirm').style.display = _lineasBulkRows.length ? '' : 'none';
+    } catch(err) { toast('Error leyendo CSV: '+err.message,'warn'); }
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+async function confirmarLineasBulk() {
+  if (!_lineasBulkRows.length) { toast('Nada que cargar','warn'); return; }
+  const replace = document.getElementById('lineas-bulk-replace')?.checked || false;
+  if (STATE.sheetsUrl) {
+    showLoading(`Cargando ${_lineasBulkRows.length} líneas…`);
+    try {
+      await fetch(STATE.sheetsUrl, {method:'POST', body:JSON.stringify({accion:'saveLineasBulk', rows:_lineasBulkRows, replace})});
+      await syncLineas(); flashSync(); toast(`✓ ${_lineasBulkRows.length} líneas cargadas`,'ok');
+    } catch(e) { toast('Error: '+e.message,'warn'); } finally { hideLoading(); }
+  } else {
+    if (replace) STATE.lineas = [];
+    _lineasBulkRows.forEach((r,i)=>{ r.rid='L'+(STATE.lineas.length+i+1); });
+    STATE.lineas = STATE.lineas.concat(_lineasBulkRows);
+    persist('lineas'); renderLineas(); toast(`✓ ${_lineasBulkRows.length} cargadas localmente`,'ok');
+  }
+  closeModal('modal-lineas-bulk');
+}
+function descargarPlantillaLineas() {
+  const ej = ['933208790','SGLXY A07 128GB','89511710121006443415','351755488640842','Empresa Plus 35.90','Activo','01/03/2026','01/09/2027','-','Massiel Carhuallanqui','Coordinador','BAT','3era cuota'];
+  const csv = LINEAS_BULK_HEADERS.join(';') + '\n' + ej.join(';') + '\n';
+  const blob = new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'plantilla_lineas.csv'; a.click();
+}
+
+// ════════════════════════════════════════════════════════════
+//  SEGUROS — base mensual + relación EPS staff
+// ════════════════════════════════════════════════════════════
+const SEG_EPS_EXCL = ['81173','94062']; // contratos Ricardo Palma excluidos
+async function syncSeguros() {
+  if (!STATE.sheetsUrl) { renderSegBase(); renderSegEps(); return; }
+  try {
+    const [b, ep] = await Promise.all([fetchFromSheets('getSegurosBase'), fetchFromSheets('getSegurosEps')]);
+    STATE.segBase = (b.rows||[]).map(r => ({
+      rid:(r.rid||'').toString(), mes:(r.mes||'').toString().trim(), empresa:(r.empresa||'').toString().trim(),
+      aseguradora:(r.aseguradora||'').toString().trim(), tipo:(r.tipo||'').toString().trim(),
+      monto:parseFloat(r.monto)||0, status:(r.status||'').toString().trim(),
+    }));
+    STATE.segEps = (ep.rows||[]).map(r => ({
+      rid:(r.rid||'').toString(), mes:(r.mes||'').toString().trim(), seguro:(r.seguro||'').toString().trim(),
+      empresa:(r.empresa||'').toString().trim(), contrato:(r.contrato||'').toString().trim(),
+      afiliado:(r.afiliado||'').toString().trim(), dependientes:r.dependientes, costo:parseFloat(r.costo)||0,
+      costo_titular:r.costo_titular,
+    }));
+    persist('segBase'); persist('segEps'); renderSegBase(); renderSegEps(); flashSync();
+  } catch(e) { console.warn(e); renderSegBase(); renderSegEps(); }
+}
+function switchSegTab(el, id) {
+  document.querySelectorAll('#page-seguros .tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('#page-seguros .tp').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(id)?.classList.add('active');
+}
+function renderSegBase() {
+  const tb = document.getElementById('seg-tbody');
+  if (!tb) return;
+  const meses = [...new Set(STATE.segBase.map(s=>s.mes).filter(Boolean))].sort((a,b)=>mesIdx(a)-mesIdx(b));
+  fillSelect('seg-f-mes', meses);
+  fillSelect('seg-f-empresa', [...new Set(STATE.segBase.map(s=>s.empresa).filter(Boolean))].sort());
+  fillSelect('seg-f-tipo', [...new Set(STATE.segBase.map(s=>s.tipo).filter(Boolean))].sort());
+  fillSelect('seg-f-status', [...new Set(STATE.segBase.map(s=>s.status).filter(Boolean))].sort());
+  const fMes = document.getElementById('seg-f-mes')?.value || '';
+  const fEmp = document.getElementById('seg-f-empresa')?.value || '';
+  const fTipo= document.getElementById('seg-f-tipo')?.value || '';
+  const fSt  = document.getElementById('seg-f-status')?.value || '';
+  const q = (document.getElementById('seg-buscar')?.value || '').toLowerCase().trim();
+
+  let data = STATE.segBase.slice();
+  if (fMes) data = data.filter(s=>s.mes===fMes);
+  if (fEmp) data = data.filter(s=>s.empresa===fEmp);
+  if (fTipo)data = data.filter(s=>s.tipo===fTipo);
+  if (fSt)  data = data.filter(s=>s.status===fSt);
+  if (q) data = data.filter(s=>(s.mes+' '+s.empresa+' '+s.aseguradora+' '+s.tipo+' '+s.status).toLowerCase().includes(q));
+
+  // KPIs
+  const cardsEl = document.getElementById('seg-cards');
+  if (cardsEl) {
+    const totMonto = data.reduce((a,s)=>a+s.monto,0);
+    const pagado = data.filter(s=>/pagad|abonad/i.test(s.status)).reduce((a,s)=>a+s.monto,0);
+    const pend = data.filter(s=>/pendiente/i.test(s.status)).reduce((a,s)=>a+s.monto,0);
+    cardsEl.innerHTML = `
+      <div class="card"><div class="card-label">Monto total</div><div class="card-value" style="font-size:20px">${fmtSoles(totMonto)}</div><div class="card-sub">${data.length} registros</div></div>
+      <div class="card"><div class="card-label">Pagado / abonado</div><div class="card-value" style="color:#15803d;font-size:20px">${fmtSoles(pagado)}</div><div class="card-sub">liquidado</div></div>
+      <div class="card"><div class="card-label">Pendiente</div><div class="card-value warn" style="font-size:20px">${fmtSoles(pend)}</div><div class="card-sub">por pagar</div></div>
+      <div class="card"><div class="card-label">Meses</div><div class="card-value">${new Set(data.map(s=>s.mes)).size}</div><div class="card-sub">con registros</div></div>`;
+  }
+  // resumen por mes
+  const porMes = {}; data.forEach(s=>{ porMes[s.mes]=(porMes[s.mes]||0)+s.monto; });
+  const tbMes = document.getElementById('seg-res-mes-tbody');
+  if (tbMes) {
+    const ks = Object.keys(porMes).sort((a,b)=>mesIdx(a)-mesIdx(b));
+    tbMes.innerHTML = ks.map(k=>`<tr><td>${escHtml(k)}</td><td style="text-align:right">${fmtSoles(porMes[k])}</td></tr>`).join('')
+      || '<tr><td colspan="2" style="text-align:center;color:var(--hi);padding:16px">—</td></tr>';
+  }
+  // resumen por tipo
+  const porTipo = {}; data.forEach(s=>{ porTipo[s.tipo]=(porTipo[s.tipo]||0)+s.monto; });
+  const tbTipo = document.getElementById('seg-res-tipo-tbody');
+  if (tbTipo) {
+    const ks = Object.keys(porTipo).sort((a,b)=>porTipo[b]-porTipo[a]);
+    tbTipo.innerHTML = ks.map(k=>`<tr><td>${escHtml(k)||'—'}</td><td style="text-align:right">${fmtSoles(porTipo[k])}</td></tr>`).join('')
+      || '<tr><td colspan="2" style="text-align:center;color:var(--hi);padding:16px">—</td></tr>';
+  }
+
+  if (!data.length) {
+    tb.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--hi)">Sin registros con esos filtros.</td></tr>';
+    return;
+  }
+  data.sort((a,b)=> mesIdx(a.mes)-mesIdx(b.mes) || a.empresa.localeCompare(b.empresa));
+  tb.innerHTML = data.map(s => `<tr>
+    <td>${escHtml(s.mes)}</td>
+    <td style="font-weight:600">${escHtml(s.empresa)||'—'}</td>
+    <td>${escHtml(s.aseguradora)||'—'}</td>
+    <td>${escHtml(s.tipo)||'—'}</td>
+    <td style="text-align:right">${fmtSoles(s.monto)}</td>
+    <td style="text-align:center">${segStatusBadge(s.status)}</td>
+  </tr>`).join('');
+  applySortable && applySortable('seg-table');
+}
+function segStatusBadge(st) {
+  const s = (st||'').toLowerCase();
+  let style = 'background:#eef;color:#334;border:1px solid #ccd';
+  if (/pagad|abonad/.test(s)) style = 'background:#dcfce7;color:#15803d;border:1px solid #86efac';
+  else if (/pendiente/.test(s)) style = 'background:#fef3c7;color:#b45309;border:1px solid #fcd34d';
+  else if (/reembols/.test(s)) style = 'background:#dbeafe;color:#1d4ed8;border:1px solid #93c5fd';
+  return `<span style="${style};border-radius:10px;padding:2px 10px;font-size:11px;font-weight:600">${escHtml(st)||'—'}</span>`;
+}
+function renderSegEps() {
+  const tb = document.getElementById('seps-tbody');
+  if (!tb) return;
+  // excluir contratos Ricardo Palma
+  const base = STATE.segEps.filter(s => !SEG_EPS_EXCL.includes((s.contrato||'').toString().trim()));
+  const meses = [...new Set(base.map(s=>s.mes).filter(Boolean))].sort((a,b)=>mesIdx(a)-mesIdx(b));
+  fillSelect('seps-f-mes', meses);
+  fillSelect('seps-f-seguro', [...new Set(base.map(s=>s.seguro).filter(Boolean))].sort());
+  const fMes = document.getElementById('seps-f-mes')?.value || '';
+  const fSeg = document.getElementById('seps-f-seguro')?.value || '';
+  const q = (document.getElementById('seps-buscar')?.value || '').toLowerCase().trim();
+
+  let data = base.slice();
+  if (fMes) data = data.filter(s=>s.mes===fMes);
+  if (fSeg) data = data.filter(s=>s.seguro===fSeg);
+  if (q) data = data.filter(s=>(s.afiliado+' '+s.contrato+' '+s.seguro+' '+s.empresa).toLowerCase().includes(q));
+
+  // KPIs
+  const cardsEl = document.getElementById('seg-eps-cards');
+  if (cardsEl) {
+    const afiliados = new Set(data.map(s=>s.afiliado)).size;
+    const costoTot = data.reduce((a,s)=>a+s.costo,0);
+    const deps = data.reduce((a,s)=>a+(parseInt(s.dependientes)||0),0);
+    cardsEl.innerHTML = `
+      <div class="card"><div class="card-label">Afiliados</div><div class="card-value">${afiliados}</div><div class="card-sub">EPS staff</div></div>
+      <div class="card"><div class="card-label">Costo prima total</div><div class="card-value" style="font-size:20px">${fmtSoles(costoTot)}</div><div class="card-sub">${data.length} registros</div></div>
+      <div class="card"><div class="card-label">Dependientes</div><div class="card-value">${deps}</div><div class="card-sub">declarados</div></div>
+      <div class="card"><div class="card-label">Meses</div><div class="card-value">${new Set(data.map(s=>s.mes)).size}</div><div class="card-sub">con registros</div></div>`;
+  }
+
+  if (!data.length) {
+    tb.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--hi)">Sin registros con esos filtros.</td></tr>';
+    return;
+  }
+  data.sort((a,b)=> mesIdx(a.mes)-mesIdx(b.mes) || a.afiliado.localeCompare(b.afiliado));
+  tb.innerHTML = data.map(s => `<tr>
+    <td>${escHtml(s.mes)}</td>
+    <td>${escHtml(s.seguro)||'—'}</td>
+    <td>${escHtml(s.empresa)||'—'}</td>
+    <td class="mono" style="color:var(--mu)">${escHtml(s.contrato)||'—'}</td>
+    <td style="font-weight:600">${escHtml(s.afiliado)||'—'}</td>
+    <td style="text-align:center">${(s.dependientes===''||s.dependientes==null)?'—':escHtml(s.dependientes)}</td>
+    <td style="text-align:right">${fmtSoles(s.costo)}</td>
+  </tr>`).join('');
+  applySortable && applySortable('seps-table');
+}
+
+// Seguros — carga masiva CSV
+const SEG_BASE_BULK_HEADERS = ['Mes','Empresa','Aseguradora','Tipo_Seguro','Monto','Status'];
+const SEG_EPS_BULK_HEADERS  = ['Mes','Seguro','Empresa','Contrato','Afiliado','Dependientes','Costo_Prima','Costo_Titular'];
+let _segBaseBulkRows = [], _segEpsBulkRows = [];
+function openSegBaseBulk() {
+  _segBaseBulkRows = [];
+  document.getElementById('seg-base-info').textContent = '';
+  document.getElementById('seg-base-confirm').style.display = 'none';
+  const f = document.getElementById('file-seg-base'); if (f) f.value = '';
+  openModal('modal-seg-base-bulk');
+}
+function handleSegBaseCSV(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const rows = parseCSV(e.target.result);
+      if (rows.length < 2) { toast('El archivo no tiene datos','warn'); return; }
+      _segBaseBulkRows = rows.slice(1).map(r => ({
+        mes:(r[0]||'').trim(), empresa:(r[1]||'').trim(), aseguradora:(r[2]||'').trim(),
+        tipo:(r[3]||'').trim(), monto:numPE(r[4]), status:(r[5]||'').trim(),
+      })).filter(x => x.mes);
+      const tot = _segBaseBulkRows.reduce((a,r)=>a+r.monto,0);
+      document.getElementById('seg-base-info').innerHTML = `Se detectaron <b>${_segBaseBulkRows.length}</b> filas válidas · total ${fmtSoles(tot)}.`;
+      document.getElementById('seg-base-confirm').style.display = _segBaseBulkRows.length ? '' : 'none';
+    } catch(err) { toast('Error leyendo CSV: '+err.message,'warn'); }
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+async function confirmarSegBaseBulk() {
+  if (!_segBaseBulkRows.length) { toast('Nada que cargar','warn'); return; }
+  const replace = document.getElementById('seg-base-replace')?.checked || false;
+  if (STATE.sheetsUrl) {
+    showLoading(`Cargando ${_segBaseBulkRows.length} registros…`);
+    try {
+      for (let i=0;i<_segBaseBulkRows.length;i+=200) {
+        const lote = _segBaseBulkRows.slice(i,i+200);
+        await fetch(STATE.sheetsUrl,{method:'POST',body:JSON.stringify({accion:'saveSegBaseBulk', rows:lote, replace: replace && i===0})});
+      }
+      await syncSeguros(); flashSync(); toast(`✓ ${_segBaseBulkRows.length} registros cargados`,'ok');
+    } catch(e){ toast('Error: '+e.message,'warn'); } finally { hideLoading(); }
+  } else {
+    if (replace) STATE.segBase = [];
+    _segBaseBulkRows.forEach((r,i)=>{ r.rid='S'+(STATE.segBase.length+i+1); });
+    STATE.segBase = STATE.segBase.concat(_segBaseBulkRows);
+    persist('segBase'); renderSegBase(); toast(`✓ ${_segBaseBulkRows.length} cargados localmente`,'ok');
+  }
+  closeModal('modal-seg-base-bulk');
+}
+function descargarPlantillaSegBase() {
+  const ej = ['ENERO','TRAD','PACIFICO','EPS','2614.93','PAGADO'];
+  const csv = SEG_BASE_BULK_HEADERS.join(';') + '\n' + ej.join(';') + '\n';
+  const blob = new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'plantilla_seguros_base.csv'; a.click();
+}
+function openSegEpsBulk() {
+  _segEpsBulkRows = [];
+  document.getElementById('seg-eps-info').textContent = '';
+  document.getElementById('seg-eps-confirm').style.display = 'none';
+  const f = document.getElementById('file-seg-eps'); if (f) f.value = '';
+  openModal('modal-seg-eps-bulk');
+}
+function handleSegEpsCSV(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const rows = parseCSV(e.target.result);
+      if (rows.length < 2) { toast('El archivo no tiene datos','warn'); return; }
+      const all = rows.slice(1).map(r => ({
+        mes:(r[0]||'').trim(), seguro:(r[1]||'').trim(), empresa:(r[2]||'').trim(), contrato:(r[3]||'').trim(),
+        afiliado:(r[4]||'').trim(), dependientes:(r[5]||'').trim(), costo:numPE(r[6]),
+        costo_titular:(r[7]||'').trim()===''?'':numPE(r[7]),
+      })).filter(x => x.afiliado);
+      const excl = all.filter(x => SEG_EPS_EXCL.includes(x.contrato)).length;
+      _segEpsBulkRows = all.filter(x => !SEG_EPS_EXCL.includes(x.contrato));
+      const tot = _segEpsBulkRows.reduce((a,r)=>a+r.costo,0);
+      document.getElementById('seg-eps-info').innerHTML = `Se detectaron <b>${_segEpsBulkRows.length}</b> afiliados válidos · costo total ${fmtSoles(tot)}.` + (excl?` <span style="color:var(--mu)">(${excl} filas de Ricardo Palma 81173/94062 excluidas)</span>`:'');
+      document.getElementById('seg-eps-confirm').style.display = _segEpsBulkRows.length ? '' : 'none';
+    } catch(err) { toast('Error leyendo CSV: '+err.message,'warn'); }
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+async function confirmarSegEpsBulk() {
+  if (!_segEpsBulkRows.length) { toast('Nada que cargar','warn'); return; }
+  const replace = document.getElementById('seg-eps-replace')?.checked || false;
+  if (STATE.sheetsUrl) {
+    showLoading(`Cargando ${_segEpsBulkRows.length} afiliados…`);
+    try {
+      for (let i=0;i<_segEpsBulkRows.length;i+=200) {
+        const lote = _segEpsBulkRows.slice(i,i+200);
+        await fetch(STATE.sheetsUrl,{method:'POST',body:JSON.stringify({accion:'saveSegEpsBulk', rows:lote, replace: replace && i===0})});
+      }
+      await syncSeguros(); flashSync(); toast(`✓ ${_segEpsBulkRows.length} afiliados cargados`,'ok');
+    } catch(e){ toast('Error: '+e.message,'warn'); } finally { hideLoading(); }
+  } else {
+    if (replace) STATE.segEps = [];
+    _segEpsBulkRows.forEach((r,i)=>{ r.rid='E'+(STATE.segEps.length+i+1); });
+    STATE.segEps = STATE.segEps.concat(_segEpsBulkRows);
+    persist('segEps'); renderSegEps(); toast(`✓ ${_segEpsBulkRows.length} cargados localmente`,'ok');
+  }
+  closeModal('modal-seg-eps-bulk');
+}
+function descargarPlantillaSegEps() {
+  const ej = ['JUNIO','EPS','TRAD','100670173','CAMARENA VELASQUEZ CLAUDIA CECILIA','0','224.60','224.60'];
+  const csv = SEG_EPS_BULK_HEADERS.join(';') + '\n' + ej.join(';') + '\n';
+  const blob = new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'plantilla_seguros_eps.csv'; a.click();
+}
+
 // ════════════════════════════════════════════════════════════
 //  APPS SCRIPT CODE (for display in Config)
 // ════════════════════════════════════════════════════════════
@@ -3242,6 +4156,16 @@ const SHEET_COSTO        = 'Costo Personal';       // (legado) costo por categor
 const SHEET_PLANILLA     = 'Planilla';             // base detallada de planilla por persona/quincena
 const SHEET_INVENTARIO   = 'Inventario';           // activos de la empresa
 const SHEET_INV_HIST     = 'Inventario Historial'; // historial de movimientos de activos
+const SHEET_LINEAS       = 'Lineas Celulares';     // líneas móviles / equipos (Entel)
+const SHEET_SEG_BASE     = 'Seguros Base';         // base mensual de seguros (todos los meses)
+const SHEET_SEG_EPS      = 'Seguros EPS Staff';    // relación EPS staff con costo de prima
+
+// Encabezados de Inventario (extendido con columnas de laptop)
+const INV_HEADERS = ['ID','Nombre','Categoria','Estado','Asignado','Fecha_Creacion','Obs',
+                     'Cuenta','Marca','Procesador','RAM','ID_Dispositivo','Fecha_Compra','Mantenimiento','Mouse'];
+const LINEAS_HEADERS  = ['Telefono','Modelo','SIM','IMEI','Plan','Estado','Inicio_Adenda','Fin_Adenda','Penalidad','Nombre','Posicion','Proyecto','Cuota'];
+const SEG_BASE_HEADERS = ['Mes','Empresa','Aseguradora','Tipo_Seguro','Monto','Status'];
+const SEG_EPS_HEADERS  = ['Mes','Seguro','Empresa','Contrato','Afiliado','Dependientes','Costo_Prima','Costo_Titular'];
 
 // ── Obtener el Spreadsheet (activo o por ID) ───────────────────────
 function getSS() {
@@ -3317,8 +4241,16 @@ function initSheets() {
 
   getOrCreate(ss, SHEET_COSTO,      ['Anio','Mes','Quincena','Categoria','Monto']);
   getOrCreate(ss, SHEET_PLANILLA,   ['ID','Razon_Social','Tipo_Personal','Anio','Mes','Quincena','Cuenta','Proyecto','Gerente','Supervisor','Nombres','DNI','Ubigeo','Ciudad','Banco','Num_Cuenta','Num_CCI','Total_Pagar']);
-  getOrCreate(ss, SHEET_INVENTARIO, ['ID','Nombre','Categoria','Estado','Asignado','Fecha_Creacion','Obs']);
+  getOrCreate(ss, SHEET_INVENTARIO, INV_HEADERS);
+  // Migración: agrega los encabezados de columnas de laptop si la pestaña ya tenía datos
+  ensureHeaders(ss.getSheetByName(SHEET_INVENTARIO),
+    { 8:'Cuenta', 9:'Marca', 10:'Procesador', 11:'RAM', 12:'ID_Dispositivo', 13:'Fecha_Compra', 14:'Mantenimiento', 15:'Mouse' });
   getOrCreate(ss, SHEET_INV_HIST,   ['Fecha','ID_Activo','Nombre','Estado','Asignado','Admin','Comentario']);
+
+  // Gestión — Líneas celulares y Seguros
+  getOrCreate(ss, SHEET_LINEAS,   LINEAS_HEADERS);
+  getOrCreate(ss, SHEET_SEG_BASE, SEG_BASE_HEADERS);
+  getOrCreate(ss, SHEET_SEG_EPS,  SEG_EPS_HEADERS);
 
   Logger.log('initSheets OK');
   return 'OK — pestañas creadas';
@@ -3581,7 +4513,8 @@ function handleGet(e) {
     if (!sh) return jsonResp({ rows: [], count: 0 });
     const data = sh.getDataRange().getValues();
     if (data.length < 2) return jsonResp({ rows: [], count: 0 });
-    // Columnas: ID(0), Nombre(1), Categoria(2), Estado(3), Asignado(4), Fecha_Creacion(5), Obs(6)
+    // Columnas: ID(0),Nombre(1),Categoria(2),Estado(3),Asignado(4),Fecha_Creacion(5),Obs(6),
+    //           Cuenta(7),Marca(8),Procesador(9),RAM(10),ID_Dispositivo(11),Fecha_Compra(12),Mantenimiento(13),Mouse(14)
     const rows = data.slice(1)
       .filter(r => r[0])
       .map(r => ({
@@ -3592,6 +4525,86 @@ function handleGet(e) {
         asignado:  r[4] ? r[4].toString().trim() : '',
         creacion:  r1ToString(r[5]),
         obs:       r[6] ? r[6].toString().trim() : '',
+        cuenta:    r[7]  ? r[7].toString().trim()  : '',
+        marca:     r[8]  ? r[8].toString().trim()  : '',
+        procesador:r[9]  ? r[9].toString().trim()  : '',
+        ram:       r[10] ? r[10].toString().trim() : '',
+        dispositivo:r[11]? r[11].toString().trim() : '',
+        fecha_compra:r1ToString(r[12]),
+        mantenimiento:r1ToString(r[13]),
+        mouse:     r[14] ? r[14].toString().trim() : '',
+      }));
+    return jsonResp({ rows, count: rows.length });
+  }
+
+  // ── GET LINEAS CELULARES ────────────────────────────────────────
+  if (accion === 'getLineas') {
+    const sh = ss.getSheetByName(SHEET_LINEAS);
+    if (!sh) return jsonResp({ rows: [], count: 0 });
+    const data = sh.getDataRange().getValues();
+    if (data.length < 2) return jsonResp({ rows: [], count: 0 });
+    // Telefono(0),Modelo(1),SIM(2),IMEI(3),Plan(4),Estado(5),Inicio(6),Fin(7),Penalidad(8),Nombre(9),Posicion(10),Proyecto(11),Cuota(12)
+    const rows = data.slice(1)
+      .filter(r => r.some(c => c !== '' && c != null))
+      .map((r, i) => ({
+        rid:       String(i + 2),
+        telefono:  r[0] != null ? r[0].toString().trim() : '',
+        modelo:    r[1] ? r[1].toString().trim() : '',
+        sim:       r[2] != null ? r[2].toString().trim() : '',
+        imei:      r[3] != null ? r[3].toString().trim() : '',
+        plan:      r[4] ? r[4].toString().trim() : '',
+        estado:    r[5] ? r[5].toString().trim() : '',
+        inicio:    r1ToString(r[6]),
+        fin:       r1ToString(r[7]),
+        penalidad: r[8] != null ? r[8].toString().trim() : '',
+        nombre:    r[9] ? r[9].toString().trim() : '',
+        posicion:  r[10] ? r[10].toString().trim() : '',
+        proyecto:  r[11] ? r[11].toString().trim() : '',
+        cuota:     r[12] ? r[12].toString().trim() : '',
+      }));
+    return jsonResp({ rows, count: rows.length });
+  }
+
+  // ── GET SEGUROS BASE (todos los meses) ──────────────────────────
+  if (accion === 'getSegurosBase') {
+    const sh = ss.getSheetByName(SHEET_SEG_BASE);
+    if (!sh) return jsonResp({ rows: [], count: 0 });
+    const data = sh.getDataRange().getValues();
+    if (data.length < 2) return jsonResp({ rows: [], count: 0 });
+    // Mes(0),Empresa(1),Aseguradora(2),Tipo_Seguro(3),Monto(4),Status(5)
+    const rows = data.slice(1)
+      .filter(r => r[0])
+      .map((r, i) => ({
+        rid:         String(i + 2),
+        mes:         r[0] ? r[0].toString().trim() : '',
+        empresa:     r[1] ? r[1].toString().trim() : '',
+        aseguradora: r[2] ? r[2].toString().trim() : '',
+        tipo:        r[3] ? r[3].toString().trim() : '',
+        monto:       parseFloat(r[4]) || 0,
+        status:      r[5] ? r[5].toString().trim() : '',
+      }));
+    return jsonResp({ rows, count: rows.length });
+  }
+
+  // ── GET SEGUROS EPS STAFF ───────────────────────────────────────
+  if (accion === 'getSegurosEps') {
+    const sh = ss.getSheetByName(SHEET_SEG_EPS);
+    if (!sh) return jsonResp({ rows: [], count: 0 });
+    const data = sh.getDataRange().getValues();
+    if (data.length < 2) return jsonResp({ rows: [], count: 0 });
+    // Mes(0),Seguro(1),Empresa(2),Contrato(3),Afiliado(4),Dependientes(5),Costo_Prima(6),Costo_Titular(7)
+    const rows = data.slice(1)
+      .filter(r => r[4])
+      .map((r, i) => ({
+        rid:         String(i + 2),
+        mes:         r[0] ? r[0].toString().trim() : '',
+        seguro:      r[1] ? r[1].toString().trim() : '',
+        empresa:     r[2] ? r[2].toString().trim() : '',
+        contrato:    r[3] != null ? r[3].toString().trim() : '',
+        afiliado:    r[4] ? r[4].toString().trim() : '',
+        dependientes:r[5] != null && r[5] !== '' ? (parseInt(r[5]) || 0) : '',
+        costo:       parseFloat(r[6]) || 0,
+        costo_titular: r[7] != null && r[7] !== '' ? (parseFloat(r[7]) || 0) : '',
       }));
     return jsonResp({ rows, count: rows.length });
   }
@@ -3892,9 +4905,11 @@ function handlePost(e) {
 
   // ── SAVE INVENTARIO (activo) — registra historial si cambia estado/asignado ──
   if (accion === 'saveInventario') {
-    const sh  = getOrCreate(ss, SHEET_INVENTARIO, ['ID','Nombre','Categoria','Estado','Asignado','Fecha_Creacion','Obs']);
+    const sh  = getOrCreate(ss, SHEET_INVENTARIO, INV_HEADERS);
+    ensureHeaders(sh, { 8:'Cuenta', 9:'Marca', 10:'Procesador', 11:'RAM', 12:'ID_Dispositivo', 13:'Fecha_Compra', 14:'Mantenimiento', 15:'Mouse' });
     const shH = getOrCreate(ss, SHEET_INV_HIST,   ['Fecha','ID_Activo','Nombre','Estado','Asignado','Admin','Comentario']);
-    let { id, nombre, categoria, estado, asignado, obs, admin, comentario } = body;
+    let { id, nombre, categoria, estado, asignado, obs, admin, comentario,
+          cuenta, marca, procesador, ram, dispositivo, fecha_compra, mantenimiento, mouse } = body;
     if (!nombre) return jsonResp({ error: 'nombre requerido' });
     estado = estado || 'Disponible';
     const data = sh.getDataRange().getValues();
@@ -3909,10 +4924,12 @@ function handlePost(e) {
     if (found > 0) {
       // conservar fecha de creación existente
       const creacion = data[found][5] || '';
-      sh.getRange(found + 1, 1, 1, 7).setValues([[id, nombre, categoria || '', estado, asignado || '', creacion, obs || '']]);
+      sh.getRange(found + 1, 1, 1, 15).setValues([[id, nombre, categoria || '', estado, asignado || '', creacion, obs || '',
+        cuenta || '', marca || '', procesador || '', ram || '', dispositivo || '', fecha_compra || '', mantenimiento || '', mouse || '']]);
     } else {
       if (!id) id = nextInvId(data);
-      sh.appendRow([id, nombre, categoria || '', estado, asignado || '', r1ToStringFull(new Date()), obs || '']);
+      sh.appendRow([id, nombre, categoria || '', estado, asignado || '', r1ToStringFull(new Date()), obs || '',
+        cuenta || '', marca || '', procesador || '', ram || '', dispositivo || '', fecha_compra || '', mantenimiento || '', mouse || '']);
     }
     // Historial: registra en alta o cuando cambia estado/asignado
     const cambio = (found <= 0) || (prevEstado !== estado) || (prevAsignado !== (asignado || ''));
@@ -3939,6 +4956,84 @@ function handlePost(e) {
     return jsonResp({ ok: false, error: 'ID no encontrado' });
   }
 
+  // ── SAVE INVENTARIO BULK (carga masiva de activos) ──────────────
+  if (accion === 'saveInventarioBulk') {
+    const sh = getOrCreate(ss, SHEET_INVENTARIO, INV_HEADERS);
+    ensureHeaders(sh, { 8:'Cuenta', 9:'Marca', 10:'Procesador', 11:'RAM', 12:'ID_Dispositivo', 13:'Fecha_Compra', 14:'Mantenimiento', 15:'Mouse' });
+    const items = body.rows || [];
+    if (!items.length) return jsonResp({ error: 'Sin filas para cargar' });
+    if (body.replace) clearBody(sh);
+    const data = sh.getDataRange().getValues();
+    let maxId = 0;
+    for (let i = 1; i < data.length; i++) { const n = parseInt((data[i][0]||'').toString().replace(/\\D/g,''),10); if (!isNaN(n) && n>maxId) maxId=n; }
+    const now = r1ToStringFull(new Date());
+    const nuevas = items.map(b => [
+      String(++maxId).padStart(3,'0'), b.nombre||'', b.categoria||'', b.estado||'Disponible', b.asignado||'', now, b.obs||'',
+      b.cuenta||'', b.marca||'', b.procesador||'', b.ram||'', b.dispositivo||'', b.fecha_compra||'', b.mantenimiento||'', b.mouse||''
+    ]);
+    if (nuevas.length) sh.getRange(sh.getLastRow() + 1, 1, nuevas.length, 15).setValues(nuevas);
+    return jsonResp({ ok: true, count: nuevas.length });
+  }
+
+  // ── SAVE LINEA (una fila; upsert por fila rid) ──────────────────
+  if (accion === 'saveLinea') {
+    const sh = getOrCreate(ss, SHEET_LINEAS, LINEAS_HEADERS);
+    const b  = body;
+    const row = lineaRow(b);
+    const rid = b.rid ? parseInt(b.rid, 10) : 0;
+    if (rid && rid >= 2 && rid <= sh.getLastRow()) {
+      sh.getRange(rid, 1, 1, LINEAS_HEADERS.length).setValues([row]);
+      return jsonResp({ ok: true, action: 'updated', rid: String(rid) });
+    }
+    sh.appendRow(row);
+    return jsonResp({ ok: true, action: 'created', rid: String(sh.getLastRow()) });
+  }
+
+  // ── SAVE LINEAS BULK ────────────────────────────────────────────
+  if (accion === 'saveLineasBulk') {
+    const sh = getOrCreate(ss, SHEET_LINEAS, LINEAS_HEADERS);
+    const items = body.rows || [];
+    if (!items.length) return jsonResp({ error: 'Sin filas para cargar' });
+    if (body.replace) clearBody(sh);
+    const nuevas = items.map(lineaRow);
+    if (nuevas.length) sh.getRange(sh.getLastRow() + 1, 1, nuevas.length, LINEAS_HEADERS.length).setValues(nuevas);
+    return jsonResp({ ok: true, count: nuevas.length });
+  }
+
+  // ── DELETE LINEA ────────────────────────────────────────────────
+  if (accion === 'deleteLinea') {
+    const sh = ss.getSheetByName(SHEET_LINEAS);
+    if (!sh) return jsonResp({ error: 'Pestaña no encontrada' });
+    const rid = parseInt(body.rid, 10);
+    if (rid && rid >= 2 && rid <= sh.getLastRow()) { sh.deleteRow(rid); return jsonResp({ ok: true, action: 'deleted' }); }
+    return jsonResp({ ok: false, error: 'Fila no encontrada' });
+  }
+
+  // ── SAVE SEGUROS BASE BULK ──────────────────────────────────────
+  if (accion === 'saveSegBaseBulk') {
+    const sh = getOrCreate(ss, SHEET_SEG_BASE, SEG_BASE_HEADERS);
+    const items = body.rows || [];
+    if (!items.length) return jsonResp({ error: 'Sin filas para cargar' });
+    if (body.replace) clearBody(sh);
+    const nuevas = items.map(b => [ b.mes||'', b.empresa||'', b.aseguradora||'', b.tipo||'', parseFloat(b.monto)||0, b.status||'' ]);
+    if (nuevas.length) sh.getRange(sh.getLastRow() + 1, 1, nuevas.length, SEG_BASE_HEADERS.length).setValues(nuevas);
+    return jsonResp({ ok: true, count: nuevas.length });
+  }
+
+  // ── SAVE SEGUROS EPS BULK ───────────────────────────────────────
+  if (accion === 'saveSegEpsBulk') {
+    const sh = getOrCreate(ss, SHEET_SEG_EPS, SEG_EPS_HEADERS);
+    const items = body.rows || [];
+    if (!items.length) return jsonResp({ error: 'Sin filas para cargar' });
+    if (body.replace) clearBody(sh);
+    const nuevas = items.map(b => [ b.mes||'', b.seguro||'', b.empresa||'', b.contrato||'', b.afiliado||'',
+      (b.dependientes===''||b.dependientes==null)?'':(parseInt(b.dependientes)||0),
+      parseFloat(b.costo)||0,
+      (b.costo_titular===''||b.costo_titular==null)?'':(parseFloat(b.costo_titular)||0) ]);
+    if (nuevas.length) sh.getRange(sh.getLastRow() + 1, 1, nuevas.length, SEG_EPS_HEADERS.length).setValues(nuevas);
+    return jsonResp({ ok: true, count: nuevas.length });
+  }
+
   return jsonResp({ error: 'Acción no reconocida: ' + accion });
 }
 
@@ -3963,6 +5058,20 @@ function nextPlanillaId(data) {
     if (!isNaN(n) && n > max) max = n;
   }
   return String(max + 1).padStart(5, '0');
+}
+
+// Construye la fila de Líneas Celulares (13 columnas) desde el objeto del front
+function lineaRow(b) {
+  return [
+    b.telefono || '', b.modelo || '', b.sim || '', b.imei || '', b.plan || '', b.estado || '',
+    b.inicio || '', b.fin || '', b.penalidad || '', b.nombre || '', b.posicion || '', b.proyecto || '', b.cuota || '',
+  ];
+}
+
+// Borra todas las filas de datos (deja el encabezado) de una pestaña
+function clearBody(sh) {
+  const last = sh.getLastRow();
+  if (last > 1) sh.getRange(2, 1, last - 1, sh.getLastColumn()).clearContent();
 }
 
 // Genera un ID numérico incremental de 3 dígitos para inventario
