@@ -469,6 +469,25 @@ th.sortable.asc,th.sortable.desc{background:rgba(255,255,255,.1)!important}
       <div class="card"><div class="card-label">Días sin marca</div><div class="card-value" id="dc-sinmarca">0</div><div class="card-sub">lunes a viernes sin registro</div></div>
       <div class="card"><div class="card-label">Total descuentos</div><div class="card-value warn" id="dc-descuento" style="font-size:17px">S/. 0.00</div><div class="card-sub" id="dc-descuento-sub">en el mes activo</div></div>
     </div>
+
+    <!-- ── Resumen · Tardanzas ─────────────────────────────── -->
+    <div style="margin-top:28px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;flex-wrap:wrap">
+        <h2 style="font-size:15px;font-weight:700;margin:0">Resumen · Tardanzas</h2>
+        <select class="fsel" id="dash-tard-year" onchange="renderDashResumen()" style="max-width:120px">
+          <option value="2026">2026</option>
+          <option value="2024">2024</option>
+        </select>
+      </div>
+      <div id="dash-tard-charts" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px"></div>
+    </div>
+
+    <!-- ── Resumen · Gestión ──────────────────────────────── -->
+    <div style="margin-top:28px">
+      <h2 style="font-size:15px;font-weight:700;margin:0 0 12px">Resumen · Gestión</h2>
+      <div class="cards" id="dash-gestion-cards"></div>
+    </div>
+
     <div class="empty" id="dash-empty" style="display:none">
       <div class="empty-ico">📊</div>
       <div class="empty-title">Carga datos para ver el resumen</div>
@@ -1733,7 +1752,13 @@ function _navigateTo(id) {
     if (STATE.sheetsUrl) syncPersonalFromSheets().then(() => renderMatrix()).catch(() => {});
   }
   if (id === 'personal') renderPersonalTable();
-  if (id === 'dashboard') updateDashboard();
+  if (id === 'dashboard') {
+    updateDashboard();
+    if (STATE.sheetsUrl) {
+      syncDescuentosAll();
+      Promise.all([syncInventario(), syncLineas()]).then(renderDashResumen).catch(()=>{});
+    }
+  }
   if (id === 'config') { renderConfigPage(); renderConfigCampo(); if (STATE.sheetsUrl) syncConfigCampo().then(renderConfigCampo).catch(()=>{}); }
   if (id === 'campo') {
     renderCampoTable();
@@ -2730,6 +2755,79 @@ function updateDashboard() {
     const descSub = document.getElementById('dc-descuento-sub');
     if (descSub) descSub.textContent = `${Object.keys(descMes).length} colaborador${Object.keys(descMes).length!==1?'es':''} con descuento`;
   }
+
+  renderDashResumen();
+}
+
+// Barras verticales tipo "histórico mensual" para el panel general.
+// items = [{lbl, v}]; shortFmt = etiqueta encima de la barra; fullFmt = tooltip.
+function dashBars(items, color, shortFmt, fullFmt) {
+  const sf = shortFmt || (v=>v);
+  const ff = fullFmt || sf;
+  const mx = Math.max(...items.map(x=>x.v), 1);
+  return `<div style="display:flex;align-items:flex-end;gap:6px;height:150px">${items.map(x=>{
+    const h = Math.round(x.v/mx*120);
+    return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px" title="${escHtml(x.lbl)}: ${escHtml(String(ff(x.v)))}">
+      <div style="font-size:9px;color:var(--mu)">${x.v?escHtml(String(sf(x.v))):''}</div>
+      <div style="width:100%;background:${color||'var(--buk)'};border-radius:4px 4px 0 0;height:${h}px;min-height:${x.v?2:0}px"></div>
+      <div style="font-size:10px;color:var(--mu)">${escHtml(x.lbl)}</div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+// Resumen de Tardanzas (barras por mes) + Gestión (laptops y líneas asignadas).
+function renderDashResumen() {
+  // ── Tardanzas ──
+  const chartsEl = document.getElementById('dash-tard-charts');
+  if (chartsEl) {
+    const year = document.getElementById('dash-tard-year')?.value || '2026';
+    const porMesGente = [], porMesMonto = [];
+    for (let m=1; m<=12; m++) {
+      const mesKey = `${year}-${String(m).padStart(2,'0')}`;
+      const desc = STATE.descuentos[mesKey] || {};
+      const gente = Object.values(desc).filter(v => (parseFloat(v)||0) > 0).length;
+      const monto = Object.values(desc).reduce((s,v)=>s+(parseFloat(v)||0), 0);
+      porMesGente.push({lbl: COSTO_MESES[m], v: gente});
+      porMesMonto.push({lbl: COSTO_MESES[m], v: monto});
+    }
+    const totGente = Math.max(...porMesGente.map(x=>x.v));
+    const totMonto = porMesMonto.reduce((a,x)=>a+x.v, 0);
+    if (totGente === 0 && totMonto === 0) {
+      chartsEl.innerHTML = `<div class="card" style="padding:16px 18px;grid-column:1/-1;color:var(--hi)">Sin descuentos registrados en ${year}. Los datos aparecen al registrarlos en Asistencia → Tardanzas &amp; descuentos.</div>`;
+    } else {
+      chartsEl.innerHTML =
+        `<div class="card" style="padding:16px 18px"><div class="card-label" style="margin-bottom:12px">Colaboradores con tardanza por mes · ${year}</div>${dashBars(porMesGente, '#b45309', v=>v)}</div>` +
+        `<div class="card" style="padding:16px 18px"><div class="card-label" style="margin-bottom:12px">Monto de descuento por mes · ${year} <span style="color:var(--mu);font-weight:500">(total ${fmtSoles(totMonto)})</span></div>${dashBars(porMesMonto, 'var(--danger)', fmtMiles, fmtSoles)}</div>`;
+    }
+  }
+
+  // ── Gestión ──
+  const gEl = document.getElementById('dash-gestion-cards');
+  if (gEl) {
+    const laptops = STATE.inventario.filter(a => /laptop/i.test(a.categoria||''));
+    const laptopsAsig = laptops.filter(a => a.estado === 'Asignado').length;
+    const lineasAsig = STATE.lineas.filter(l => (l.nombre||'').trim()).length;
+    gEl.innerHTML =
+      `<div class="card"><div class="card-label">Laptops asignadas</div><div class="card-value" style="color:#1d4ed8">${laptopsAsig}</div><div class="card-sub">de ${laptops.length} laptop${laptops.length!==1?'s':''} en inventario</div></div>` +
+      `<div class="card"><div class="card-label">Líneas asignadas</div><div class="card-value" style="color:#0e7490">${lineasAsig}</div><div class="card-sub">de ${STATE.lineas.length} línea${STATE.lineas.length!==1?'s':''} registradas</div></div>`;
+  }
+}
+
+// Carga TODOS los descuentos del año desde Sheets (getTardanzas sin mes → todos los meses).
+async function syncDescuentosAll() {
+  if (!STATE.sheetsUrl) return;
+  try {
+    const data = await fetchFromSheets('getTardanzas');
+    (data.rows||[]).forEach(r => {
+      const mk = (r.mesKey||'').toString().trim();
+      const dni = (r.dni||'').toString().trim();
+      if (!mk || !dni) return;
+      if (!STATE.descuentos[mk]) STATE.descuentos[mk] = {};
+      STATE.descuentos[mk][dni] = parseFloat(r.monto) || 0;
+    });
+    persist('descuentos');
+    renderDashResumen();
+  } catch(e) { console.warn('syncDescuentosAll', e); }
 }
 
 // ════════════════════════════════════════════════════════════
@@ -5948,6 +6046,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const inp = document.getElementById('sheets-url-input');
     if (inp) inp.value = STATE.sheetsUrl;
     document.getElementById('sheets-status-label').textContent = 'Sheets: conectado';
+    // Refrescar datos del resumen del panel general en segundo plano
+    syncDescuentosAll();
+    Promise.all([syncInventario(), syncLineas()]).then(renderDashResumen).catch(()=>{});
   }
   document.getElementById('am-mes')?.addEventListener('change', renderAbrirMesPersonal);
   // Wire sort on static tables
