@@ -1817,6 +1817,10 @@ function _navigateTo(id) {
     if (STATE.sheetsUrl) {
       syncDescuentosAll();
       Promise.all([syncInventario(), syncLineas()]).then(renderDashResumen).catch(()=>{});
+      syncPersonalFromSheets()
+        .then(() => syncAsistenciaFromSheets(mesActualKey()))
+        .then(updateDashboard)
+        .catch(()=>{});
     }
   }
   if (id === 'config') { renderConfigPage(); renderConfigCampo(); if (STATE.sheetsUrl) syncConfigCampo().then(renderConfigCampo).catch(()=>{}); }
@@ -2125,6 +2129,12 @@ function mesKeyToLabel(key) {
   return `${MES_NAMES[parseInt(m)]} ${y}`;
 }
 
+// Mes calendario real (hoy) — independiente del mes que se haya "abierto" en Asistencia
+function mesActualKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+}
+
 function getMesesDisponibles() {
   const keys = [...new Set(STATE.asistencia.map(r => r.mes_key))].filter(Boolean);
   Object.keys(STATE.mesConfig).forEach(k => { if (!keys.includes(k)) keys.push(k); });
@@ -2344,15 +2354,11 @@ function updateTopbarMes() {
   const label = document.getElementById('top-month-label');
   const dot   = document.getElementById('top-month-dot');
   const badge = document.getElementById('asi-mes-badge');
-  if (STATE.activeMes) {
-    label.textContent = mesKeyToLabel(STATE.activeMes);
-    dot.classList.remove('off');
-    if (badge) badge.textContent = `Mes activo: ${mesKeyToLabel(STATE.activeMes)}`;
-  } else {
-    label.textContent = 'Sin mes activo';
-    dot.classList.add('off');
-    if (badge) badge.textContent = '';
-  }
+  // El mes activo del topbar siempre es el mes calendario real, sin importar
+  // qué mes se haya abierto/revisado en Asistencia.
+  label.textContent = mesKeyToLabel(mesActualKey());
+  dot.classList.remove('off');
+  if (badge) badge.textContent = `Mes activo: ${mesKeyToLabel(mesActualKey())}`;
 }
 
 // ── PROYECTO FILTER ──────────────────────────────────────────
@@ -2862,14 +2868,14 @@ async function guardarPersonal() {
 //  DASHBOARD
 // ════════════════════════════════════════════════════════════
 function updateDashboard() {
-  const mes = STATE.activeMes;
+  const mes = mesActualKey();
 
-  // Mes activo
+  // Mes activo — siempre el mes calendario real
   const mesEl = document.getElementById('dc-mes');
   if (mesEl) {
-    mesEl.textContent = mes ? mesKeyToLabel(mes) : '—';
+    mesEl.textContent = mesKeyToLabel(mes);
     const sub = mesEl.nextElementSibling;
-    if (sub) sub.textContent = mes ? 'mes activo' : 'Sin mes abierto';
+    if (sub) sub.textContent = STATE.asistencia.some(r => r.mes_key === mes) ? 'mes activo' : 'Sin datos sincronizados aún';
   }
 
   // Personal
@@ -6261,6 +6267,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Refrescar datos del resumen del panel general en segundo plano
     syncDescuentosAll();
     Promise.all([syncInventario(), syncLineas()]).then(renderDashResumen).catch(()=>{});
+    syncPersonalFromSheets()
+      .then(() => syncAsistenciaFromSheets(mesActualKey()))
+      .then(updateDashboard)
+      .catch(()=>{});
   }
   document.getElementById('am-mes')?.addEventListener('change', renderAbrirMesPersonal);
   // Wire sort on static tables
