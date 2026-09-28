@@ -717,11 +717,19 @@ function handlePost(e) {
   // ── SAVE PLANILLA (una fila; upsert por ID) ─────────────────────
   if (accion === 'savePlanilla') {
     const sh = getOrCreate(ss, SHEET_PLANILLA, ['ID','Razon_Social','Tipo_Personal','Anio','Mes','Quincena','Cuenta','Proyecto','Gerente','Supervisor','Nombres','DNI','Ubigeo','Ciudad','Banco','Num_Cuenta','Num_CCI','Total_Pagar']);
-    let b = body;
+    const b = body || {};
     const data = sh.getDataRange().getValues();
     let id = b.id ? b.id.toString().trim() : '';
     let found = -1;
-    if (id) { for (let i = 1; i < data.length; i++) { if (data[i][0].toString().trim() === id) { found = i; break; } } }
+    if (id) {
+      for (let i = 1; i < data.length; i++) { if (data[i][0].toString().trim() === id) { found = i; break; } }
+      // ID sintético "F<fila>" (fila que getPlanilla mostró sin ID real en la Sheet):
+      // ubicarla por número de fila y asignarle recién un ID real definitivo.
+      if (found < 0 && /^F(\d+)$/.test(id)) {
+        const rowNum = parseInt(id.slice(1), 10);
+        if (rowNum >= 2 && rowNum <= data.length) { found = rowNum - 1; id = ''; }
+      }
+    }
     if (!id) id = nextPlanillaId(data);
     const row = planillaRow(id, b);
     if (found > 0) sh.getRange(found + 1, 1, 1, 18).setValues([row]);
@@ -918,6 +926,7 @@ function handlePost(e) {
 // ════════════════════════════════════════════════════════════════════
 // Construye la fila de Planilla (18 columnas) desde el objeto del front
 function planillaRow(id, b) {
+  b = b || {};
   return [
     id,
     b.razon || '', b.tipo || '', parseInt(b.anio) || '', parseInt(b.mes) || '', b.quincena || '',

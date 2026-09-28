@@ -3327,6 +3327,7 @@ async function syncPlanilla() {
   } catch(e) { console.warn(e); renderPlanilla(); }
 }
 function mapPlanillaRow(r){
+  r = r || {};
   return {
     id:(r.id||'').toString(), razon:(r.razon||'').toString(), tipo:(r.tipo||'').toString(),
     anio:parseInt(r.anio)||0, mes:parseInt(r.mes)||0, quincena:(r.quincena||'').toString(),
@@ -3524,7 +3525,8 @@ async function guardarPlanilla() {
     showLoading('Guardando registro…');
     try {
       const res = await fetch(STATE.sheetsUrl,{method:'POST',body:JSON.stringify(Object.assign({accion:'savePlanilla'}, d))});
-      await res.json().catch(()=>({}));
+      const json = await res.json().catch(()=>({}));
+      if (json.error) throw new Error(json.error);
       await syncPlanilla();
       flashSync(); toast('✓ Registro guardado','ok');
     } catch(e){ toast('Error: '+e.message,'warn'); } finally { hideLoading(); }
@@ -3615,7 +3617,9 @@ async function confirmarPlanillaBulk() {
     try {
       for (let i=0;i<_planillaBulkRows.length;i+=200) {
         const lote = _planillaBulkRows.slice(i,i+200);
-        await fetch(STATE.sheetsUrl,{method:'POST',body:JSON.stringify({accion:'savePlanillaBulk', rows:lote})});
+        const res = await fetch(STATE.sheetsUrl,{method:'POST',body:JSON.stringify({accion:'savePlanillaBulk', rows:lote})});
+        const json = await res.json().catch(()=>({}));
+        if (json.error) throw new Error(json.error);
       }
       await syncPlanilla();
       flashSync(); toast(`✓ ${_planillaBulkRows.length} registros cargados`,'ok');
@@ -5158,11 +5162,19 @@ function handlePost(e) {
   // ── SAVE PLANILLA (una fila; upsert por ID) ─────────────────────
   if (accion === 'savePlanilla') {
     const sh = getOrCreate(ss, SHEET_PLANILLA, ['ID','Razon_Social','Tipo_Personal','Anio','Mes','Quincena','Cuenta','Proyecto','Gerente','Supervisor','Nombres','DNI','Ubigeo','Ciudad','Banco','Num_Cuenta','Num_CCI','Total_Pagar']);
-    let b = body;
+    const b = body || {};
     const data = sh.getDataRange().getValues();
     let id = b.id ? b.id.toString().trim() : '';
     let found = -1;
-    if (id) { for (let i = 1; i < data.length; i++) { if (data[i][0].toString().trim() === id) { found = i; break; } } }
+    if (id) {
+      for (let i = 1; i < data.length; i++) { if (data[i][0].toString().trim() === id) { found = i; break; } }
+      // ID sintético "F<fila>" (fila que getPlanilla mostró sin ID real en la Sheet):
+      // ubicarla por número de fila y asignarle recién un ID real definitivo.
+      if (found < 0 && /^F(\\d+)$/.test(id)) {
+        const rowNum = parseInt(id.slice(1), 10);
+        if (rowNum >= 2 && rowNum <= data.length) { found = rowNum - 1; id = ''; }
+      }
+    }
     if (!id) id = nextPlanillaId(data);
     const row = planillaRow(id, b);
     if (found > 0) sh.getRange(found + 1, 1, 1, 18).setValues([row]);
@@ -5359,6 +5371,7 @@ function handlePost(e) {
 // ════════════════════════════════════════════════════════════════════
 // Construye la fila de Planilla (18 columnas) desde el objeto del front
 function planillaRow(id, b) {
+  b = b || {};
   return [
     id,
     b.razon || '', b.tipo || '', parseInt(b.anio) || '', parseInt(b.mes) || '', b.quincena || '',
