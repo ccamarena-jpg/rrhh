@@ -332,10 +332,15 @@ function handleGet(e) {
     // Columnas: ID(0),Razon_Social(1),Tipo_Personal(2),Anio(3),Mes(4),Quincena(5),Cuenta(6),
     //           Proyecto(7),Gerente(8),Supervisor(9),Nombres(10),DNI(11),Ubigeo(12),Ciudad(13),
     //           Banco(14),Num_Cuenta(15),Num_CCI(16),Total_Pagar(17)
-    let rows = data.slice(1).filter(r => r[0]);
-    if (anio) rows = rows.filter(r => r[3].toString().trim() === anio.toString().trim());
-    const result = rows.map(r => ({
-      id:         r[0].toString().trim(),
+    // Acepta filas sin ID (ingresadas a mano directo en el Sheet, sin pasar por la
+    // plataforma): basta con que tengan Nombres o Total_Pagar; se les asigna un id
+    // sintético "F<fila>" para que igual se puedan listar.
+    let rows = data.slice(1)
+      .map((r, i) => ({ r: r, rowNum: i + 2 }))
+      .filter(x => x.r[0] || x.r[10] || x.r[17]);
+    if (anio) rows = rows.filter(x => x.r[3].toString().trim() === anio.toString().trim());
+    const result = rows.map(x => { const r = x.r; return {
+      id:         r[0] ? r[0].toString().trim() : ('F' + x.rowNum),
       razon:      r[1] ? r[1].toString().trim() : '',
       tipo:       r[2] ? r[2].toString().trim() : '',
       anio:       parseInt(r[3]) || 0,
@@ -353,7 +358,7 @@ function handleGet(e) {
       numCuenta:  r[15] ? r[15].toString().trim() : '',
       numCCI:     r[16] ? r[16].toString().trim() : '',
       total:      parseFloat(r[17]) || 0,
-    }));
+    };});
     return jsonResp({ rows: result, count: result.length });
   }
 
