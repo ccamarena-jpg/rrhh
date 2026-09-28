@@ -291,6 +291,7 @@ th.sortable.asc,th.sortable.desc{background:rgba(255,255,255,.1)!important}
 .hamburger-lines{display:flex;flex-direction:column;gap:4.5px}
 .hamburger-lines span{display:block;width:17px;height:1.5px;background:currentColor;border-radius:2px;transition:.2s}
 </style>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
 
@@ -314,9 +315,9 @@ th.sortable.asc,th.sortable.desc{background:rgba(255,255,255,.1)!important}
     </div>
   </div>
   <div class="t-sep"></div>
-  <div class="t-right">
-    <div class="t-avatar">CL</div>
-    <span class="t-uname">Claudia</span>
+  <div class="t-right" id="t-user-box" style="cursor:pointer" onclick="logoutGoogle()" title="Cerrar sesión">
+    <div class="t-avatar" id="t-avatar">CL</div>
+    <span class="t-uname" id="t-uname">Claudia</span>
   </div>
 </div>
 
@@ -792,6 +793,30 @@ th.sortable.asc,th.sortable.desc{background:rgba(255,255,255,.1)!important}
       <button class="btn btn-primary" style="margin-top:12px" onclick="saveConfigCampo()">Guardar horarios</button>
       <span id="cfg-campo-msg" style="margin-left:10px;font-size:12.5px;color:var(--ok)"></span>
     </div>
+
+    <!-- Acceso · Google Sign-In -->
+    <div class="card" style="max-width:560px;padding:22px 24px;box-shadow:var(--sh2);margin-top:14px">
+      <div class="card-label" style="margin-bottom:4px">Acceso · Login con Google</div>
+      <p style="font-size:12.5px;color:var(--mu);margin:0 0 14px">Restringe el acceso a la plataforma a cuentas de Google del dominio <b>@ttaudit.com</b>. Necesitas un <b>Client ID de OAuth</b> de Google Cloud.</p>
+      <div class="fg" style="margin-bottom:14px">
+        <label>Client ID de Google OAuth</label>
+        <input id="google-client-id-input" type="text" placeholder="1234567890-abc...apps.googleusercontent.com" value="">
+      </div>
+      <button class="btn btn-primary" onclick="saveGoogleAuthConfig()">Guardar</button>
+      <span id="google-cfg-msg" style="margin-left:10px;font-size:12.5px;color:var(--ok)"></span>
+      <div style="margin-top:16px">
+        <div style="font-size:11.5px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Cómo crear el Client ID (una sola vez)</div>
+        <ol style="font-size:13px;color:var(--mu);line-height:2;padding-left:18px">
+          <li>Ve a <b>console.cloud.google.com</b> con tu cuenta @ttaudit.com</li>
+          <li>Crea o selecciona un proyecto</li>
+          <li><b>APIs y servicios → Pantalla de consentimiento OAuth</b>: tipo Interno (o Externo si tu Workspace no lo permite), completa nombre y correo</li>
+          <li><b>APIs y servicios → Credenciales → Crear credenciales → ID de cliente de OAuth</b></li>
+          <li>Tipo de aplicación: <b>Aplicación web</b></li>
+          <li>En <b>Orígenes de JavaScript autorizados</b> agrega la URL donde se aloja esta plataforma (ej. tu dominio de GitHub Pages/Vercel, y <span class="mono">http://localhost</span> si la pruebas local)</li>
+          <li>Copia el <b>Client ID</b> generado y pégalo arriba</li>
+        </ol>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -959,10 +984,26 @@ th.sortable.asc,th.sortable.desc{background:rgba(255,255,255,.1)!important}
     </div>
   </div>
   <div class="tabs">
-    <div class="tab active" onclick="switchInvTab(this,'inv-lista')">📦 Inventario</div>
+    <div class="tab active" onclick="switchInvTab(this,'inv-cuenta')">🖥️ Laptops por cuenta</div>
+    <div class="tab" onclick="switchInvTab(this,'inv-lista')">📦 Inventario</div>
     <div class="tab" onclick="switchInvTab(this,'inv-hist')">🕑 Historial de movimientos</div>
   </div>
-  <div class="tp active" id="inv-lista">
+  <div class="tp active" id="inv-cuenta">
+    <div class="cards" id="inv-res-cards" style="margin:14px 0 4px"></div>
+    <div class="tbl-wrap">
+      <div style="font-size:12px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.4px;margin:6px 2px">Total de laptops por cuenta</div>
+      <table class="pst" id="inv-res-cuenta">
+        <thead><tr>
+          <th class="sortable">Cuenta</th>
+          <th class="sortable" style="text-align:center">Total laptops</th>
+          <th class="sortable" style="text-align:center">Asignadas</th>
+          <th class="sortable" style="text-align:center">Disponibles</th>
+        </tr></thead>
+        <tbody id="inv-res-cuenta-tbody"><tr><td colspan="4" style="text-align:center;padding:24px;color:var(--hi)">Sin laptops registradas.</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="tp" id="inv-lista">
     <div class="cards" id="inv-cards" style="margin-bottom:16px"></div>
     <div class="ctrl" style="gap:8px">
       <select class="fsel" id="inv-filtro-estado" onchange="renderInventario()" style="min-width:160px">
@@ -1037,10 +1078,10 @@ th.sortable.asc,th.sortable.desc{background:rgba(255,255,255,.1)!important}
     </div>
   </div>
   <div class="tabs">
-    <div class="tab active" onclick="switchLineasTab(this,'lin-detalle')">📋 Detalle</div>
-    <div class="tab" onclick="switchLineasTab(this,'lin-resumen')">📊 Líneas por cuenta</div>
+    <div class="tab active" onclick="switchLineasTab(this,'lin-resumen')">📊 Líneas por cuenta</div>
+    <div class="tab" onclick="switchLineasTab(this,'lin-detalle')">📋 Detalle</div>
   </div>
-  <div class="tp active" id="lin-detalle">
+  <div class="tp" id="lin-detalle">
     <div class="cards" id="lin-cards" style="margin:14px 0 4px"></div>
     <div class="ctrl" style="gap:8px;flex-wrap:wrap">
       <select class="fsel" id="lin-f-proy" data-all="Todas las cuentas" onchange="renderLineas()" style="min-width:170px"><option value="">Todas las cuentas</option></select>
@@ -1064,7 +1105,7 @@ th.sortable.asc,th.sortable.desc{background:rgba(255,255,255,.1)!important}
       </table>
     </div>
   </div>
-  <div class="tp" id="lin-resumen">
+  <div class="tp active" id="lin-resumen">
     <div class="cards" id="lin-res-cards" style="margin:14px 0 4px"></div>
     <div class="grid-2" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start">
       <div class="tbl-wrap">
@@ -1170,6 +1211,21 @@ th.sortable.asc,th.sortable.desc{background:rgba(255,255,255,.1)!important}
 
 </main>
 </div><!-- /shell -->
+
+<!-- ══ GOOGLE LOGIN GATE ══ -->
+<div class="lock-overlay open" id="google-login-gate" style="z-index:950;background:linear-gradient(135deg,rgba(30,34,96,.92),rgba(44,50,128,.92));">
+  <div class="lock-box" style="width:380px">
+    <div class="t-mark" style="width:44px;height:44px;font-size:13px;margin:0 auto 14px">TTA</div>
+    <h2>Acceso a la plataforma</h2>
+    <p>Ingresa con tu cuenta de Google <b>@ttaudit.com</b></p>
+    <div id="google-btn-container" style="display:flex;justify-content:center;min-height:44px;margin:16px 0 4px"></div>
+    <div class="lock-err" id="google-login-err"></div>
+    <div id="google-login-noconfig" style="display:none;font-size:12px;color:var(--mu);margin-top:16px;line-height:1.7">
+      El login con Google aún no está configurado.<br>
+      <a onclick="skipGoogleGate()" style="color:var(--buk3);cursor:pointer;font-weight:700">Continuar a Configuración →</a>
+    </div>
+  </div>
+</div>
 
 <!-- ══ SISTEMA LOCK MODAL ══ -->
 <div class="lock-overlay" id="sistema-lock">
@@ -1690,7 +1746,10 @@ const STATE = {
   lineas: JSON.parse(localStorage.getItem('tt_lineas') || '[]'),
   segBase: JSON.parse(localStorage.getItem('tt_seg_base') || '[]'),
   segEps: JSON.parse(localStorage.getItem('tt_seg_eps') || '[]'),
+  googleClientId: localStorage.getItem('tt_google_client_id') || '',
+  authUser: JSON.parse(localStorage.getItem('tt_auth_user') || 'null'),
 };
+const AUTH_DOMAIN = 'ttaudit.com';
 
 // Subtipos de personal de campo y tipos de personal (planilla)
 const SUBTIPOS_CAMPO = ['Merch','Promotor','Operaciones','Practicantes'];
@@ -1708,7 +1767,7 @@ function persist(key) {
 }
 
 // ── NAVIGATION ─────────────────────────────────────────────
-const SISTEMA_PAGES = ['personal','config','costo'];
+const SISTEMA_PAGES = ['personal','config'];
 let _sistemaUnlocked = sessionStorage.getItem('tt_sis_ok')    === '1';
 let _campoUnlocked   = sessionStorage.getItem('tt_campo_ok')  === '1';
 let _pendingPage      = null;
@@ -1831,6 +1890,108 @@ function checkLock() {
   }
 }
 
+// ── GOOGLE LOGIN (restringido a @ttaudit.com) ─────────────────
+function initAuth() {
+  const gate = document.getElementById('google-login-gate');
+  if (STATE.authUser && (STATE.authUser.email || '').toLowerCase().endsWith('@' + AUTH_DOMAIN)) {
+    gate.classList.remove('open');
+    applyAuthUserToUI();
+    return;
+  }
+  STATE.authUser = null;
+  localStorage.removeItem('tt_auth_user');
+  gate.classList.add('open');
+  if (!STATE.googleClientId) {
+    document.getElementById('google-login-noconfig').style.display = 'block';
+    return;
+  }
+  document.getElementById('google-login-noconfig').style.display = 'none';
+  renderGoogleButton();
+}
+
+function renderGoogleButton(retries) {
+  retries = retries || 0;
+  if (!window.google || !google.accounts || !google.accounts.id) {
+    if (retries < 40) { setTimeout(() => renderGoogleButton(retries + 1), 150); }
+    return;
+  }
+  google.accounts.id.initialize({
+    client_id: STATE.googleClientId,
+    callback: handleGoogleCredential,
+    hd: AUTH_DOMAIN,
+  });
+  const box = document.getElementById('google-btn-container');
+  box.innerHTML = '';
+  google.accounts.id.renderButton(box, { theme: 'outline', size: 'large', shape: 'pill', text: 'signin_with', width: 300 });
+}
+
+function handleGoogleCredential(response) {
+  const errEl = document.getElementById('google-login-err');
+  errEl.textContent = '';
+  let payload;
+  try {
+    payload = JSON.parse(atob(response.credential.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
+  } catch (e) {
+    errEl.textContent = 'No se pudo leer la cuenta de Google. Intenta de nuevo.';
+    return;
+  }
+  const email = (payload.email || '').toLowerCase();
+  if (!payload.email_verified || !email.endsWith('@' + AUTH_DOMAIN)) {
+    errEl.textContent = `Solo se permite el acceso con cuentas @${AUTH_DOMAIN}.`;
+    return;
+  }
+  STATE.authUser = { email, name: payload.name || email, picture: payload.picture || '' };
+  localStorage.setItem('tt_auth_user', JSON.stringify(STATE.authUser));
+  document.getElementById('google-login-gate').classList.remove('open');
+  applyAuthUserToUI();
+  toast(`✓ Bienvenido/a, ${(payload.given_name || STATE.authUser.name).split(' ')[0]}`, 'ok');
+}
+
+function applyAuthUserToUI() {
+  if (!STATE.authUser) return;
+  const initials = (STATE.authUser.name || STATE.authUser.email)
+    .split(' ').filter(Boolean).slice(0, 2).map(s => s[0].toUpperCase()).join('') || 'TT';
+  const nameEl = document.getElementById('t-uname');
+  const avEl = document.getElementById('t-avatar');
+  if (nameEl) nameEl.textContent = (STATE.authUser.name || STATE.authUser.email).split(' ')[0];
+  if (avEl) {
+    if (STATE.authUser.picture) {
+      avEl.style.backgroundImage = `url(${STATE.authUser.picture})`;
+      avEl.style.backgroundSize = 'cover';
+      avEl.textContent = '';
+    } else {
+      avEl.textContent = initials;
+    }
+  }
+}
+
+function logoutGoogle() {
+  if (!STATE.authUser) return;
+  if (!confirm('¿Cerrar sesión?')) return;
+  STATE.authUser = null;
+  localStorage.removeItem('tt_auth_user');
+  if (window.google?.accounts?.id) google.accounts.id.disableAutoSelect();
+  const avEl = document.getElementById('t-avatar');
+  if (avEl) { avEl.style.backgroundImage = ''; avEl.textContent = 'TT'; }
+  const nameEl = document.getElementById('t-uname'); if (nameEl) nameEl.textContent = '';
+  initAuth();
+}
+
+function skipGoogleGate() {
+  document.getElementById('google-login-gate').classList.remove('open');
+  showPage('config');
+}
+
+function saveGoogleAuthConfig() {
+  const val = (document.getElementById('google-client-id-input').value || '').trim();
+  STATE.googleClientId = val;
+  localStorage.setItem('tt_google_client_id', val);
+  const msg = document.getElementById('google-cfg-msg');
+  msg.textContent = '✓ Guardado';
+  setTimeout(() => msg.textContent = '', 2500);
+  if (!STATE.authUser) initAuth();
+}
+
 let sidebarCollapsed = false;
 function toggleSidebar() {
   sidebarCollapsed = !sidebarCollapsed;
@@ -1916,6 +2077,7 @@ function applySortable(tableId) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  initAuth();
   document.querySelectorAll('.overlay').forEach(o =>
     o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); })
   );
@@ -2836,6 +2998,8 @@ async function syncDescuentosAll() {
 function renderConfigPage() {
   const inp = document.getElementById('sheets-url-input');
   if (inp && STATE.sheetsUrl) inp.value = STATE.sheetsUrl;
+  const gInp = document.getElementById('google-client-id-input');
+  if (gInp && STATE.googleClientId) gInp.value = STATE.googleClientId;
 }
 
 async function saveConfig() {
@@ -3511,7 +3675,52 @@ function switchInvTab(el, id) {
   document.querySelectorAll('#page-inventario .tp').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
   document.getElementById(id)?.classList.add('active');
+  if (id === 'inv-cuenta') renderInvResumen();
   if (id === 'inv-hist' && STATE.sheetsUrl) syncInvHist();
+}
+
+function renderInvResumen() {
+  const laptops = STATE.inventario.filter(a => /laptop/i.test(a.categoria||''));
+  const cardsEl = document.getElementById('inv-res-cards');
+  if (cardsEl) {
+    const asignadas   = laptops.filter(a=>a.estado==='Asignado').length;
+    const disponibles = laptops.filter(a=>a.estado==='Disponible').length;
+    const cuentas = new Set(laptops.map(a=>a.cuenta||'(Sin cuenta)')).size;
+    cardsEl.innerHTML = `
+      <div class="card"><div class="card-label">Total laptops</div><div class="card-value">${laptops.length}</div><div class="card-sub">en inventario</div></div>
+      <div class="card"><div class="card-label">Asignadas</div><div class="card-value" style="color:#1d4ed8">${asignadas}</div><div class="card-sub">en uso</div></div>
+      <div class="card"><div class="card-label">Disponibles</div><div class="card-value" style="color:#15803d">${disponibles}</div><div class="card-sub">libres</div></div>
+      <div class="card"><div class="card-label">Cuentas</div><div class="card-value">${cuentas}</div><div class="card-sub">con laptops</div></div>`;
+  }
+  const porCuenta = {};
+  laptops.forEach(a => {
+    const k = a.cuenta || '(Sin cuenta)';
+    if (!porCuenta[k]) porCuenta[k] = {total:0, asignadas:0, disponibles:0};
+    porCuenta[k].total++;
+    if (a.estado === 'Asignado')   porCuenta[k].asignadas++;
+    if (a.estado === 'Disponible') porCuenta[k].disponibles++;
+  });
+  const tb = document.getElementById('inv-res-cuenta-tbody');
+  if (tb) {
+    const rows = Object.keys(porCuenta).sort((a,b)=>porCuenta[b].total-porCuenta[a].total);
+    if (!rows.length) {
+      tb.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:24px;color:var(--hi)">Sin laptops registradas.</td></tr>';
+    } else {
+      tb.innerHTML = rows.map(k => `<tr>
+        <td style="font-weight:600">${escHtml(k)}</td>
+        <td style="text-align:center">${porCuenta[k].total}</td>
+        <td style="text-align:center;color:#1d4ed8">${porCuenta[k].asignadas}</td>
+        <td style="text-align:center;color:#15803d">${porCuenta[k].disponibles}</td>
+      </tr>`).join('') +
+      `<tr style="font-weight:700;border-top:1.5px solid var(--bd)">
+        <td>Total</td>
+        <td style="text-align:center">${laptops.length}</td>
+        <td style="text-align:center">${laptops.filter(a=>a.estado==='Asignado').length}</td>
+        <td style="text-align:center">${laptops.filter(a=>a.estado==='Disponible').length}</td>
+      </tr>`;
+    }
+    applySortable && applySortable('inv-res-cuenta');
+  }
 }
 
 function renderInventario() {
@@ -3531,6 +3740,7 @@ function renderInventario() {
       <div class="card"><div class="card-label">Mantenimiento</div><div class="card-value warn">${cnt('Mantenimiento')}</div><div class="card-sub">en reparación</div></div>
       <div class="card"><div class="card-label">Inactivos</div><div class="card-value" style="color:#b91c1c">${cnt('Inactivo')}</div><div class="card-sub">de baja</div></div>`;
   }
+  renderInvResumen();
 
   let data = STATE.inventario.slice();
   if (fEst) data = data.filter(a => a.estado === fEst);
@@ -3789,6 +3999,7 @@ function renderLineas() {
       <div class="card"><div class="card-label">Costo mensual</div><div class="card-value" style="font-size:20px">${fmtSoles(costoMes)}</div><div class="card-sub">según plan</div></div>
       <div class="card"><div class="card-label">Cuentas</div><div class="card-value">${cuentas}</div><div class="card-sub">con líneas</div></div>`;
   }
+  renderLineasResumen();
 
   let data = STATE.lineas.slice();
   if (fProy) data = data.filter(l=>l.proyecto===fProy);
