@@ -1724,6 +1724,7 @@ function getCutoffMin(mesKey) {
 const CUTOFF_MIN = 10 * 60 + 30; // legado — usar getCutoffMin(mesKey) donde se tenga el mes
 const SHEET_ID = '1s7r7KjxTYO_PK2obc_yQ9pXI8l-mEl3vbmrrfIqCrio';
 const DEFAULT_GOOGLE_CLIENT_ID = '382427877987-tcj1fc3fef8reg2b5uuj0r12cf0iqibj.apps.googleusercontent.com';
+const DEFAULT_SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzjilNzGRhPjOllbg-w1Nd-MRpWHHHu9US2MYFruyT9bzAraQN6KH9EdtYZ-dZJ4qZv/exec';
 
 // ── STATE ──────────────────────────────────────────────────
 // Tipo de vista activo: 'Staff' o 'Campo'
@@ -1731,7 +1732,7 @@ let TIPO_FILTRO_ASIST = 'Staff';
 let TIPO_FILTRO_VAC   = 'Staff';
 
 const STATE = {
-  sheetsUrl: localStorage.getItem('tt_sheets_url') || '',
+  sheetsUrl: localStorage.getItem('tt_sheets_url') || DEFAULT_SHEETS_URL,
   personal: JSON.parse(localStorage.getItem('tt_personal') || '[]'),
   asistencia: JSON.parse(localStorage.getItem('tt_asistencia') || '[]'),
   mesConfig: JSON.parse(localStorage.getItem('tt_mes_config') || '{}'),
