@@ -1723,6 +1723,7 @@ function getCutoffMin(mesKey) {
 }
 const CUTOFF_MIN = 10 * 60 + 30; // legado — usar getCutoffMin(mesKey) donde se tenga el mes
 const SHEET_ID = '1s7r7KjxTYO_PK2obc_yQ9pXI8l-mEl3vbmrrfIqCrio';
+const DEFAULT_GOOGLE_CLIENT_ID = '382427877987-tcj1fc3fef8reg2b5uuj0r12cf0iqibj.apps.googleusercontent.com';
 
 // ── STATE ──────────────────────────────────────────────────
 // Tipo de vista activo: 'Staff' o 'Campo'
@@ -1746,7 +1747,7 @@ const STATE = {
   lineas: JSON.parse(localStorage.getItem('tt_lineas') || '[]'),
   segBase: JSON.parse(localStorage.getItem('tt_seg_base') || '[]'),
   segEps: JSON.parse(localStorage.getItem('tt_seg_eps') || '[]'),
-  googleClientId: localStorage.getItem('tt_google_client_id') || '',
+  googleClientId: localStorage.getItem('tt_google_client_id') || DEFAULT_GOOGLE_CLIENT_ID,
   authUser: JSON.parse(localStorage.getItem('tt_auth_user') || 'null'),
 };
 const AUTH_DOMAIN = 'ttaudit.com';
