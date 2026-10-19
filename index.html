@@ -1764,6 +1764,7 @@ const AUTH_DOMAIN = 'ttaudit.com';
 // Usuarios con acceso restringido a solo ciertas páginas (resto del menú queda oculto/bloqueado)
 const RESTRICTED_ACCESS = {
   'contabilidad2@ttaudit.com': ['inventario'],
+  'acarrillo@ttaudit.com': ['inventario'],
 };
 function restrictedPagesFor(email) {
   return RESTRICTED_ACCESS[(email || '').toLowerCase()] || null;
