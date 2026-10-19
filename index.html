@@ -1761,6 +1761,12 @@ const STATE = {
 };
 const AUTH_DOMAIN = 'ttaudit.com';
 
+// Correos con acceso completo a toda la plataforma
+const FULL_ACCESS_EMAILS = [
+  'rgallo@ttaudit.com',
+  'botero@ttaudit.com',
+  'ccamarena@ttaudit.com',
+];
 // Usuarios con acceso restringido a solo ciertas páginas (resto del menú queda oculto/bloqueado)
 const RESTRICTED_ACCESS = {
   'contabilidad2@ttaudit.com': ['inventario'],
@@ -1768,6 +1774,11 @@ const RESTRICTED_ACCESS = {
 };
 function restrictedPagesFor(email) {
   return RESTRICTED_ACCESS[(email || '').toLowerCase()] || null;
+}
+// Solo los correos de FULL_ACCESS_EMAILS o RESTRICTED_ACCESS pueden ingresar a la plataforma
+function isAllowedEmail(email) {
+  email = (email || '').toLowerCase();
+  return FULL_ACCESS_EMAILS.includes(email) || Object.prototype.hasOwnProperty.call(RESTRICTED_ACCESS, email);
 }
 
 // Subtipos de personal de campo y tipos de personal (planilla)
@@ -1919,10 +1930,10 @@ function checkLock() {
   }
 }
 
-// ── GOOGLE LOGIN (restringido a @ttaudit.com) ─────────────────
+// ── GOOGLE LOGIN (restringido a @ttaudit.com + lista blanca FULL_ACCESS_EMAILS/RESTRICTED_ACCESS) ─────────────────
 function initAuth() {
   const gate = document.getElementById('google-login-gate');
-  if (STATE.authUser && (STATE.authUser.email || '').toLowerCase().endsWith('@' + AUTH_DOMAIN)) {
+  if (STATE.authUser && (STATE.authUser.email || '').toLowerCase().endsWith('@' + AUTH_DOMAIN) && isAllowedEmail(STATE.authUser.email)) {
     gate.classList.remove('open');
     applyAuthUserToUI();
     applyAccessRestrictions();
@@ -1968,6 +1979,10 @@ function handleGoogleCredential(response) {
   const email = (payload.email || '').toLowerCase();
   if (!payload.email_verified || !email.endsWith('@' + AUTH_DOMAIN)) {
     errEl.textContent = `Solo se permite el acceso con cuentas @${AUTH_DOMAIN}.`;
+    return;
+  }
+  if (!isAllowedEmail(email)) {
+    errEl.textContent = 'Tu cuenta no tiene acceso a esta plataforma.';
     return;
   }
   STATE.authUser = { email, name: payload.name || email, picture: payload.picture || '' };
