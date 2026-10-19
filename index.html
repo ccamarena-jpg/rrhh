@@ -1761,6 +1761,14 @@ const STATE = {
 };
 const AUTH_DOMAIN = 'ttaudit.com';
 
+// Usuarios con acceso restringido a solo ciertas páginas (resto del menú queda oculto/bloqueado)
+const RESTRICTED_ACCESS = {
+  'contabilidad2@ttaudit.com': ['inventario'],
+};
+function restrictedPagesFor(email) {
+  return RESTRICTED_ACCESS[(email || '').toLowerCase()] || null;
+}
+
 // Subtipos de personal de campo y tipos de personal (planilla)
 const SUBTIPOS_CAMPO = ['Merch','Promotor','Operaciones','Practicantes'];
 const TIPOS_PLANILLA = ['Staff','RxH','Campo','Practicantes'];
@@ -1783,8 +1791,11 @@ let _campoUnlocked   = sessionStorage.getItem('tt_campo_ok')  === '1';
 let _pendingPage      = null;
 let _pendingTipoAsist = null;
 let _pendingTipoVac   = null;
+let _currentPageId    = 'dashboard';
 
 function showPage(id) {
+  const allowed = restrictedPagesFor(STATE.authUser && STATE.authUser.email);
+  if (allowed && !allowed.includes(id)) return;
   if (SISTEMA_PAGES.includes(id) && !_sistemaUnlocked) {
     _pendingPage = id;
     openLock();
@@ -1794,6 +1805,8 @@ function showPage(id) {
 }
 
 function showPageCampo(page) {
+  const allowed = restrictedPagesFor(STATE.authUser && STATE.authUser.email);
+  if (allowed && !allowed.includes(page)) return;
   if (!_campoUnlocked) {
     _pendingPage = page;
     _pendingTipoAsist = page === 'asistencia' ? 'Campo' : null;
@@ -1807,6 +1820,7 @@ function showPageCampo(page) {
 }
 
 function _navigateTo(id) {
+  _currentPageId = id;
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.sb-item, .sb-icon').forEach(i => i.classList.remove('active'));
   document.getElementById('page-' + id)?.classList.add('active');
@@ -1910,6 +1924,7 @@ function initAuth() {
   if (STATE.authUser && (STATE.authUser.email || '').toLowerCase().endsWith('@' + AUTH_DOMAIN)) {
     gate.classList.remove('open');
     applyAuthUserToUI();
+    applyAccessRestrictions();
     return;
   }
   STATE.authUser = null;
@@ -1958,7 +1973,27 @@ function handleGoogleCredential(response) {
   localStorage.setItem('tt_auth_user', JSON.stringify(STATE.authUser));
   document.getElementById('google-login-gate').classList.remove('open');
   applyAuthUserToUI();
+  applyAccessRestrictions();
   toast(`✓ Bienvenido/a, ${(payload.given_name || STATE.authUser.name).split(' ')[0]}`, 'ok');
+}
+
+function applyAccessRestrictions() {
+  const allowed = restrictedPagesFor(STATE.authUser && STATE.authUser.email);
+  document.querySelectorAll('.sb-icon[data-page], .sb-item[data-page]').forEach(el => {
+    el.style.display = (!allowed || allowed.includes(el.dataset.page)) ? '' : 'none';
+  });
+  document.querySelectorAll('.sb-icon-sep').forEach(sep => { sep.style.display = allowed ? 'none' : ''; });
+  document.querySelectorAll('.sb-section').forEach(sec => {
+    const items = sec.querySelectorAll('[data-page]');
+    const anyVisible = Array.from(items).some(el => el.style.display !== 'none');
+    const hide = items.length > 0 && !anyVisible;
+    sec.style.display = hide ? 'none' : '';
+    let sep = sec.nextElementSibling;
+    if (sep && sep.classList.contains('sb-sep')) sep.style.display = hide ? 'none' : '';
+  });
+  if (allowed && !allowed.includes(_currentPageId)) {
+    _navigateTo(allowed[0]);
+  }
 }
 
 function applyAuthUserToUI() {
